@@ -1,0 +1,74 @@
+#tick {
+    stroke-width: 8;
+    transition: all 1s;
+}
+
+#circle {
+    stroke-width: 8;
+    transform-origin: 50px 50px 0;
+    transition: all 1s;
+}
+
+.progress-my #tick {
+    opacity: 0;
+}
+
+.ready-my #tick {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    stroke:url(#grad2) ;
+
+    animation: draw 8s ease-out forwards;
+}
+
+.hide-my #tick {
+    stroke:url(#grad2) ;
+    opacity: 0;
+}
+
+.hide-my #circle {
+    stroke:url(#grad2) ;
+    opacity: 0;
+}
+
+.progress-my #circle {
+    stroke-dasharray: 314;
+    stroke-dashoffset: 1000;
+    animation: spin 3s linear infinite;
+}
+
+.ready-my #circle {
+    stroke-dashoffset: 66;
+    stroke:url(#grad2) ;
+}
+
+#circle {
+    stroke-dasharray: 500;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+        stroke-dashoffset: 66;
+    }
+    50% {
+        transform: rotate(540deg);
+        stroke-dashoffset: 314;
+    }
+    100% {
+        transform: rotate(1080deg);
+        stroke-dashoffset: 66;
+    }
+}
+
+@keyframes draw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+#check {
+    width: 300px;
+    height: 300px;
+}
+
