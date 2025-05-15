@@ -1,0 +1,140 @@
+import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
+import {useEffect, useRef, useState} from "react";
+import {sendEditTask} from "../../services/fetch/tasks/task/SendEditTask.js";
+import {Box, IconButton, Typography} from "@mui/material";
+import {EditIcon} from "../../assets/icons/EditIcon.jsx";
+import * as React from "react";
+import ConflictException from "../../exception/ConflictException.jsx";
+
+export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
+
+    const {userHasPermission} = useTaskOperations();
+
+    const [isEditing, setIsEditing] = useState(false);
+    const typographyRef = useRef(null);
+    const lastSelectionRef = useRef(null);
+    const [initialText, setInitialText] = useState(task.name);
+
+    // Сохраняем выделение перед обновлением
+    const saveSelection = () => {
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            lastSelectionRef.current = selection.getRangeAt(0);
+        }
+    };
+
+    // Восстанавливаем выделение после обновления
+    const restoreSelection = () => {
+        if (lastSelectionRef.current) {
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(lastSelectionRef.current);
+        }
+    };
+
+    const handleEditClick = () => {
+        setIsEditing(true);
+    };
+
+
+    const handleBlur = async (event, duplicatedCount = 0) => {
+        saveSelection();
+        const newText = typographyRef.current?.textContent.trim() || '';
+        if (newText !== initialText && newText !== '') { // Сравниваем с исходным текстом
+            try {
+                const newNameWithDubls = newText + (duplicatedCount === 0 ? '' : (' (' + duplicatedCount + ')'));
+                const profile = await sendEditTask(task.api.links.updateTaskName.href,
+                    {
+                        newName: newNameWithDubls
+                    });
+                typographyRef.current.textContent = newNameWithDubls;
+            } catch (error) {
+                switch (true) {
+                    case error instanceof ConflictException:
+                        await handleBlur(event, duplicatedCount + 1);
+                        break;
+                    default:
+                        console.log(error);
+                        typographyRef.current.textContent = initialText;
+                }
+
+            }
+        } else {
+            typographyRef.current.textContent = initialText;
+        }
+        setIsEditing(false);
+    };
+
+    const handleKeyDown = async (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            await handleBlur();
+        } else if (e.key === 'Escape') {
+            typographyRef.current.textContent = task.name;
+            typographyRef.current?.blur();
+        }
+    };
+
+    const handleInput = () => {
+        saveSelection();
+        // Не используем setText, чтобы избежать лишних ререндеров
+    };
+
+    useEffect(() => {
+        if (isEditing && typographyRef.current) {
+            typographyRef.current.focus();
+
+            // Помещаем курсор в конец текста только при первом открытии
+            if (!lastSelectionRef.current) {
+                const range = document.createRange();
+                range.selectNodeContents(typographyRef.current);
+                range.collapse(false);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } else {
+                restoreSelection();
+            }
+        } else {
+            lastSelectionRef.current = null;
+        }
+    }, [isEditing]);
+
+    return (
+        <Box sx={{display: 'flex', alignItems: 'center'}}>
+            <Typography
+                ref={typographyRef}
+                contentEditable={isEditing}
+                suppressContentEditableWarning
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
+                onInput={handleInput}
+                sx={{
+                    m: 1,
+                    opacity: isEditing || !taskCompleted ? 1 : (!hovered ? 0.5 : 1),
+                    zIndex: 2,
+                    mr: 3,
+                    userSelect: "none",
+                    fontSize: '0.9rem',
+                    alignSelf: 'start',
+                    overflowWrap: 'break-word',
+                    wordBreak: 'break-all',
+                    whiteSpace: 'normal',
+                    borderBottom: isEditing ? '1px solid #90caf9' : 'none',
+                    outline: 'none',
+                    width: '227px',
+                }}
+            >
+                {task.name} {userHasPermission('UPDATE_TASK') && hovered && !isEditing && (
+                <IconButton
+                    sx={{width: '16px', height: '16px', p: 0, ml: '2px'}}
+                    onClick={handleEditClick}
+                >
+                    <EditIcon color="rgb(99,99,99)" size="16px"/>
+                </IconButton>
+            )}
+            </Typography>
+
+        </Box>
+    );
+}

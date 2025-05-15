@@ -1,5 +1,3 @@
-
-
 export const formatDate = (dateString) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("en-US", {
@@ -30,4 +28,27 @@ export function getCurrentDateTime() {
     const seconds = String(now.getSeconds()).padStart(2, '0');
 
     return `${year}-${month}-${day} ${hours}-${minutes}-${seconds}`;
+}
+
+export const avatarColor = (email) => {
+    const colors = [
+        "rgba(6,101,193,0.8)",
+        "rgba(202,56,47,0.8)",
+        "rgba(55,133,6,0.8)",
+        "rgba(193,105,4,0.8)",
+        "rgba(152,4,193,0.8)",
+        "rgba(6,177,162,0.8)",
+        "rgba(146,177,6,0.8)",
+    ];
+
+    let hash = 0;
+    for (let i = 0; i < email.length; i++) {
+        const char = email.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash |= 0; // Преобразуем в 32-битное целое
+    }
+    const index = email.charCodeAt(0) % 7;
+
+    const string = colors[index];
+    return string;
 }

@@ -1,17 +1,17 @@
 import React, {createContext, useContext, useState} from 'react';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
-import {AlertTitle} from '@mui/material';
+import {AlertTitle, CssBaseline} from '@mui/material';
 
 const NotificationContext = createContext();
 // eslint-disable-next-line react-refresh/only-export-components
 export const useNotification = () => useContext(NotificationContext);
 
 const backgroundColors = {
-    success: "rgba(70,182,0,0.3)",
-    info: "rgba(0,129,255,0.3)",
-    error: "rgba(244,67,54,0.3)",
-    warning: "rgba(255,136,0,0.3)",
+    success: "rgba(70,182,0,0.6)",
+    info: "rgba(0,129,255,0.6)",
+    error: "rgba(244,67,54,0.6)",
+    warning: "rgba(255,136,0,0.6)",
 };
 
 const colors = {
@@ -83,13 +83,14 @@ export const NotificationProvider = ({children}) => {
         <NotificationContext.Provider value={{showWarn, showInfo, showSuccess, showError}}>
             {children}
 
-
+            {/*<CssBaseline/>*/}
             <Snackbar
                 open={notification.open}
                 onClose={closeNotification}
                 autoHideDuration={notification.duration}
                 anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
             >
+                {/*<CssBaseline/>*/}
                 <Alert
                     variant='filled'
                     onClose={closeNotification}
@@ -97,8 +98,9 @@ export const NotificationProvider = ({children}) => {
                     sx={{
                         backdropFilter: 'blur(5px)',
                         WebkitBackdropFilter: 'blur(5px)',
+                        fontSize: '18px',
                         width: '100%',
-                        fontSize: '15px',
+                        // fontSize: '15px',
                         alignItems: 'center',
                         backgroundColor: backgroundColors[notification.severity],
                         border: '2px solid',

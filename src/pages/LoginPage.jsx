@@ -1,15 +1,16 @@
 import {Box, Button, Card, Link, Tooltip, Zoom} from "@mui/material";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Typography from "@mui/material/Typography";
 import ValidatedEmailTextField from "../components/InputElements/TextField/ValidatedEmailTextField.jsx";
 import ValidatedPasswordField from "../components/InputElements/TextField/ValidatedPasswordField.jsx";
 import AnimatedElement from "../components/InputElements/AnimatedElement.jsx";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import {sendLoginForm} from "../services/fetch/unauth/SendLoginForm.js";
 import {useAuthContext} from "../context/Auth/AuthContext.jsx";
 import {useNotification} from "../context/Notification/NotificationProvider.jsx";
 import UnauthorizedException from "../exception/UnauthorizedException.jsx";
 import NotFoundException from "../exception/NotFoundException.jsx";
+import {sendRegistrationConfirm} from "../services/fetch/unauth/SendRegistrationConfirm.js";
 
 
 export const LoginPage = () => {
@@ -26,16 +27,20 @@ export const LoginPage = () => {
     const navigate = useNavigate();
     const {showError, showInfo, showWarn} = useNotification();
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (event, externalMail = null, extPass = null) => {
         if (usernameError || passwordError) {
             return
         }
 
-        const requestData = {username, password,};
+        const requestData = {
+            email: (externalMail ? externalMail : username), password: (extPass ? extPass : password)
+        };
 
+        console.log(requestData);
         try {
             setLoading(true);
             const profile = await sendLoginForm(requestData);
+            console.log(profile);
             login(profile);
             showInfo("Вход успшено выполнен", 4000);
         } catch (error) {
@@ -44,18 +49,35 @@ export const LoginPage = () => {
                     showWarn(error.message);
                     setUsernameError(error.message);
                     break;
-
                 case error instanceof NotFoundException:
                     showWarn(error.message);
                     setUsernameError(error.message);
                     break;
                 default:
                     showError("Ошибка при попытке входа. Попробуйте позже");
-                    console.log('Unknown validationError occurred! ');
+                    console.log(error);
             }
         }
         setLoading(false);
     };
+
+    const location = useLocation();
+
+    useEffect(() => {
+        const func = async () => {
+            const loginDetails = location.state;
+
+            if (loginDetails !== null) {
+                console.log(loginDetails);
+                setUsername(loginDetails.email);
+                setPassword(loginDetails.password);
+                setTimeout(async () => {
+                    handleSubmit(null, loginDetails.email, loginDetails.password);
+                }, 800)
+            }
+        }
+        func();
+    }, [location]);
 
 
     const validationError = usernameError || passwordError || !password || !username;
@@ -72,7 +94,7 @@ export const LoginPage = () => {
                   top: '350px',
                   // backgroundColor: 'searchInput',
                   alignSelf: 'center',
-                  borderRadius: 1,
+                  borderRadius: 2,
                   width: '400px',
                   height: '330px',
                   transition: 'height 0.5s ease',
@@ -151,7 +173,6 @@ export const LoginPage = () => {
                     <Button
                         loadingPosition="center"
                         fullWidth
-                        type="submit"
                         variant="contained"
                         onClick={handleSubmit}
                         loading={loading}

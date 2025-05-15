@@ -5,7 +5,7 @@ import {IconButton, InputAdornment} from "@mui/material";
 import {Visibility, VisibilityOff} from "@mui/icons-material";
 
 
-export default function ValidatedTextField({id, label, value, onChange, helperText, placeholder}) {
+export default function ValidatedTextField({id, label, value, onChange, helperText, placeholder, disabled = false}) {
 
     const [showPassword, setShowPassword] = React.useState(false);
     const handlePasswordVisibility = () => {
@@ -17,7 +17,7 @@ export default function ValidatedTextField({id, label, value, onChange, helperTe
             marginBottom: 10,
             // width: '100%'
             width: '300px',
-            alignSelf: 'center',
+            // alignSelf: 'center',
         }}>
 
             <TextField
@@ -28,6 +28,7 @@ export default function ValidatedTextField({id, label, value, onChange, helperTe
                 value={value}
                 error={helperText}
                 onChange={onChange}
+                disabled={disabled}
                 // helperText={helperText}
                 placeholder={placeholder}
                 type={!id.startsWith("password") ? 'text' : (showPassword ? "text" : "password")}

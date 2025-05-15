@@ -1,4 +1,3 @@
-import './App.css'
 import {GlobalProvider} from "./context/GlobalProvider.jsx";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import {BaseLayout} from "./pages/BaseLayout.jsx";
@@ -6,6 +5,10 @@ import UnavailableAfterLoginRoute from "./context/Auth/UnavailableAfterLoginRout
 import {LoginPage} from "./pages/LoginPage.jsx";
 import {RegistrationPage} from "./pages/RegistrationPage.jsx";
 import {RegistrationConfirmationPage} from "./pages/RegistrationConfirmationPage.jsx";
+import WorkspacesPage from "./pages/WorkspacesPage.jsx";
+import AvailableAfterLoginRoute from "./context/Auth/AvailableAfterLoginRoute.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
+import ErrorPage from "./pages/ErrorPage.jsx";
 
 function App() {
 
@@ -14,6 +17,9 @@ function App() {
             <GlobalProvider>
                 <Routes>
                     <Route element={<BaseLayout/>}>
+
+                        <Route path="*" element={<ErrorPage />}/>
+
 
                         {/*available before login only*/}
                         <Route path="login"
@@ -28,6 +34,22 @@ function App() {
                                    <UnavailableAfterLoginRoute>
                                        <RegistrationPage/>
                                    </UnavailableAfterLoginRoute>
+                               }/>
+
+                        <Route path="workspaces/*"
+                               element={
+                                   <AvailableAfterLoginRoute>
+                                       <WorkspacesPage/>
+                                   </AvailableAfterLoginRoute>
+                               }/>
+
+
+
+                        <Route path="profile"
+                               element={
+                                   <AvailableAfterLoginRoute>
+                                       <ProfilePage/>
+                                   </AvailableAfterLoginRoute>
                                }/>
 
                         <Route path="registration-confirm"

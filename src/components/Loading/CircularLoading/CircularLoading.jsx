@@ -2,7 +2,7 @@ import './Circular.css'
 import {useEffect, useState} from "react";
 
 
-export const CircularLoading = ({loading}) => {
+export const CircularLoading = ({loading, multi=1}) => {
 
     const [state, setState] = useState("hide-my");
 

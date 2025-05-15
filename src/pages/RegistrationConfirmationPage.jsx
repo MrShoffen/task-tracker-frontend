@@ -1,88 +1,72 @@
-import {Box, Button, Card, Link, Tooltip, Zoom} from "@mui/material";
+import {Button, Card, CircularProgress} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import Typography from "@mui/material/Typography";
-import ValidatedEmailTextField from "../components/InputElements/TextField/ValidatedEmailTextField.jsx";
-import ValidatedPasswordField from "../components/InputElements/TextField/ValidatedPasswordField.jsx";
-import AnimatedElement from "../components/InputElements/AnimatedElement.jsx";
 import {useLocation, useNavigate} from "react-router-dom";
-import {sendLoginForm} from "../services/fetch/unauth/SendLoginForm.js";
 import {useAuthContext} from "../context/Auth/AuthContext.jsx";
 import {useNotification} from "../context/Notification/NotificationProvider.jsx";
 import UnauthorizedException from "../exception/UnauthorizedException.jsx";
-import NotFoundException from "../exception/NotFoundException.jsx";
 import {sendRegistrationConfirm} from "../services/fetch/unauth/SendRegistrationConfirm.js";
 
 
 export const RegistrationConfirmationPage = () => {
     const {login} = useAuthContext();
 
-    const [username, setUsername] = useState('');
-    const [usernameError, setUsernameError] = useState('');
+    const [confirmationInProgress, setConfirmationInProgress] = useState(true);
+    const [confirmationError, setConfirmationError] = useState('');
 
-    const [password, setPassword] = useState('');
-    const [passwordError, setPasswordError] = useState('');
-
-    const [loading, setLoading] = useState(false);
-
-    const navigate = useNavigate();
-    const {showError, showInfo, showWarn} = useNotification();
-
-    const handleSubmit = async () => {
-        if (usernameError || passwordError) {
-            return
-        }
-
-        const requestData = {username, password,};
-
-        try {
-            setLoading(true);
-            const profile = await sendLoginForm(requestData);
-            login(profile);
-            showInfo("Вход успшено выполнен", 4000);
-        } catch (error) {
-            switch (true) {
-                case error instanceof UnauthorizedException:
-                    showWarn(error.message);
-                    setUsernameError(error.message);
-                    break;
-
-                case error instanceof NotFoundException:
-                    showWarn(error.message);
-                    setUsernameError(error.message);
-                    break;
-                default:
-                    showError("Ошибка при попытке входа. Попробуйте позже");
-                    console.log('Unknown validationError occurred! ');
-            }
-        }
-        setLoading(false);
-    };
-
-
-    const validationError = usernameError || passwordError || !password || !username;
+    const {showError} = useNotification();
 
     const location = useLocation();
 
-    // 🔽 Извлечь параметр confirmation из URL
+    const [email, setEmail] = useState('');
+    const [pass, setPass] = useState('');
+
     useEffect(() => {
         const func = async () => {
             const params = new URLSearchParams(location.search);
             const confirmationId = params.get('confirmationId');
 
-            if (confirmationId) {
+            setEmail(localStorage.getItem("email"));
+            setPass(localStorage.getItem("pass"));
+            localStorage.removeItem("pass");
+            localStorage.removeItem("email");
+
+            if (confirmationId && confirmationInProgress) {
                 console.log("Получен confirmation ID:", confirmationId);
-                const response = await sendRegistrationConfirm(confirmationId);
-                console.log(response);
+
+                try {
+                    await sendRegistrationConfirm(confirmationId);
+                } catch (error) {
+                    switch (true) {
+                        case error instanceof UnauthorizedException:
+                            setConfirmationError(error.message);
+                            break;
+                        default:
+                            showError("Не удалось подвтердить. Попробуйте позже");
+                            console.log('Unknown error occurred! ');
+                    }
+                }
+                setConfirmationInProgress(false);
             }
         }
-        func();
+        if (confirmationInProgress) {
+            setTimeout(() => func(), 1500);
+        }
     }, [location]);
+    const navigate = useNavigate()
+    function handleAutoLogin() {
+        const loginData = {
+            email: email,
+            password: pass
+        }
+
+        navigate("/login", {state: loginData});
+    }
 
     return (
         <Card variant="outlined"
               sx={{
-                  paddingLeft: 5,
-                  paddingRight: 5,
+                  padding: 2,
                   boxShadow: 3,
                   position: 'fixed',
                   left: '50%',
@@ -97,8 +81,36 @@ export const RegistrationConfirmationPage = () => {
               }}>
 
             <Typography variant="h4" sx={{textAlign: 'center', mb: 2, mt: 3}}>
-                Вход
+                {confirmationInProgress ? 'Проверка ссылки...' :
+                    confirmationError ? 'Ошибка' : 'Успешно!'}
             </Typography>
+
+            {confirmationInProgress ? <CircularProgress
+                    sx={{width: 20, mt: 2}}/> :
+                <>
+                    <Typography variant="body1" sx={{textAlign: 'center', mb: 5}}>
+                        {confirmationError
+                            ? confirmationError
+                            : 'Почта подтверждена. Теперь Вы можете войти в аккаунт'}
+                    </Typography>
+                    {!confirmationError &&
+                        <Button
+                            loadingPosition="center"
+                            fullWidth
+                            type="submit"
+                            variant="contained"
+                            onClick={handleAutoLogin}
+                            sx={{
+                                width: '300px',
+                                alignSelf: 'center',
+                            }}
+                        >
+                            Войти
+                        </Button>
+                    }
+
+                </>
+            }
 
 
         </Card>

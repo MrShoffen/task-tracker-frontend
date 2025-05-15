@@ -2,7 +2,7 @@ import {API_REGISTRATION} from "../../../../UrlConstants.jsx";
 import {throwSpecifyException} from "../../../exception/ThrowSpecifyException.jsx";
 
 
-export const sendRegistrationForm = async (registrationData) =>{
+export const sendRegistrationForm = async (registrationData) => {
     const response = await fetch(API_REGISTRATION, {
         method: 'POST',
         headers: {
@@ -19,5 +19,5 @@ export const sendRegistrationForm = async (registrationData) =>{
         throwSpecifyException(error);
     }
 
-    return await response.json(response);
+    return await response.json();
 }

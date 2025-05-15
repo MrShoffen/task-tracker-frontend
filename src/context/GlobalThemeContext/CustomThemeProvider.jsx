@@ -1,5 +1,6 @@
 import {createContext, useContext, useEffect, useMemo, useState} from "react";
 import {createTheme, CssBaseline, ThemeProvider} from "@mui/material";
+import {BackgroundWrapper} from "./BackgroundWrapper.jsx";
 
 
 const ThemeContext = createContext();
@@ -60,15 +61,18 @@ export const CustomThemeProvider = ({children}) => {
 
                 palette: {
                     mode: isDarkMode ? 'dark' : 'light',
-                    header: isDarkMode ? "rgba(30,30,30,0.8)" : "rgba(240,240,240,0.5)",
+                    drawer: isDarkMode ? "rgba(34,34,44,0.71)" : "rgba(221,221,221,0.5)",
                     searchInput: isDarkMode ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.3)",
                     menu: isDarkMode ? 'rgba(0,0,0,0.8)' : "white",
-                    modal: isDarkMode ? "rgba(0,0,0,0.4)" : "white",
+                    modal: isDarkMode ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.89)",
+                    desk: !isDarkMode ? "#e4e7ec" : "rgba(255,255,255,0.89)",
+                    card: isDarkMode ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.51)",
+                    header: isDarkMode ? "rgba(46,46,46,0.52)" : "rgba(207,207,207,0.34)",
                     objectHover: isDarkMode ? "rgba(45,58,112,0.6)" : "rgba(202,202,202,0.7)",
                     objectSelected: isDarkMode ? "rgba(45,86,197,0.35)" : "rgba(126,126,126,0.7)",
                     selectHeader: isDarkMode ? "rgb(18,18,18)" : "rgb(209,209,209)",
                     background: {
-                        default: isDarkMode ? 'black' : 'white',
+                        default: isDarkMode ? 'rgba(21,21,27,0.66)' : 'white',
                     },
                 },
             }),
@@ -79,7 +83,9 @@ export const CustomThemeProvider = ({children}) => {
         <ThemeContext.Provider value={{isDarkMode, toggleTheme}}>
             <ThemeProvider theme={theme}>
                 <CssBaseline enableColorScheme/>
-                {children}
+                <BackgroundWrapper>
+                    {children}
+                </BackgroundWrapper>
             </ThemeProvider>
         </ThemeContext.Provider>
     );

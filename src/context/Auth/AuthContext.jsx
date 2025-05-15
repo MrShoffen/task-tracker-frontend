@@ -1,7 +1,9 @@
 import React, {createContext, useContext, useEffect, useState} from "react";
-import {checkSession} from "../../services/fetch/auth/user/CheckSession.js";
+import {checkJwt} from "../../services/fetch/jwt/CheckJwt.js";
 import {useLocation, useNavigate} from "react-router-dom";
 import {useNotification} from "../Notification/NotificationProvider.jsx";
+import ConflictException from "../../exception/ConflictException.jsx";
+import UnauthorizedException from "../../exception/UnauthorizedException.jsx";
 
 const AuthContext = createContext();
 
@@ -39,10 +41,9 @@ export const AuthProvider = ({children}) => {
     const navigate = useNavigate();
 
     const {showError} = useNotification();
-    const validateSession = async () => {
-        if (auth.isAuthenticated) {
+    const validateJwt = async () => {
             try {
-                const user = await checkSession();
+                const user = await checkJwt();
                 if (user !== auth.user) {
                     login(user);
                 }
@@ -53,40 +54,24 @@ export const AuthProvider = ({children}) => {
                     showError("Session is expired! Please login again", 4000)
                 }, 300)
             }
-        }
     };
 
-    const validateCookieIsAlive = async () => {
-        if (!auth.isAuthenticated) {
-            try {
-                const user = await checkSession();
-                if (user) {
-                    login(user);
-                }
-            } catch (error) {
-                console.log('Session not present')
-            }
-        }
-    };
+    useEffect(() => {
+        setPageVisits((prev) => prev + 1);
 
-    // useEffect(() => {
-    //     setPageVisits((prev) => prev + 1);
-    //
-    //     if (pageVisits >= 3) {
-    //         validateSession();
-    //         setPageVisits(0);
-    //     }
-    // }, [urlLocation.pathname]);
-    //
-    //
-    // useEffect(() => {
-    //     validateSession();
-    //     validateCookieIsAlive();
-    // }, []);
+        if (pageVisits >= 3) {
+            validateJwt();
+        }
+    }, [urlLocation.pathname]);
+
+
+    useEffect(() => {
+        validateJwt();
+    }, []);
 
 
     return (
-        <AuthContext.Provider value={{auth, login, logout}}>
+        <AuthContext.Provider value={{auth, login, logout, validateJwt}}>
             {children}
         </AuthContext.Provider>
     );

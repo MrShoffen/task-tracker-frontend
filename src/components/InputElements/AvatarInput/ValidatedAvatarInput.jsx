@@ -10,13 +10,18 @@ import {CircularLoading} from "../../Loading/CircularLoading/CircularLoading.jsx
 import {useNotification} from "../../../context/Notification/NotificationProvider.jsx";
 
 
-export default function ValidatedAvatarInput({setAvatarUrl, initialAvatarUrl = '', avatarLoading, setAvatarLoading}) {
-    const [avatarPreview, setAvatarPreview] = useState(initialAvatarUrl || null);
+export default function ValidatedAvatarInput({
+                                                 setAvatarUrl,
+                                                 initialAvatarUrl = '',
+                                                 avatarLoading,
+                                                 setAvatarLoading,
+                                                 multi = 1
+                                             }) {
+    const [avatarPreview, setAvatarPreview] = useState(null);
     const [avatarError, setAvatarError] = useState(false);
     const [avatarErrorMessage, setAvatarErrorMessage] = useState('');
 
     const {showError, showSuccess} = useNotification();
-
     const validateAvatar = (file) => {
         const acceptedFileTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
         if (!acceptedFileTypes.includes(file.type)) {
@@ -33,6 +38,11 @@ export default function ValidatedAvatarInput({setAvatarUrl, initialAvatarUrl = '
         }
         return true;
     }
+    useEffect(() => {
+        if (initialAvatarUrl) {
+            setAvatarPreview(initialAvatarUrl);
+        }
+    }, [initialAvatarUrl]);
 
     const handleAvatarChange = async (e) => {
         const file = e.target.files[0];
@@ -78,7 +88,9 @@ export default function ValidatedAvatarInput({setAvatarUrl, initialAvatarUrl = '
 
     const [opacity, setOpacity] = useState(0);
     useEffect(() => {
-        setTimeout(() => {setOpacity(1)}, 4000)
+        setTimeout(() => {
+            setOpacity(1)
+        }, 4000)
     })
 
     return (
@@ -86,8 +98,8 @@ export default function ValidatedAvatarInput({setAvatarUrl, initialAvatarUrl = '
             <Box sx={{display: "flex", justifyContent: "center", p: 1}}>
                 <Box
                     sx={{
-                        width: 70,
-                        height: 70,
+                        width: 70 * multi,
+                        height: 70 * multi,
                         position: "relative",
                         border: avatarPreview ? "2px solid" : "2px dashed",
                         borderColor: avatarPreview ? "divider" : "#bbb",
@@ -118,8 +130,8 @@ export default function ValidatedAvatarInput({setAvatarUrl, initialAvatarUrl = '
                             <AddIcon
                                 sx={{
                                     fontSize: 42,
-                                    height: 58,
-                                    width: 58,
+                                    height: 58 * multi,
+                                    width: 58 * multi,
                                     color: "#bbb",
                                     alignItems: "center",
                                     marginTop: "3px",
@@ -127,7 +139,8 @@ export default function ValidatedAvatarInput({setAvatarUrl, initialAvatarUrl = '
                         )}
 
                         {avatarPreview && <>
-                            <Box component="img" src={avatarPreview} alt="Avatar Preview"
+                            <Box component="img" src={avatarPreview ? avatarPreview : initialAvatarUrl}
+                                 alt="Avatar Preview"
                                  sx={{
                                      width: "100%",
                                      height: "100%",
@@ -135,9 +148,9 @@ export default function ValidatedAvatarInput({setAvatarUrl, initialAvatarUrl = '
                                      borderRadius: "6px"
                                  }}/>
                             {
-                            <Box  sx={{position: 'absolute', opacity: opacity, top: 3, left: 3, }}>
-                                <CircularLoading loading={avatarLoading}/>
-                            </Box>}
+                                <Box sx={{position: 'absolute', opacity: opacity, top: 3, left: 3,}}>
+                                    <CircularLoading loading={avatarLoading}/>
+                                </Box>}
                         </>}
                     </label>
 

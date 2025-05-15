@@ -11,6 +11,7 @@ import ValidatedPasswordConfirmField from "../components/InputElements/TextField
 import {useNotification} from "../context/Notification/NotificationProvider.jsx";
 import {sendRegistrationForm} from "../services/fetch/unauth/SendRegistrationForm.js";
 import ConflictException from "../exception/ConflictException.jsx";
+import UnauthorizedException from "../exception/UnauthorizedException.jsx";
 
 const FlipCard = ({isFlipped, front, back, height = 530, width = 400}) => {
 
@@ -20,6 +21,13 @@ const FlipCard = ({isFlipped, front, back, height = 530, width = 400}) => {
                 perspective: '1500px',
                 width: `400px`,
                 height: `500px`,
+                position: 'fixed',
+                left: '50%',
+                transform: 'translate(-50%, 0%)',
+                top: '350px',
+                // backgroundColor: 'searchInput',
+                alignSelf: 'center',
+
             }}
         >
             <Box
@@ -29,6 +37,7 @@ const FlipCard = ({isFlipped, front, back, height = 530, width = 400}) => {
                     position: 'relative',
                     transformStyle: 'preserve-3d',
                     transition: 'transform 0.8s',
+                    top: '-35px',
                     transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                 }}
             >
@@ -82,6 +91,8 @@ export const RegistrationPage = () => {
 
     const [isFlipped, setIsFlipped] = useState(false);
 
+    const [confirmationLink, setConfirmationLink] = useState('');
+
     const handleSubmit = async () => {
         if (usernameError || passwordError || confirmPasswordError) {
             return;
@@ -91,16 +102,22 @@ export const RegistrationPage = () => {
 
         try {
             setRegistrationLoading(true);
-            await sendRegistrationForm(requestData);
-            // navigate("/login");
+            const response = await sendRegistrationForm(requestData);
+            setConfirmationLink(response.link);
             setIsFlipped(true)
-            showSuccess("Регистрация успешно выполнена", 5000);
+            localStorage.setItem("email", email);
+            localStorage.setItem("pass", password);
+            // showSuccess("Регистрация успешно выполнена", 5000);
         } catch (error) {
             switch (true) {
                 case error instanceof ConflictException:
                     showWarn(error.message);
                     setUsernameError(error.message);
                     break;
+               case error instanceof UnauthorizedException:
+                   showWarn(error.message);
+                   setUsernameError(error.message);
+                   break;
                 default:
                     showError("Не удалось зарегистрироваться. Попробуйте позже");
                     console.log('Unknown error occurred! ');
@@ -122,11 +139,9 @@ export const RegistrationPage = () => {
                           paddingLeft: 5,
                           paddingRight: 5,
                           boxShadow: 3,
-                          position: 'fixed',
                           borderRadius: 2,
                           width: '400px',
                           height: '530px',
-                          transition: 'height 0.5s ease',
                           backgroundColor: 'background.paper',
                       }}
                 >
@@ -292,15 +307,17 @@ export const RegistrationPage = () => {
                           flexDirection: 'column'
                       }}
                 >
-                    <Typography variant="h5" sx={{mb: 2}}>
-                        🎉 Регистрация успешна!
+                    <Typography variant="h5" sx={{mb: 10, mt: -10}}>
+                        Подтверждение регистрации!
                     </Typography>
-                    <Typography variant="body1" sx={{textAlign: 'center'}}>
-                        Перейдите на почту и подтвердите свой аккаунт.
+                    <Typography variant="body1" sx={{textAlign: 'center', mb: 5}}>
+                        На Вашу почту отправлено письмо для подтвреждения почты. Пройдите по ссылке из письма для
+                        подтверждения. Скорее всего, письмо попало в папку "Спам"
                     </Typography>
-                    <Button variant="outlined" sx={{mt: 4}} onClick={() => navigate('/login')}>
-                        Перейти на страницу входа
-                    </Button>
+                    <Typography variant="body21" sx={{textAlign: 'center', mt: 2}}>
+                        Или можете пройти по этой <a href={confirmationLink}> ссылке </a>- она такая же как в почте :)
+                    </Typography>
+
                 </Card>
             }
         />

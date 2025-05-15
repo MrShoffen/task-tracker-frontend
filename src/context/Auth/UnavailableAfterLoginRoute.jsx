@@ -6,7 +6,7 @@ const UnavailableAfterLoginRoute = ({children}) => {
     const {auth} = useAuthContext();
 
     return auth.isAuthenticated
-        ? <Navigate to="/files"/>
+        ? <Navigate to="/profile"/>
         : children;
 
 };

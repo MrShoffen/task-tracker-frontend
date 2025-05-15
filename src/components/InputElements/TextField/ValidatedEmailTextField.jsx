@@ -3,7 +3,7 @@ import * as React from "react";
 import {useEffect} from "react";
 
 
-export default function ValidatedEmailTextField({username, setUsername, usernameError, setUsernameError, label='Email'}) {
+export default function ValidatedEmailTextField({username, setUsername, usernameError, setUsernameError, label='Email', disabled = false}) {
 
     const validateUsername = (value) => {
         let isValid = true;
@@ -42,7 +42,7 @@ export default function ValidatedEmailTextField({username, setUsername, username
             label={label}
             placeholder="Латинские буквы и цифры "
             type="text"
-
+            disabled = {disabled}
             value={username}
             onChange={(e) => validateUsername(e.target.value)}
             error={usernameError}

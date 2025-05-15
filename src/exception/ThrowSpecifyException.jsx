@@ -18,8 +18,6 @@ export const throwSpecifyException = (error) => {
         case 404:
             throw new NotFoundException(error.detail);
 
-        case 413:
-            throw new StorageExceedException(error.detail);
         default:
             throw new Error('Unknown error');
     }
