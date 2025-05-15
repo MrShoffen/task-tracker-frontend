@@ -42,25 +42,26 @@ export const AuthProvider = ({children}) => {
 
     const {showError} = useNotification();
     const validateJwt = async () => {
-            try {
-                const user = await checkJwt();
-                if (user !== auth.user) {
-                    login(user);
-                }
-            } catch (error) {
-                logout();
-                setTimeout(() => {
-                    navigate("/login");
-                    showError("Session is expired! Please login again", 4000)
-                }, 300)
+        try {
+            const user = await checkJwt();
+            if (user !== auth.user) {
+                login(user);
             }
+        } catch (error) {
+            logout();
+            setTimeout(() => {
+                navigate("/login");
+                showError("Session is expired! Please login again", 4000)
+            }, 300)
+        }
     };
 
     useEffect(() => {
         setPageVisits((prev) => prev + 1);
-
-        if (pageVisits >= 3) {
-            validateJwt();
+        if (auth.isAuthenticated) {
+            if (pageVisits >= 3) {
+                validateJwt();
+            }
         }
     }, [urlLocation.pathname]);
 

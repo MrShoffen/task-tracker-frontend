@@ -98,7 +98,7 @@ export const NotificationProvider = ({children}) => {
                     sx={{
                         backdropFilter: 'blur(5px)',
                         WebkitBackdropFilter: 'blur(5px)',
-                        fontSize: '18px',
+                        fontSize: '17px',
                         width: '100%',
                         // fontSize: '15px',
                         alignItems: 'center',

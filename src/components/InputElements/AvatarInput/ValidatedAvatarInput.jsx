@@ -5,7 +5,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import * as React from "react";
 import {useEffect, useState} from "react";
 import {FormHelperText} from "@mui/material";
-import {uploadAvatar} from "../../../services/fetch/unauth/UploadAvatar.js";
+import {uploadImage} from "../../../services/fetch/unauth/UploadImage.js";
 import {CircularLoading} from "../../Loading/CircularLoading/CircularLoading.jsx";
 import {useNotification} from "../../../context/Notification/NotificationProvider.jsx";
 
@@ -60,7 +60,7 @@ export default function ValidatedAvatarInput({
             formData.append('image', file);
 
             try {
-                const avatar = await uploadAvatar(formData);
+                const avatar = await uploadImage(formData);
                 setAvatarUrl(avatar.imageUrl);
                 setAvatarError(false)
                 setAvatarErrorMessage('')

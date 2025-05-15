@@ -28,6 +28,8 @@ export function Task({task, setContentIsLoading}) {
     const [hovered, setHovered] = React.useState(false);
     const theme = useTheme();
 
+    const [currentTask, setCurrentTask] = React.useState(task);
+
     const [taskCompleted, setTaskCompleted] = React.useState(task.completed);
 
     const handleCompletionClick = async () => {
@@ -40,6 +42,10 @@ export function Task({task, setContentIsLoading}) {
         }
     }
 
+    const updateTask = (updatedTask) => {
+        setCurrentTask(updatedTask);
+    }
+
     return (
         <Card
             elevation={1}
@@ -50,7 +56,7 @@ export function Task({task, setContentIsLoading}) {
                 flex: 1,
                 // boxShadow: !hovered && 'none',
                 border: '1px solid',
-                borderColor: !hovered ? taskColor(task.color) : 'action.disabled',
+                borderColor: !hovered ? taskColor(currentTask.color) : 'action.disabled',
                 // borderColor: 'action.disabled',
                 borderRadius: 2,
                 position: 'relative',
@@ -59,14 +65,14 @@ export function Task({task, setContentIsLoading}) {
                 transition: 'none',
                 backdropFilter: 'blur(9px)',
                 WebkitBackdropFilter: 'blur(9px)',
-                backgroundColor: taskColor(task.color),
+                backgroundColor: taskColor(currentTask.color),
                 display: 'flex',
                 flexDirection: 'column',
                 ':hover': {
                     cursor: 'pointer',
                 }
             }}>
-            {task.coverUrl && <TaskCover coverUrl={task.coverUrl}/>}
+            {currentTask.coverUrl && <TaskCover coverUrl={currentTask.coverUrl}/>}
 
             <Box sx={{display: 'flex', flexDirection: 'row'}}>
                 <IconButton
@@ -80,14 +86,15 @@ export function Task({task, setContentIsLoading}) {
 
                 <Box sx={{display: 'flex', flexDirection: 'column'}}>
                     <EditableTaskName
-                        task={task}
+                        task={currentTask}
                         hovered={hovered}
                         taskCompleted={taskCompleted}
                     />
                 </Box>
 
                 <TaskMenu
-                    task={task}
+                    task={currentTask}
+                    updateTask={updateTask}
                     hovered={hovered}
                     taskCompleted={taskCompleted}
                     setContentIsLoading={setContentIsLoading}

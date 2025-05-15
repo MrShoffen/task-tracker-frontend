@@ -11,20 +11,17 @@ import {sendCreateTask} from "../../services/fetch/tasks/task/SendCreateTask.js"
 import ConflictException from "../../exception/ConflictException.jsx";
 
 
-export function NewTaskBadge({taskCreationLink}) {
+export function NewTaskBadge({taskCreationLink, addNewTask}) {
 
     const handleNewTaskClick = async () => {
         setIsEditing(true);
     }
-
-    const {addNewTaskToCurrentWorkspace} = useTaskOperations();
 
     const [isEditing, setIsEditing] = useState(false);
     const typographyRef = useRef(null);
     const lastSelectionRef = useRef(null);
     const [initialText, setInitialText] = useState('');
 
-    // Сохраняем выделение перед обновлением
     const saveSelection = () => {
         const selection = window.getSelection();
         if (selection.rangeCount > 0) {
@@ -32,17 +29,12 @@ export function NewTaskBadge({taskCreationLink}) {
         }
     };
 
-    // Восстанавливаем выделение после обновления
     const restoreSelection = () => {
         if (lastSelectionRef.current) {
             const selection = window.getSelection();
             selection.removeAllRanges();
             selection.addRange(lastSelectionRef.current);
         }
-    };
-
-    const handleEditClick = () => {
-        setIsEditing(true);
     };
 
     const handleBlur = async (event, conflictText = '', duplicatedCount = 0) => {
@@ -54,7 +46,7 @@ export function NewTaskBadge({taskCreationLink}) {
                 const taskNameWithDubls = taskName + (duplicatedCount === 0 ? '' : (' (' + duplicatedCount + ')'));
                 const newTask = await sendCreateTask(taskCreationLink,
                     {name: taskNameWithDubls});
-                addNewTaskToCurrentWorkspace(newTask);
+                addNewTask(newTask);
             } catch (error) {
                 switch (true) {
                     case error instanceof ConflictException:
@@ -81,14 +73,12 @@ export function NewTaskBadge({taskCreationLink}) {
 
     const handleInput = () => {
         saveSelection();
-        // Не используем setText, чтобы избежать лишних ререндеров
     };
 
     useEffect(() => {
         if (isEditing && typographyRef.current) {
             typographyRef.current.focus();
 
-            // Помещаем курсор в конец текста только при первом открытии
             if (!lastSelectionRef.current) {
                 const range = document.createRange();
                 range.selectNodeContents(typographyRef.current);
@@ -115,7 +105,7 @@ export function NewTaskBadge({taskCreationLink}) {
                 border: isEditing && '1px solid',
                 borderColor: 'action.disabled',
 
-                backgroundColor: isEditing ? "white" : 'transparent',
+                backgroundColor: isEditing ? "task" : 'transparent',
                 borderRadius: 2,
                 position: 'relative',
                 minWidth: '286px',

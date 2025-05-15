@@ -42,7 +42,9 @@ export const avatarColor = (email) => {
         "rgba(6,177,162,0.8)",
         "rgba(146,177,6,0.8)",
     ];
-
+    if(!email){
+        return "white";
+    }
 
     let hash = 0;
     for (let i = 0; i < email.length; i++) {
@@ -57,8 +59,8 @@ export const avatarColor = (email) => {
 }
 
 const lightTaskColor = {
-    'RED': '#FFB0B0',
     null: 'white',
+    'RED': '#FFB0B0',
     'PINK': '#FFD1D6',
     'YELLOW': '#FFF7AD',
     'GREEN': '#DFFABC',
@@ -68,8 +70,8 @@ const lightTaskColor = {
 };
 
 const darkTaskColor = {
-    'RED': '#703535',
     null: '#333c49',
+    'RED': '#703535',
     'PINK': '#713C4F',
     'YELLOW': '#706335',
     'GREEN': '#34572E',
@@ -81,4 +83,41 @@ const darkTaskColor = {
 export const taskColor = (taskColor) => {
     const {isDarkMode} = useCustomThemeContext();
     return !isDarkMode ? lightTaskColor[taskColor] : darkTaskColor[taskColor];
+}
+
+export const taskColorsPalette = () => {
+    const {isDarkMode} = useCustomThemeContext();
+    return !isDarkMode ? lightTaskColor : darkTaskColor;
+}
+
+const lightDeskColor = {
+    null: 'rgb(123, 134, 158)',
+    'RED': 'rgb(235, 55, 55)',
+    'ORANGE': 'rgb(242, 115, 43)',
+    'YELLOW': 'rgb(245, 204, 0)',
+    'GREEN': 'rgb(92, 220, 17)',
+    'CYAN': 'rgb(8, 167, 169)',
+    'BLUE': 'rgb(80, 137, 242)',
+    'PURPLE': 'rgb(226, 94, 242)',
+};
+
+const darkDeskColor = {
+    null: 'rgb(102, 112, 133)',
+    'RED': 'rgb(219, 60, 60)',
+    'ORANGE': 'rgb(216, 103, 39)',
+    'YELLOW': 'rgb(212, 177, 2)',
+    'GREEN': 'rgb(88, 181, 34)',
+    'CYAN': 'rgb(8, 167, 169)',
+    'BLUE': 'rgb(70, 125, 225)',
+    'PURPLE': 'rgb(191, 72, 205)',
+};
+
+export const deskColor = (deskColor) => {
+    const {isDarkMode} = useCustomThemeContext();
+    return !isDarkMode ? lightDeskColor[deskColor] : darkDeskColor[deskColor];
+}
+
+export const deskColorsPalette = () => {
+    const {isDarkMode} = useCustomThemeContext();
+    return !isDarkMode ? lightDeskColor : darkDeskColor;
 }

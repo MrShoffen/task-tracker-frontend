@@ -9,6 +9,8 @@ export default function WorkspaceHeader({workspace}) {
 
     return (
         <Box sx={{
+            backdropFilter: 'blur(5px)',
+            WebkitBackdropFilter: 'blur(5px)',
             height: '65px',
             backgroundColor: 'header',
             position: 'sticky',

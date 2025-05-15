@@ -2,7 +2,7 @@ import {throwSpecifyException} from "../../../exception/ThrowSpecifyException.js
 import {API_IMAGE_UPLOAD} from "../../../../UrlConstants.jsx";
 
 
-export const uploadAvatar = async (formData) => {
+export const uploadImage = async (formData) => {
 
     const response = await fetch(API_IMAGE_UPLOAD, {
         method: 'POST',

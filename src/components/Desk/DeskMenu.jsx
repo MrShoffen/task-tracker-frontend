@@ -1,5 +1,5 @@
 import {
-    Backdrop, Box, CircularProgress,
+    Box,
     ClickAwayListener,
     Divider,
     IconButton,
@@ -8,20 +8,18 @@ import {
     ListItemIcon,
     ListItemText,
     Paper,
-    Popper, useTheme
+    Popper,
+    useTheme
 } from "@mui/material";
 import {MenuIcon} from "../../assets/icons/MenuIcon.jsx";
-import {EditIcon} from "../../assets/icons/EditIcon.jsx";
-import {UploadCover} from "../../assets/icons/UploadCover.jsx";
 import * as React from "react";
-import {useRef, useState} from "react";
+import {useState} from "react";
 import * as PropTypes from "prop-types";
-import {uploadImage} from "../../services/fetch/unauth/UploadImage.js";
 import {sendEditTask} from "../../services/fetch/tasks/task/SendEditTask.js";
 import {DeleteCover} from "../../assets/icons/DeleteCover.jsx";
-import {taskColorsPalette} from "../../services/util/Utils.js";
+import {deskColorsPalette} from "../../services/util/Utils.js";
 import {Galka} from "../../assets/icons/Galka.jsx";
-import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
+import {sendEditDesk} from "../../services/fetch/tasks/desk/SendEditDesk.js";
 
 function UploadIcon(props) {
     return null;
@@ -32,7 +30,7 @@ UploadIcon.propTypes = {
     size: PropTypes.string
 };
 
-export function TaskMenu({task, hovered, taskCompleted, setContentIsLoading, updateTask}) {
+export function DeskMenu({desk,  updateDeskColor}) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const theme = useTheme();
@@ -49,71 +47,15 @@ export function TaskMenu({task, hovered, taskCompleted, setContentIsLoading, upd
         handleMenuClose(); // Закрываем меню
     };
 
-    const fileInputRef = useRef(null);
-
-    const {showWarn} = useNotification();
-
-    const validateCover = (file) => {
-        const acceptedFileTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
-        if (!acceptedFileTypes.includes(file.type)) {
-            showWarn("Поддерживается только jpg, png или gif");
-            return false;
-        }
-
-        const maxSize = 5 * 1024 * 1024;
-        if (file.size > maxSize) {
-            showWarn("Файл слишком большой");
-            return false;
-        }
-        return true;
-    }
-
-    const handleCoverUpload = async (e) => {
-        handleMenuClose();
-        const file = e.target.files[0];
-
-        if (file && validateCover(file)) {
-            setContentIsLoading(true);
-            // setContentIsLoading(true);
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-
-            const formData = new FormData();
-            formData.append('image', file);
-
-            try {
-                const uploadedImage = await uploadImage(formData);
-                const updatedTask = await sendEditTask(task.api.links.updateTaskCover.href,
-                    {
-                        newCoverUrl: uploadedImage.imageUrl
-                    }
-                );
-                updateTask(updatedTask);
-            } catch (error) {
-                console.log(error);
-            }
-        }
-        setTimeout(() => setContentIsLoading(false), 1000);
-    };
-
-    const handleCoverDelete = async (e) => {
-        handleMenuClose();
-        const updatedTask = await sendEditTask(task.api.links.updateTaskCover.href,
-            {
-                newCoverUrl: null
-            }
-        );
-        updateTask(updatedTask);
-    }
 
     const handleColorChange = async (newColor) => {
         try {
-            const updatedTask = await sendEditTask(task.api.links.updateTaskColor.href,
+            const updatedTask = await sendEditDesk(desk.api.links.updateDeskColor.href,
                 {
                     newColor: newColor
                 }
             );
-            updateTask(updatedTask);
+            updateDeskColor(newColor);
         } catch (error) {
             console.log(error);
         }
@@ -127,9 +69,8 @@ export function TaskMenu({task, hovered, taskCompleted, setContentIsLoading, upd
                 sx={{
                     width: '17px',
                     height: '17px',
-                    opacity: !taskCompleted ? 1 : (!hovered ? 0.5 : 1),
                     p: 0,
-                    ml: -2.8,
+                    ml: -3.1,
                     mt: 1
                 }}>
                 <MenuIcon color={theme.palette.taskName} size={"17px"}/>
@@ -164,56 +105,6 @@ export function TaskMenu({task, hovered, taskCompleted, setContentIsLoading, upd
                     >
                         <List disablePadding dense>
                             <ListItem
-                                button={"true"}
-                                disableGutters
-                                onClick={() => fileInputRef.current.click()}
-                                sx={{
-                                    px: 1,
-                                    py: 1
-                                }}
-                            >
-
-                                <ListItemIcon sx={{
-                                    m: 0,
-                                    minWidth: '24px !important'
-                                }}
-                                >
-                                    <UploadCover color={theme.palette.taskName} size="16px"/>
-                                </ListItemIcon>
-                                <ListItemText sx={{m: 0}} primary="Загрузить обложку"/>
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="image/jpeg, image/png, image/jpg"
-                                    style={{display: "none"}}
-                                    id="cover-upload"
-                                    onChange={handleCoverUpload}
-                                />
-                            </ListItem>
-
-                            {task.coverUrl &&
-                                <ListItem
-                                    button={"true"}
-                                    disableGutters
-                                    onClick={handleCoverDelete}
-                                    sx={{
-                                        px: 1,
-                                        py: 1
-                                    }}
-                                >
-                                    <ListItemIcon sx={{
-                                        m: 0,
-                                        minWidth: '24px !important'
-                                    }}
-                                    >
-                                        <DeleteCover color={theme.palette.taskName} size="16px"/>
-
-                                    </ListItemIcon>
-                                    <ListItemText sx={{m: 0}} primary="Удалить обложку"/>
-                                </ListItem>
-                            }
-                            <Divider/>
-                            <ListItem
                                 disableGutters
                                 onClick={handleEditClick}
                                 sx={{
@@ -232,7 +123,7 @@ export function TaskMenu({task, hovered, taskCompleted, setContentIsLoading, upd
                                         gap: '3px', // Расстояние между кружками
                                         ml: '1px'   // Отступ от текста
                                     }}>
-                                        {Object.entries(taskColorsPalette()).map(([name, color]) => (
+                                        {Object.entries(deskColorsPalette()).map(([name, color]) => (
                                             <Box
                                                 key={color}
                                                 sx={{
@@ -255,7 +146,7 @@ export function TaskMenu({task, hovered, taskCompleted, setContentIsLoading, upd
                                                     handleColorChange(name);
                                                 }}
                                             >
-                                                {task.color === name &&
+                                                {desk.color === name &&
                                                     <Box sx={{ml: '3px', mt: '-5px'}}>
                                                         <Galka color={theme.palette.taskName}/>
                                                     </Box>
@@ -270,7 +161,6 @@ export function TaskMenu({task, hovered, taskCompleted, setContentIsLoading, upd
                             <ListItem
                                 button={"true"}
                                 disableGutters
-                                onClick={handleCoverDelete}
                                 sx={{
                                     px: 1,
                                     py: 1

@@ -1,15 +1,38 @@
-import Typography from "@mui/material/Typography";
 import {Backdrop, Box, Card, CircularProgress} from "@mui/material";
 import * as React from "react";
-import {TaskStack} from "../Task/TaskStack.jsx";
-import {EditableDeskName} from "./EditableDeskName.jsx";
 import {useState} from "react";
+import {EditableDeskName} from "./EditableDeskName.jsx";
+import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
+import {NewTaskBadge} from "../Task/NewTaskBadge.jsx";
+import {Task} from "../Task/Task.jsx";
+import {deskColor} from "../../services/util/Utils.js";
+import {DeskMenu} from "./DeskMenu.jsx";
 
 
 export function TaskDesk({desk}) {
 
     const [contentIsLoading, setContentIsLoading] = useState(false);
 
+    const [currentDesk, setCurrentDesk] = useState(desk);
+
+    const {userHasPermission} = useTaskOperations();
+
+
+    const addNewTask = (newTask) => {
+        setCurrentDesk(prev => ({
+            ...prev,
+            tasks: [...prev.tasks, newTask]
+        }));
+    }
+
+    const updateDeskColor = (newDeskColor) => {
+        setCurrentDesk(prev => (
+            {
+                ...prev,
+                color: newDeskColor
+            }
+        ))
+    }
 
     return (
         <Card
@@ -42,7 +65,7 @@ export function TaskDesk({desk}) {
             </Backdrop>
             <Box
                 sx={{
-                    backgroundColor: 'rgb(92, 220, 17)',
+                    backgroundColor: deskColor(currentDesk.color),
                     height: '15px',
                 }}
             />
@@ -58,12 +81,35 @@ export function TaskDesk({desk}) {
                     // zIndex: 200,
                 }}
             />
-            <EditableDeskName desk={desk} hovered={true}/>
-            <TaskStack
-                tasks={desk.tasks}
-                taskCreationLink={desk.api.links.createTask.href}
-                setContentIsLoading={setContentIsLoading}
-            />
+            <Box sx={{display: 'flex', flexDirection: 'row'}}>
+                <EditableDeskName desk={currentDesk} hovered={true}/>
+                <DeskMenu desk={currentDesk} updateDeskColor={updateDeskColor}/>
+            </Box>
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1,
+                    minHeight: 0,
+                }}
+            >
+                {userHasPermission("CREATE_TASK") &&
+                    <NewTaskBadge taskCreationLink={currentDesk.api.links.createTask.href}
+                                  addNewTask={addNewTask}
+                    />
+                }
+
+                {currentDesk.tasks
+                    .sort((a, b) => b.orderIndex - a.orderIndex)
+                    .map(task =>
+                        <Task
+                            key={task.id}
+                            task={task}
+                            setContentIsLoading={setContentIsLoading}
+                        />
+                    )
+                }
+            </Box>
 
 
         </Card>

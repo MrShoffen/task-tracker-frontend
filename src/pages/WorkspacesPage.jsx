@@ -2,12 +2,10 @@ import {Box, CircularProgress} from "@mui/material";
 import * as React from "react";
 import {useEffect, useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
-import PasswordChangeModal from "../components/Modals/PasswordChangeModal.jsx";
-import EmailChangeModal from "../components/Modals/EmailChangeModal.jsx";
 import {useTaskOperations} from "../context/Tasks/TaskLoadProvider.jsx";
 import WorkspaceHeader from "../components/Workspace/WorkspaceHeader.jsx";
-import {DeskStack} from "../components/Desk/DeskStack.jsx";
 import {useNotification} from "../context/Notification/NotificationProvider.jsx";
+import {TaskDesk} from "../components/Desk/TaskDesk.jsx";
 
 
 export default function WorkspacesPage() {
@@ -82,7 +80,20 @@ export default function WorkspacesPage() {
                 justifyContent: 'left',
                 fontSize: '0.9rem',
             }}>
-                <DeskStack desks={fullWorkspaceInformation.desks}/>
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        m: 2,
+                        gap: 1.5
+                    }}>
+                    {fullWorkspaceInformation
+                        .desks
+                        .sort((a, b) => a.orderIndex - b.orderIndex)
+                        .map(desk =>
+                            <TaskDesk key={desk.id} desk={desk}/>)
+                    }
+                </Box>
             </Box>
         </Box>
     )

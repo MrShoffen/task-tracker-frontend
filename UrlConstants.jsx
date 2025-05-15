@@ -2,7 +2,7 @@ const isProduction = import.meta.env.MODE === "production"; // Определя�
 
 
 export const API_BASE_URL = isProduction ? "" :
-        "http://192.168.0.190:8080"
+        "http://192.168.0.125:8080"
     // "http://localhost:8080"
 ;
 

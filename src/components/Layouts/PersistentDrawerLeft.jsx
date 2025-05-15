@@ -171,10 +171,11 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                                             alt={auth.isAuthenticated ? auth.user.email : ''}
                                             style={{width: 34, height: 34}}
                                             src={auth.user.avatarUrl}
-                                    > {
-                                        auth.isAuthenticated ?
-                                            auth.user.email.slice(0, 3) : 'te'}</Avatar>
-                                    {/*{index % 2 === 0 ? <InboxIcon/> : <MailIcon/>}*/}
+                                    >
+                                        {/*{*/}
+                                        {/*auth.isAuthenticated ?*/}
+                                        {/*    auth.user.email.slice(0, 3) : 'te'}*/}
+                                    </Avatar>
                                 </ListItemIcon>
                                 <ListItemText primary="Профиль" sx={{
                                     opacity: open ? 1 : 0,

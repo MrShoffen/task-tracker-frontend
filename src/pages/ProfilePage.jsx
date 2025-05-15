@@ -15,7 +15,7 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import PasswordChangeModal from "../components/Modals/PasswordChangeModal.jsx";
 import {sendEditAvatar} from "../services/fetch/user/SendEditAvatar.js";
 import EmailChangeModal from "../components/Modals/EmailChangeModal.jsx";
-import {uploadAvatar} from "../services/fetch/unauth/UploadAvatar.js";
+import {uploadImage} from "../services/fetch/unauth/UploadImage.js";
 import {checkJwt} from "../services/fetch/jwt/CheckJwt.js";
 
 
