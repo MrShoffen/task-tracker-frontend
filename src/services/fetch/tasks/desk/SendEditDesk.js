@@ -4,7 +4,7 @@ import {throwSpecifyException} from "../../../../exception/ThrowSpecifyException
 import {API_BASE_URL} from "../../../../../UrlConstants.jsx";
 
 
-export const sendEditTask = async (url, editData) => {
+export const sendEditDesk = async (url, editData) => {
     let response = await fetch(API_BASE_URL + url, {
         method: 'PATCH',
         headers: {
@@ -23,7 +23,7 @@ export const sendEditTask = async (url, editData) => {
             try {
                 await tryToRefreshJwt();
                 console.log('successfully refreshed - back to logic')
-                return await sendEditTask(url, editData);
+                await sendEditDesk(url, editData);
             } catch (in_error) {
                 throw new UnauthorizedException(in_error.detail);
             }
@@ -31,6 +31,4 @@ export const sendEditTask = async (url, editData) => {
             throwSpecifyException(error);
         }
     }
-
-    return await response.json();
 }

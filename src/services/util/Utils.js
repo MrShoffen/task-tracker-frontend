@@ -1,3 +1,5 @@
+import {useCustomThemeContext} from "../../context/GlobalThemeContext/CustomThemeProvider.jsx";
+
 export const formatDate = (dateString) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("en-US", {
@@ -41,6 +43,7 @@ export const avatarColor = (email) => {
         "rgba(146,177,6,0.8)",
     ];
 
+
     let hash = 0;
     for (let i = 0; i < email.length; i++) {
         const char = email.charCodeAt(i);
@@ -51,4 +54,31 @@ export const avatarColor = (email) => {
 
     const string = colors[index];
     return string;
+}
+
+const lightTaskColor = {
+    'RED': '#FFB0B0',
+    null: 'white',
+    'PINK': '#FFD1D6',
+    'YELLOW': '#FFF7AD',
+    'GREEN': '#DFFABC',
+    'CYAN': '#C8F7E6',
+    'BLUE': '#BEE1FB',
+    'PURPLE': '#F9C9F7',
+};
+
+const darkTaskColor = {
+    'RED': '#703535',
+    null: '#333c49',
+    'PINK': '#713C4F',
+    'YELLOW': '#706335',
+    'GREEN': '#34572E',
+    'CYAN': '#2A5D54',
+    'BLUE': '#304D6F',
+    'PURPLE': '#673A76',
+};
+
+export const taskColor = (taskColor) => {
+    const {isDarkMode} = useCustomThemeContext();
+    return !isDarkMode ? lightTaskColor[taskColor] : darkTaskColor[taskColor];
 }

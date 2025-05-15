@@ -5,15 +5,18 @@ import {Box, IconButton, Typography, useTheme} from "@mui/material";
 import {EditIcon} from "../../assets/icons/EditIcon.jsx";
 import * as React from "react";
 import ConflictException from "../../exception/ConflictException.jsx";
+import {sendEditDesk} from "../../services/fetch/tasks/desk/SendEditDesk.js";
 
-export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
+export function EditableDeskName({desk = {name: ''}}) {
+    const [hovered, setHovered] = React.useState(false);
 
     const {userHasPermission} = useTaskOperations();
-    const theme = useTheme();
+
     const [isEditing, setIsEditing] = useState(false);
     const typographyRef = useRef(null);
     const lastSelectionRef = useRef(null);
-    const [initialText, setInitialText] = useState(task.name);
+    const [initialText, setInitialText] = useState(desk.name);
+    const theme = useTheme();
 
     // Сохраняем выделение перед обновлением
     const saveSelection = () => {
@@ -43,11 +46,11 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
         if (newText !== initialText && newText !== '') { // Сравниваем с исходным текстом
             try {
                 const newNameWithDubls = newText + (duplicatedCount === 0 ? '' : (' (' + duplicatedCount + ')'));
-                const profile = await sendEditTask(task.api.links.updateTaskName.href,
+                await sendEditDesk(desk.api.links.updateDeskName.href,
                     {
                         newName: newNameWithDubls
                     });
-                typographyRef.current.textContent = newNameWithDubls +' ';
+                typographyRef.current.textContent = newNameWithDubls + ' ';
             } catch (error) {
                 switch (true) {
                     case error instanceof ConflictException:
@@ -70,7 +73,7 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
             e.preventDefault();
             await handleBlur();
         } else if (e.key === 'Escape') {
-            typographyRef.current.textContent = task.name;
+            typographyRef.current.textContent = desk.name;
             typographyRef.current?.blur();
         }
     };
@@ -100,12 +103,13 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
         }
     }, [isEditing]);
 
-
-
     return (
-        <Box sx={{display: 'flex', alignItems: 'center'}}>
+        <Box sx={{display: 'flex', alignItems: 'center'}}
+        >
             <Typography
                 component="div"
+                onMouseEnter={() => setHovered(true)}
+                onMouseLeave={() => setHovered(false)}
                 ref={typographyRef}
                 contentEditable={isEditing}
                 suppressContentEditableWarning
@@ -114,29 +118,60 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
                 onInput={handleInput}
                 sx={{
                     m: 1,
-                    opacity: isEditing || !taskCompleted ? 1 : (!hovered ? 0.5 : 1),
+                    ml: 2,
                     zIndex: 2,
                     color: 'taskName',
+                    // backgroundColor: 'desk',
+                    fontSize: '18px',
+                    fontWeight: '500',
+                    alignSelf: 'start',
                     mr: 3,
                     userSelect: "none",
-                    fontSize: '14px',
-                    alignSelf: 'start',
                     overflowWrap: 'break-word',
                     wordBreak: 'break-all',
                     whiteSpace: 'normal',
                     borderBottom: isEditing ? '1px solid #90caf9' : 'none',
                     outline: 'none',
-                    width: '227px',
+                    width: '255px',
                 }}
             >
-                {task.name} {userHasPermission('UPDATE_TASK') && hovered && !isEditing && (
-                <IconButton disableRipple
+                {desk.name} {userHasPermission('UPDATE_DESK') && hovered && !isEditing && (
+                <IconButton
+                    disableRipple
                     sx={{width: '16px', height: '16px', p: 0, mb: '2px', ml: '2px'}}
                     onClick={handleEditClick}
                 >
-                    <EditIcon color={theme.palette.taskName} size="16px"/>
+                    <EditIcon  color={theme.palette.taskName} size="16px"/>
                 </IconButton>
             )}
+
+                {!hovered && !isEditing && (
+                    <Box
+                        sx={{
+                            backgroundColor: 'task',
+                            boxShadow: '2px',
+                            borderRadius: '9px',
+                            borderColor: 'action.disabled',
+                            display: 'inline-flex',
+                            minWidth: '18px',
+                            height: '18px',
+                            alignItems: 'center', // выравнивание по вертикали
+                            justifyContent: 'center', // выравнивание по горизонтали
+
+                        }}>
+                        <Typography
+                            sx={{
+                                fontWeight: 500,
+                                fontSize: '12px',
+                                color: 'text.secondary',
+                                mb: 'px',
+                                p: 1
+                            }}
+                        >
+                            {desk.tasks.length}
+                        </Typography>
+                    </Box>
+                )}
             </Typography>
 
         </Box>

@@ -1,13 +1,19 @@
 import Typography from "@mui/material/Typography";
-import {Box, Card} from "@mui/material";
+import {Backdrop, Box, Card, CircularProgress} from "@mui/material";
 import * as React from "react";
 import {TaskStack} from "../Task/TaskStack.jsx";
+import {EditableDeskName} from "./EditableDeskName.jsx";
+import {useState} from "react";
 
 
 export function TaskDesk({desk}) {
 
+    const [contentIsLoading, setContentIsLoading] = useState(false);
+
+
     return (
         <Card
+            elevation={0}
             sx={{
                 flex: 1,
                 boxShadow: 1,
@@ -22,6 +28,18 @@ export function TaskDesk({desk}) {
                 display: 'flex',
                 flexDirection: 'column',
             }}>
+            <Backdrop
+                sx={
+                    (theme) => ({
+                        color: '#fff',
+                        zIndex: theme.zIndex.drawer + 1,
+                        position: 'absolute'
+                    })
+                }
+                open={contentIsLoading}
+            >
+                <CircularProgress sx={{width: '20px', height: '20px'}} color="inherit"/>
+            </Backdrop>
             <Box
                 sx={{
                     backgroundColor: 'rgb(92, 220, 17)',
@@ -37,15 +55,15 @@ export function TaskDesk({desk}) {
                     borderRadius: 40,
                     position: 'absolute',
                     height: '90px',
-                    zIndex: 0,
+                    // zIndex: 200,
                 }}
             />
-            <Typography sx={{m: 1, ml: 2, zIndex: 2, fontSize: '18px', fontWeight: '500', alignSelf: 'start'}}>
-                {desk.name}
-            </Typography>
-
-
-            <TaskStack tasks={desk.tasks} taskCreationLink={desk.api.links.createTask.href}/>
+            <EditableDeskName desk={desk} hovered={true}/>
+            <TaskStack
+                tasks={desk.tasks}
+                taskCreationLink={desk.api.links.createTask.href}
+                setContentIsLoading={setContentIsLoading}
+            />
 
 
         </Card>

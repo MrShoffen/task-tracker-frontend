@@ -25,7 +25,7 @@ export const sendCreateTask = async (url, createTaskDto) => {
             try {
                 await tryToRefreshJwt();
                 console.log('successfully refreshed - back to logic')
-                await sendCreateTask(url, createTaskDto);
+                return await sendCreateTask(url, createTaskDto);
             } catch (in_error) {
                 throw new UnauthorizedException(in_error.detail);
             }

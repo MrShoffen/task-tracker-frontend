@@ -4,7 +4,7 @@ import {NewTaskBadge} from "./NewTaskBadge.jsx";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 
 
-export function TaskStack({tasks, taskCreationLink}) {
+export function TaskStack({tasks, taskCreationLink, setContentIsLoading}) {
 
     const {userHasPermission} = useTaskOperations();
     return (<Box
@@ -23,7 +23,11 @@ export function TaskStack({tasks, taskCreationLink}) {
                 tasks
                     .sort((a, b) => b.orderIndex - a.orderIndex)
                     .map(task =>
-                        <Task key={task.id} task={task}/>
+                        <Task
+                            key={task.id}
+                            task={task}
+                            setContentIsLoading={setContentIsLoading}
+                        />
                     )
             }
         </Box>
