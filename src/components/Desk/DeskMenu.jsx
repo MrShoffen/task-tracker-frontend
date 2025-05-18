@@ -70,8 +70,9 @@ export function DeskMenu({desk,  updateDeskColor}) {
                     width: '17px',
                     height: '17px',
                     p: 0,
-                    ml: -3.1,
-                    mt: 1
+                    position: 'absolute',
+                    right: '14px',
+                    top: '23px'
                 }}>
                 <MenuIcon color={theme.palette.taskName} size={"17px"}/>
 
@@ -115,7 +116,7 @@ export function DeskMenu({desk,  updateDeskColor}) {
                                 <Box
                                     sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}
                                 >
-                                    <ListItemText sx={{mb: '5px',}} primary="Цвет задачи"/>
+                                    <ListItemText sx={{mb: '5px',}} primary="Цвет доски"/>
 
 
                                     <Box sx={{

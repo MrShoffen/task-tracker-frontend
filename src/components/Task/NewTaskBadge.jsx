@@ -99,7 +99,7 @@ export function NewTaskBadge({taskCreationLink, addNewTask}) {
         <Card
             elevation={0}
             sx={{
-                mt: isEditing ? -0.8 : -1.6,
+                mt: isEditing ? -0.8 : -1.1,
                 mb: isEditing ? '0px' : '-8px',
                 ml: '7px',
                 border: isEditing && '1px solid',

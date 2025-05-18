@@ -132,7 +132,7 @@ export function EditableDeskName({desk = {name: ''}}) {
                     whiteSpace: 'normal',
                     borderBottom: isEditing ? '1px solid #90caf9' : 'none',
                     outline: 'none',
-                    width: '255px',
+                    width: '250px',
                 }}
             >
                 {desk.name} {userHasPermission('UPDATE_DESK') && hovered && !isEditing && (

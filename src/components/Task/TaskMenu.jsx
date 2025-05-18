@@ -22,6 +22,7 @@ import {DeleteCover} from "../../assets/icons/DeleteCover.jsx";
 import {taskColorsPalette} from "../../services/util/Utils.js";
 import {Galka} from "../../assets/icons/Galka.jsx";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
+import {DeleteTask} from "../../assets/icons/DeleteTask.jsx";
 
 function UploadIcon(props) {
     return null;
@@ -281,10 +282,10 @@ export function TaskMenu({task, hovered, taskCompleted, setContentIsLoading, upd
                                     minWidth: '24px !important'
                                 }}
                                 >
-                                    <DeleteCover color={theme.palette.taskName} size="16px"/>
+                                    <DeleteTask color={theme.palette.taskName} />
 
                                 </ListItemIcon>
-                                <ListItemText sx={{m: 0}} primary="Удалить обложку"/>
+                                <ListItemText sx={{m: 0}} primary="Удалить задачу"/>
                             </ListItem>
                         </List>
                     </Paper>

@@ -83,6 +83,7 @@ export default function WorkspacesPage() {
                 <Box
                     sx={{
                         display: "flex",
+                        height: '100%',
                         flexDirection: "row",
                         m: 2,
                         gap: 1.5

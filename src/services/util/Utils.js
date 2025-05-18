@@ -42,9 +42,7 @@ export const avatarColor = (email) => {
         "rgba(6,177,162,0.8)",
         "rgba(146,177,6,0.8)",
     ];
-    if(!email){
-        return "white";
-    }
+
 
     let hash = 0;
     for (let i = 0; i < email.length; i++) {

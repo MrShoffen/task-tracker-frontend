@@ -46,10 +46,11 @@ export function TaskDesk({desk}) {
                 minWidth: '300px',
                 minHeight: 0,
                 height: '100%',
-                pb: 1.5,
-                backgroundColor: 'desk',
+                backgroundColor: deskColor(currentDesk.color),
                 display: 'flex',
                 flexDirection: 'column',
+                maxHeight: 'calc(100vh - 97px)', // Ограничиваем высоту карточки
+
             }}>
             <Backdrop
                 sx={
@@ -75,42 +76,66 @@ export function TaskDesk({desk}) {
                     width: '360px',
                     top: '8px',
                     left: '-30px',
-                    borderRadius: 40,
+                    borderRadius: 12.5,
                     position: 'absolute',
-                    height: '90px',
+                    height: '9000px',
                     // zIndex: 200,
                 }}
             />
-            <Box sx={{display: 'flex', flexDirection: 'row'}}>
+            <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                pb: 1.5
+
+                // flexShrink: 0, // Фиксированная высота
+            }}>
                 <EditableDeskName desk={currentDesk} hovered={true}/>
                 <DeskMenu desk={currentDesk} updateDeskColor={updateDeskColor}/>
-            </Box>
-            <Box
-                sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 1,
-                    minHeight: 0,
-                }}
-            >
                 {userHasPermission("CREATE_TASK") &&
                     <NewTaskBadge taskCreationLink={currentDesk.api.links.createTask.href}
                                   addNewTask={addNewTask}
                     />
                 }
 
-                {currentDesk.tasks
-                    .sort((a, b) => b.orderIndex - a.orderIndex)
-                    .map(task =>
-                        <Task
-                            key={task.id}
-                            task={task}
-                            setContentIsLoading={setContentIsLoading}
-                        />
-                    )
-                }
             </Box>
+            <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden', // Скрываем переполнение
+                position: 'relative',
+            }}>
+                {/* Внутренний контейнер с прокруткой */}
+                <Box sx={{
+                    overflowY: 'auto',
+                    flex: 1,
+                    '&::-webkit-scrollbar': {
+                        width: '7px',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: 'action.disabled',
+                        borderRadius: '3px',
+                        visibility: 'hidden', // Скрываем по умолчанию
+                        transition: 'visibility 0.6s ease',
+                    },
+                    '&:hover::-webkit-scrollbar-thumb': {
+                        visibility: 'visible', // Показываем при наведении на область прокрутки
+                    }
 
+
+                }}>
+
+                    {currentDesk.tasks
+                        .sort((a, b) => b.orderIndex - a.orderIndex)
+                        .map(task =>
+                            <Task
+                                key={task.id}
+                                task={task}
+                                setContentIsLoading={setContentIsLoading}
+                            />
+                        )
+                    }
+                </Box>
+            </Box>
 
         </Card>
     )

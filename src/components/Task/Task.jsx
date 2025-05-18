@@ -52,7 +52,10 @@ export function Task({task, setContentIsLoading}) {
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             sx={{
-                m: 'auto',
+                // mt: '10px',
+                mb: '10px',
+                ml: '7px',
+                // mb: '5px',
                 flex: 1,
                 // boxShadow: !hovered && 'none',
                 border: '1px solid',
@@ -63,8 +66,6 @@ export function Task({task, setContentIsLoading}) {
                 minWidth: '286px',
                 maxWidth: '286px',
                 transition: 'none',
-                backdropFilter: 'blur(9px)',
-                WebkitBackdropFilter: 'blur(9px)',
                 backgroundColor: taskColor(currentTask.color),
                 display: 'flex',
                 flexDirection: 'column',

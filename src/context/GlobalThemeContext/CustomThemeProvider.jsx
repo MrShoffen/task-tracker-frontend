@@ -65,7 +65,7 @@ export const CustomThemeProvider = ({children}) => {
                     searchInput: isDarkMode ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.3)",
                     menu: isDarkMode ? 'rgba(0,0,0,0.8)' : "white",
                     modal: isDarkMode ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.89)",
-                    desk: !isDarkMode ? "#e4e7ec" : "#252b35",
+                    desk: !isDarkMode ? "rgba(241,241,241,0.93)" : "rgba(58,58,58,0.93)",
                     task: !isDarkMode ? "white" : "#333c49",
                     taskName: !isDarkMode ? "#121b2e" : "#d2d4d6",
                     menuPopup: isDarkMode ? "#252b35" : 'white',
