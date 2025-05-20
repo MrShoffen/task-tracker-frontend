@@ -9,7 +9,7 @@ import {deskColor} from "../../services/util/Utils.js";
 import {DeskMenu} from "./DeskMenu.jsx";
 
 
-export function TaskDesk({desk}) {
+export function TaskDesk({desk, sx}) {
 
     const [contentIsLoading, setContentIsLoading] = useState(false);
 
@@ -38,19 +38,15 @@ export function TaskDesk({desk}) {
         <Card
             elevation={0}
             sx={{
-                flex: 1,
                 boxShadow: 1,
                 borderRadius: 3,
                 position: 'relative',
-                maxWidth: '300px',
-                minWidth: '300px',
-                minHeight: 0,
-                height: '100%',
+                width: '300px',
                 backgroundColor: deskColor(currentDesk.color),
                 display: 'flex',
                 flexDirection: 'column',
-                maxHeight: 'calc(100vh - 97px)', // Ограничиваем высоту карточки
-
+                maxHeight: 'calc(100vh - 120px)', // Ограничение максимальной высоты
+                ...sx
             }}>
             <Backdrop
                 sx={
@@ -124,7 +120,7 @@ export function TaskDesk({desk}) {
 
                 }}>
 
-                    {currentDesk.tasks
+                    {currentDesk.tasks && currentDesk.tasks
                         .sort((a, b) => b.orderIndex - a.orderIndex)
                         .map(task =>
                             <Task

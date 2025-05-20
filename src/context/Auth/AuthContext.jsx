@@ -66,9 +66,9 @@ export const AuthProvider = ({children}) => {
     }, [urlLocation.pathname]);
 
 
-    useEffect(() => {
-        validateJwt();
-    }, []);
+    // useEffect(() => {
+    //     validateJwt();
+    // }, []);
 
 
     return (

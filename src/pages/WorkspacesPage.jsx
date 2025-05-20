@@ -6,7 +6,7 @@ import {useTaskOperations} from "../context/Tasks/TaskLoadProvider.jsx";
 import WorkspaceHeader from "../components/Workspace/WorkspaceHeader.jsx";
 import {useNotification} from "../context/Notification/NotificationProvider.jsx";
 import {TaskDesk} from "../components/Desk/TaskDesk.jsx";
-
+import {NewDeskBadge} from "../components/Desk/NewDeskBadge.jsx";
 
 export default function WorkspacesPage() {
     const {fullWorkspaceInformation, workspaces, loadFullWorkspace, loadAllWorkspaces} = useTaskOperations();
@@ -43,6 +43,10 @@ export default function WorkspacesPage() {
         }
     }
 
+    const addNewDesk = (newDesk) => {
+
+    }
+
     useEffect(() => {
         checkAndLoadWorkspace();
     }, [location.pathname]);
@@ -53,47 +57,73 @@ export default function WorkspacesPage() {
         )
     }
 
-
     return (
         <Box sx={{
-            flex: 1
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100vh',
+            overflow: 'hidden'
         }}>
-            {workspaceLoading
-                ?
-
+            {/* Хедер - фиксированная высота */}
+            {workspaceLoading ? (
                 <Box sx={{
                     height: '65px',
                     backgroundColor: 'header',
                     position: 'sticky',
+                    top: 0,
+                    zIndex: 1,
                     alignItems: 'center',
                     borderBottom: '1px solid',
                     borderColor: 'action.selected',
                     px: 2,
-                    boxShadow: 3
+                    boxShadow: 3,
+                    flexShrink: 0
                 }}>
-                    <CircularProgress/> </Box> :
+                    <CircularProgress/>
+                </Box>
+            ) : (
                 <WorkspaceHeader workspace={fullWorkspaceInformation}/>
-            }
+            )}
+
+            {/* Основной контент с горизонтальным скроллом */}
             <Box sx={{
-                width: '100%',
+                flex: 1,
                 minHeight: 0,
-                justifyContent: 'left',
-                fontSize: '0.9rem',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                position: 'relative'
             }}>
-                <Box
-                    sx={{
-                        display: "flex",
-                        height: '100%',
-                        flexDirection: "row",
-                        m: 2,
-                        gap: 1.5
+                <Box sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    overflowX: 'auto',
+                    overflowY: 'hidden',
+                    px: 2,
+                    py: 2
+                }}>
+                    <Box sx={{
+                        display: 'inline-flex',
+                        gap: 1.5,
+                        alignItems: 'flex-start',
+                        height: 'fit-content'
                     }}>
-                    {fullWorkspaceInformation
-                        .desks
-                        .sort((a, b) => a.orderIndex - b.orderIndex)
-                        .map(desk =>
-                            <TaskDesk key={desk.id} desk={desk}/>)
-                    }
+                        {fullWorkspaceInformation?.desks
+                            ?.sort((a, b) => a.orderIndex - b.orderIndex)
+                            .map(desk => (
+                                <TaskDesk
+                                    key={desk.id}
+                                    desk={desk}
+                                    sx={{
+                                        flexShrink: 0
+                                    }}
+                                />
+                            ))}
+                        <NewDeskBadge/>
+                    </Box>
                 </Box>
             </Box>
         </Box>

@@ -119,3 +119,6 @@ export const deskColorsPalette = () => {
     const {isDarkMode} = useCustomThemeContext();
     return !isDarkMode ? lightDeskColor : darkDeskColor;
 }
+
+export const randomDeskColor = () =>
+    Object.keys(lightDeskColor)[Math.floor(Math.random() * Object.keys(lightDeskColor).length)];

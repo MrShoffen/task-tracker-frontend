@@ -23,8 +23,8 @@ const FlipCard = ({isFlipped, front, back, height = 530, width = 400}) => {
                 height: `500px`,
                 position: 'fixed',
                 left: '50%',
-                transform: 'translate(-50%, 0%)',
-                top: '350px',
+                transform: 'translate(-50%, -50%)',
+                top: '50%',
                 // backgroundColor: 'searchInput',
                 alignSelf: 'center',
 

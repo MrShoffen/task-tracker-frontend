@@ -20,6 +20,9 @@ import {DeleteCover} from "../../assets/icons/DeleteCover.jsx";
 import {deskColorsPalette} from "../../services/util/Utils.js";
 import {Galka} from "../../assets/icons/Galka.jsx";
 import {sendEditDesk} from "../../services/fetch/tasks/desk/SendEditDesk.js";
+import {DeleteTask} from "../../assets/icons/DeleteTask.jsx";
+import {sendDeleteDesk} from "../../services/fetch/tasks/desk/SendDeleteDesk.js";
+import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 
 function UploadIcon(props) {
     return null;
@@ -30,10 +33,11 @@ UploadIcon.propTypes = {
     size: PropTypes.string
 };
 
-export function DeskMenu({desk,  updateDeskColor}) {
+export function DeskMenu({desk, updateDeskColor}) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const theme = useTheme();
+    const {deleteDesk} = useTaskOperations();
 
     const handleMenuClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -59,6 +63,16 @@ export function DeskMenu({desk,  updateDeskColor}) {
         } catch (error) {
             console.log(error);
         }
+    }
+
+    const handleDeleteDesk = async () => {
+        try {
+            await sendDeleteDesk(desk.api.links.deleteDesk.href);
+            deleteDesk(desk);
+        } catch (error) {
+            console.log(error);
+        }
+        handleMenuClose()
     }
 
     return (<>
@@ -162,6 +176,7 @@ export function DeskMenu({desk,  updateDeskColor}) {
                             <ListItem
                                 button={"true"}
                                 disableGutters
+                                onClick={handleDeleteDesk}
                                 sx={{
                                     px: 1,
                                     py: 1
@@ -172,10 +187,10 @@ export function DeskMenu({desk,  updateDeskColor}) {
                                     minWidth: '24px !important'
                                 }}
                                 >
-                                    <DeleteCover color={theme.palette.taskName} size="16px"/>
+                                    <DeleteTask color={theme.palette.taskName} size="16px"/>
 
                                 </ListItemIcon>
-                                <ListItemText sx={{m: 0}} primary="Удалить обложку"/>
+                                <ListItemText sx={{m: 0}} primary="Удалить доску"/>
                             </ListItem>
                         </List>
                     </Paper>

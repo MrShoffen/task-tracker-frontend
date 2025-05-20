@@ -17,6 +17,8 @@ export function NewTaskBadge({taskCreationLink, addNewTask}) {
         setIsEditing(true);
     }
 
+    const {addNewTaskToCurrentWorkspace} = useTaskOperations();
+
     const [isEditing, setIsEditing] = useState(false);
     const typographyRef = useRef(null);
     const lastSelectionRef = useRef(null);

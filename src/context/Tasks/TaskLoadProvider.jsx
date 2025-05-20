@@ -52,6 +52,26 @@ export const TaskLoadProvider = ({children}) => {
         return permissions.includes(permission);
     }
 
+    function addNewDesk(newDesk) {
+
+        const fullDesk = {
+            ...newDesk,
+            tasks: []
+        }
+
+        setFullWorkspaceInformation(prev => ({
+            ...prev, // Копируем все существующие поля
+            desks: [...prev.desks, fullDesk] // Создаем новый массив desks со старыми элементами + новый элемент
+        }));
+    }
+
+    function deleteDesk(deskToDelete) {
+        setFullWorkspaceInformation(prev => ({
+            ...prev, // Копируем все существующие поля
+            desks: prev.desks.filter(desk => desk.id !== deskToDelete.id) // Фильтруем массив, оставляя только элементы с id не равным deskId
+        }));
+    }
+
     function addNewTaskToCurrentWorkspace(task) {
         console.log(task);
         console.log(fullWorkspaceInformation)
@@ -89,7 +109,10 @@ export const TaskLoadProvider = ({children}) => {
             permissions,
             userHasPermission,
 
-            addNewTaskToCurrentWorkspace
+            addNewTaskToCurrentWorkspace,
+
+            addNewDesk,
+            deleteDesk
         }}>
             {children}
         </TaskLoadContext.Provider>

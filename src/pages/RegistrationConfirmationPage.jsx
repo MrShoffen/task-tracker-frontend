@@ -1,4 +1,4 @@
-import {Button, Card, CircularProgress} from "@mui/material";
+import {Button, Card, CircularProgress, Box} from "@mui/material"; // Добавлен Box
 import React, {useEffect, useState} from "react";
 import Typography from "@mui/material/Typography";
 import {useLocation, useNavigate} from "react-router-dom";
@@ -6,7 +6,6 @@ import {useAuthContext} from "../context/Auth/AuthContext.jsx";
 import {useNotification} from "../context/Notification/NotificationProvider.jsx";
 import UnauthorizedException from "../exception/UnauthorizedException.jsx";
 import {sendRegistrationConfirm} from "../services/fetch/unauth/SendRegistrationConfirm.js";
-
 
 export const RegistrationConfirmationPage = () => {
     const {login} = useAuthContext();
@@ -72,12 +71,14 @@ export const RegistrationConfirmationPage = () => {
                   left: '50%',
                   transform: 'translate(-50%, 0%)',
                   top: '350px',
-                  // backgroundColor: 'searchInput',
                   alignSelf: 'center',
                   borderRadius: 1,
                   width: '400px',
                   height: '330px',
                   transition: 'height 0.5s ease',
+                  display: 'flex',          // Добавлено
+                  flexDirection: 'column', // Добавлено
+                  alignItems: 'center',    // Добавлено - центрирует по горизонтали
               }}>
 
             <Typography variant="h4" sx={{textAlign: 'center', mb: 2, mt: 3}}>
@@ -85,8 +86,10 @@ export const RegistrationConfirmationPage = () => {
                     confirmationError ? 'Ошибка' : 'Успешно!'}
             </Typography>
 
-            {confirmationInProgress ? <CircularProgress
-                    sx={{width: 20, mt: 2}}/> :
+            {confirmationInProgress ?
+                <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', my: 2 }}>
+                    <CircularProgress />
+                </Box> :
                 <>
                     <Typography variant="body1" sx={{textAlign: 'center', mb: 5}}>
                         {confirmationError
@@ -94,26 +97,22 @@ export const RegistrationConfirmationPage = () => {
                             : 'Почта подтверждена. Теперь Вы можете войти в аккаунт'}
                     </Typography>
                     {!confirmationError &&
-                        <Button
-                            loadingPosition="center"
-                            fullWidth
-                            type="submit"
-                            variant="contained"
-                            onClick={handleAutoLogin}
-                            sx={{
-                                width: '300px',
-                                alignSelf: 'center',
-                            }}
-                        >
-                            Войти
-                        </Button>
+                        <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                            <Button
+                                loadingPosition="center"
+                                type="submit"
+                                variant="contained"
+                                onClick={handleAutoLogin}
+                                sx={{
+                                    width: '300px',
+                                }}
+                            >
+                                Войти
+                            </Button>
+                        </Box>
                     }
-
                 </>
             }
-
-
         </Card>
     )
 }
-

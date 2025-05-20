@@ -168,7 +168,7 @@ export function EditableDeskName({desk = {name: ''}}) {
                                 p: 1
                             }}
                         >
-                            {desk.tasks.length}
+                            {desk.tasks && desk.tasks.length}
                         </Typography>
                     </Box>
                 )}
