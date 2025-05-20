@@ -1,20 +1,19 @@
-import {Backdrop, Box, Card, CircularProgress, IconButton, Typography, useTheme} from "@mui/material";
-import {deskColor, randomDeskColor} from "../../services/util/Utils.js";
-import {EditableDeskName} from "./EditableDeskName.jsx";
-import {DeskMenu} from "./DeskMenu.jsx";
-import {NewTaskBadge} from "../Task/NewTaskBadge.jsx";
-import {Task} from "../Task/Task.jsx";
+import {Box, IconButton, ListItemButton, ListItemIcon, ListItemText, Typography, useTheme} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import * as React from "react";
-import {EditIcon} from "../../assets/icons/EditIcon.jsx";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import {useEffect, useRef, useState} from "react";
-import {NewDeskIcon} from "../../assets/icons/NewDesk.jsx";
 import {sendCreateDesk} from "../../services/fetch/tasks/desk/SendCreateDesk.js";
+import {randomDeskColor} from "../../services/util/Utils.js";
 import ConflictException from "../../exception/ConflictException.jsx";
+import {EditIcon} from "../../assets/icons/EditIcon.jsx";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
+import {sendCreateWs} from "../../services/fetch/tasks/ws/SendCreateWs.js";
 
-export const NewDeskBadge = () => {
-    const {fullWorkspaceInformation, addNewDesk} = useTaskOperations();
+
+export function NewWorkspaceBadge() {
+
+    const {loadAllWorkspaces} = useTaskOperations();
 
     const [hovered, setHovered] = React.useState(false);
 
@@ -56,12 +55,12 @@ export const NewDeskBadge = () => {
         if (newText !== initialText && newText !== '') { // Сравниваем с исходным текстом
             try {
                 const newNameWithDubls = newText + (duplicatedCount === 0 ? '' : (' (' + duplicatedCount + ')'));
-                let newDesk = await sendCreateDesk(fullWorkspaceInformation.api.links.createDesk.href,
+                let newWs = await sendCreateWs(
                     {
                         name: newNameWithDubls,
-                        color: randomDeskColor()
+                        isPublic: false
                     });
-                addNewDesk(newDesk);
+                await loadAllWorkspaces();
             } catch (error) {
                 switch (true) {
                     case error instanceof ConflictException:
@@ -115,66 +114,43 @@ export const NewDeskBadge = () => {
     }, [isEditing]);
 
 
-    function handleNewDeskCreation() {
-        setIsEditing(true);
-    }
+    return (
+        <>
 
-    return (<>
-            {
-                !isEditing ?
-                    <Card
-                        onMouseEnter={() => setHovered(true)}
-                        onMouseLeave={() => setHovered(false)}
-                        onClick={handleNewDeskCreation}
-                        elevation={0}
-                        sx={{
-                            boxShadow: 1,
-                            borderRadius: 2,
-                            position: 'relative',
-                            maxWidth: '165px',
-                            minWidth: '165px',
-                            border: '1px solid',
-                            borderColor: 'action.disabled',
-                            height: '33px',
-                            backgroundColor: 'desk',
-                            display: 'flex',
-                            cursor: 'pointer',
-                            color: hovered ? 'rgb(0,137,246)' : 'taskName',
-                            flexDirection: 'column',
-                            // maxHeight: 'calc(100vh - 97px)', // Ограничиваем высоту карточки
+            <ListItemButton sx={{pl: 2, maxHeight: 33,}} onClick={handleEditClick}>
 
-                        }}>
-                        <Box sx={{
-                            display: 'flex',
-                            gap: 0.6, pt: '9px',
-                            pl: 1.5,
-                            flexDirection: 'row',
-                        }}>
+                <Box
+                    sx={{
+                        display: 'inline-flex',           // горизонтально, по размеру контента
+                        alignItems: 'center',            // выравнивание вертикально
+                        border: '1px solid',
+                        borderColor: 'info.dark',     // цвет рамки из темы MUI
+                        borderRadius: 3,
+                        pr: 5,
+                        width: '100%',// внутренние отступы
+                        maxHeight: 28,
+                    }}
+                >
+                    {!isEditing
+                        ?
+                        <>
+                            <ListItemIcon>
+                                <AddIcon sx={{fontSize: "20px", ml: 0.6}}/>
+                            </ListItemIcon>
+                            <ListItemText primary="Добавить" sx={{
+                                '& .MuiTypography-root': {
+                                    ml: -3,
+                                    fontSize: '0.8rem',
+                                    fontWeight: 'bold',
+                                }
+                            }}/>
+                        </>
 
-                            <NewDeskIcon color={theme.palette.taskName} hovered={hovered}/>
-                            <Typography sx={{fontSize: '0.9rem', p: 0, mt: '-3px', userSelect: 'none'}}>Новая
-                                доска</Typography>
-                        </Box>
-                    </Card>
-                    :
-                    <Card
-                        elevation={0}
-                        sx={{
-                            boxShadow: 1,
-                            borderRadius: 3,
-                            position: 'relative',
-                            maxWidth: '300px',
-                            minWidth: '300px',
-                            minHeight: 22,
-                            height: '100%',
-                            backgroundColor: 'desk',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            // maxHeight: 'calc(100vh - 97px)', // Ограничиваем высоту карточки
-
-                        }}>
-                        <Box sx={{display: 'flex', alignItems: 'center'}}
-                        >
+                        :
+                        <Box sx={{display: 'flex', alignItems: 'center'}}>
+                            <ListItemIcon>
+                                <AddIcon sx={{fontSize: "20px", ml: 0.6}}/>
+                            </ListItemIcon>
                             <Typography
                                 component="div"
                                 // onMouseEnter={() => setHovered(true)}
@@ -186,23 +162,30 @@ export const NewDeskBadge = () => {
                                 onKeyDown={handleKeyDown}
                                 onInput={handleInput}
                                 sx={{
-                                    m: 1,
-                                    ml: 2,
+
                                     zIndex: 2,
+                                    p: 1,
+                                    ml: -4,
                                     color: 'taskName',
                                     // backgroundColor: 'desk',
-                                    fontSize: '18px',
-                                    fontWeight: '500',
+                                    fontSize: '0.8rem',
+                                    fontWeight: '400',
                                     alignSelf: 'start',
                                     minHeight: '30px',
-                                    mr: 3,
+                                    maxWidth: '100px',
                                     userSelect: "none",
-                                    overflowWrap: 'break-word',
-                                    wordBreak: 'break-all',
-                                    whiteSpace: 'normal',
+                                    whiteSpace: 'nowrap', // Запрещаем перенос строк
+                                    overflowX: 'auto',
+                                    textOverflow: 'clip', // Добавляем многоточие если текст не помещается
                                     borderBottom: isEditing ? '1px solid #90caf9' : 'none',
                                     outline: 'none',
                                     width: '250px',
+                                    scrollbarWidth: 'none', // Для Firefox
+                                    '&::-webkit-scrollbar': {
+                                        display: 'none' // Для Chrome, Safari, Edge
+                                    },
+                                    // Альтернативный вариант - полностью скрыть скролл
+                                    msOverflowStyle: 'none' // Для IE и Edge (старые версии)
                                 }}
                             >
                                 {userHasPermission('CREATE_DESK') && hovered && !isEditing && (
@@ -217,10 +200,10 @@ export const NewDeskBadge = () => {
                             </Typography>
 
                         </Box>
-                    </Card>
-            }
+                    }
+                </Box>
+            </ListItemButton>
+
         </>
-
     )
-
 }

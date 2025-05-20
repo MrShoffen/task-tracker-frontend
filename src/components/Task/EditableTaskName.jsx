@@ -5,6 +5,7 @@ import {Box, IconButton, Typography, useTheme} from "@mui/material";
 import {EditIcon} from "../../assets/icons/EditIcon.jsx";
 import * as React from "react";
 import ConflictException from "../../exception/ConflictException.jsx";
+import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 
 export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
 
@@ -14,6 +15,7 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
     const typographyRef = useRef(null);
     const lastSelectionRef = useRef(null);
     const [initialText, setInitialText] = useState(task.name);
+    const {showWarn} = useNotification();
 
     // Сохраняем выделение перед обновлением
     const saveSelection = () => {
@@ -47,7 +49,7 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
                     {
                         newName: newNameWithDubls
                     });
-                typographyRef.current.textContent = newNameWithDubls +' ';
+                typographyRef.current.textContent = newNameWithDubls + ' ';
             } catch (error) {
                 switch (true) {
                     case error instanceof ConflictException:
@@ -55,6 +57,7 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
                         break;
                     default:
                         console.log(error);
+                        showWarn(error.message);
                         typographyRef.current.textContent = initialText;
                 }
 
@@ -101,7 +104,6 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
     }, [isEditing]);
 
 
-
     return (
         <Box sx={{display: 'flex', alignItems: 'center'}}>
             <Typography
@@ -131,8 +133,8 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
             >
                 {task.name} {userHasPermission('UPDATE_TASK') && hovered && !isEditing && (
                 <IconButton disableRipple
-                    sx={{width: '16px', height: '16px', p: 0, mb: '2px', ml: '2px'}}
-                    onClick={handleEditClick}
+                            sx={{width: '16px', height: '16px', p: 0, mb: '2px', ml: '2px'}}
+                            onClick={handleEditClick}
                 >
                     <EditIcon color={theme.palette.taskName} size="16px"/>
                 </IconButton>

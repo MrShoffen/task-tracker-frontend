@@ -6,6 +6,7 @@ import {EditIcon} from "../../assets/icons/EditIcon.jsx";
 import * as React from "react";
 import ConflictException from "../../exception/ConflictException.jsx";
 import {sendEditDesk} from "../../services/fetch/tasks/desk/SendEditDesk.js";
+import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 
 export function EditableDeskName({desk = {name: ''}}) {
     const [hovered, setHovered] = React.useState(false);
@@ -39,6 +40,7 @@ export function EditableDeskName({desk = {name: ''}}) {
         setIsEditing(true);
     };
 
+    const {showWarn} = useNotification();
 
     const handleBlur = async (event, duplicatedCount = 0) => {
         saveSelection();
@@ -58,6 +60,7 @@ export function EditableDeskName({desk = {name: ''}}) {
                         break;
                     default:
                         console.log(error);
+                        showWarn(error.message);
                         typographyRef.current.textContent = initialText;
                 }
 

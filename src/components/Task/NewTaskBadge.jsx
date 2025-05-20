@@ -9,6 +9,7 @@ import {UncheckedIcon} from "../../assets/icons/UncheckedIcon.jsx";
 import {CheckedIcon} from "../../assets/icons/CheckedIcon.jsx";
 import {sendCreateTask} from "../../services/fetch/tasks/task/SendCreateTask.js";
 import ConflictException from "../../exception/ConflictException.jsx";
+import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 
 
 export function NewTaskBadge({taskCreationLink}) {
@@ -39,6 +40,8 @@ export function NewTaskBadge({taskCreationLink}) {
         }
     };
 
+    const {showWarn} = useNotification();
+
     const handleBlur = async (event, conflictText = '', duplicatedCount = 0) => {
         setIsEditing(false);
         saveSelection();
@@ -55,6 +58,7 @@ export function NewTaskBadge({taskCreationLink}) {
                         await handleBlur(event, taskName, duplicatedCount + 1);
                         break;
                     default:
+                        showWarn(error.message);
                         console.log(error);
                         typographyRef.current.textContent = initialText;
                 }

@@ -27,6 +27,7 @@ import {useNavigate, useNavigation} from "react-router-dom";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import AddIcon from '@mui/icons-material/Add';
 import WorkspaceListElement from "../Workspace/WorkspaceListElement.jsx";
+import {NewWorkspaceBadge} from "../Workspace/NewWorkspaceBadge.jsx";
 
 
 const drawerWidth = 180;
@@ -221,33 +222,8 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                             </ListItemButton>
                             <Collapse in={openSubmenu} timeout="auto" unmountOnExit>
                                 <List disablePadding component="div">
+                                    <NewWorkspaceBadge/>
 
-                                    <ListItemButton sx={{pl: 2, maxHeight: 33,}}>
-
-                                        <Box
-                                            sx={{
-                                                display: 'inline-flex',           // горизонтально, по размеру контента
-                                                alignItems: 'center',            // выравнивание вертикально
-                                                border: '1px solid',
-                                                borderColor: 'info.dark',     // цвет рамки из темы MUI
-                                                borderRadius: 3,
-                                                pr: 5,
-                                                width: '100%',// внутренние отступы
-                                                maxHeight: 28,
-                                            }}
-                                        >
-                                            <ListItemIcon>
-                                                <AddIcon sx={{fontSize: "24px"}}/>
-                                            </ListItemIcon>
-                                            <ListItemText primary="Добавить" sx={{
-                                                '& .MuiTypography-root': {
-                                                    ml: -2,
-                                                    fontSize: '0.8rem',
-                                                    fontWeight: 'bold',
-                                                }
-                                            }}/>
-                                        </Box>
-                                    </ListItemButton>
                                     {workspaces
                                         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                                         .map(ws => <WorkspaceListElement workspace={ws}/>)}
