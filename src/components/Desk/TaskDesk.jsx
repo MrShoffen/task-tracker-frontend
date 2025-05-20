@@ -13,26 +13,7 @@ export function TaskDesk({desk, sx}) {
 
     const [contentIsLoading, setContentIsLoading] = useState(false);
 
-    const [currentDesk, setCurrentDesk] = useState(desk);
-
     const {userHasPermission} = useTaskOperations();
-
-
-    const addNewTask = (newTask) => {
-        setCurrentDesk(prev => ({
-            ...prev,
-            tasks: [...prev.tasks, newTask]
-        }));
-    }
-
-    const updateDeskColor = (newDeskColor) => {
-        setCurrentDesk(prev => (
-            {
-                ...prev,
-                color: newDeskColor
-            }
-        ))
-    }
 
     return (
         <Card
@@ -42,7 +23,7 @@ export function TaskDesk({desk, sx}) {
                 borderRadius: 3,
                 position: 'relative',
                 width: '300px',
-                backgroundColor: deskColor(currentDesk.color),
+                backgroundColor: deskColor(desk.color),
                 display: 'flex',
                 flexDirection: 'column',
                 maxHeight: 'calc(100vh - 120px)', // Ограничение максимальной высоты
@@ -62,7 +43,7 @@ export function TaskDesk({desk, sx}) {
             </Backdrop>
             <Box
                 sx={{
-                    backgroundColor: deskColor(currentDesk.color),
+                    backgroundColor: deskColor(desk.color),
                     height: '15px',
                 }}
             />
@@ -85,11 +66,10 @@ export function TaskDesk({desk, sx}) {
 
                 // flexShrink: 0, // Фиксированная высота
             }}>
-                <EditableDeskName desk={currentDesk} hovered={true}/>
-                <DeskMenu desk={currentDesk} updateDeskColor={updateDeskColor}/>
+                <EditableDeskName desk={desk} hovered={true}/>
+                <DeskMenu desk={desk}/>
                 {userHasPermission("CREATE_TASK") &&
-                    <NewTaskBadge taskCreationLink={currentDesk.api.links.createTask.href}
-                                  addNewTask={addNewTask}
+                    <NewTaskBadge taskCreationLink={desk.api.links.createTask.href}
                     />
                 }
 
@@ -120,7 +100,7 @@ export function TaskDesk({desk, sx}) {
 
                 }}>
 
-                    {currentDesk.tasks && currentDesk.tasks
+                    {desk.tasks && desk.tasks
                         .sort((a, b) => b.orderIndex - a.orderIndex)
                         .map(task =>
                             <Task

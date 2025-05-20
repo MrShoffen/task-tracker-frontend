@@ -3,10 +3,9 @@ import {tryToRefreshJwt} from "../../jwt/RefreshJwt.js";
 import UnauthorizedException from "../../../../exception/UnauthorizedException.jsx";
 import {API_ALL_WORKSPACES, API_BASE_URL} from "../../../../../UrlConstants.jsx";
 
-export const sendGetFullWsInformation = async (workspace) => {
-    console.log(workspace.api.links.fullAggregatedInfo.href)
+export const sendGetFullWsInformation = async (fullWsLink) => {
     let response = await fetch(
-        API_BASE_URL + workspace.api.links.fullAggregatedInfo.href,
+        API_BASE_URL + fullWsLink,
         {
             method: 'GET',
             credentials: 'include'
@@ -20,7 +19,7 @@ export const sendGetFullWsInformation = async (workspace) => {
             try {
                 await tryToRefreshJwt();
                 console.log('successfully refreshed - back to logic')
-                return await sendGetFullWsInformation(workspace);
+                return await sendGetFullWsInformation(fullWsLink);
             } catch (in_error) {
                 throw new UnauthorizedException(in_error.detail);
             }

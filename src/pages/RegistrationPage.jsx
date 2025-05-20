@@ -143,6 +143,7 @@ export const RegistrationPage = () => {
                           width: '400px',
                           height: '530px',
                           backgroundColor: 'background.paper',
+
                       }}
                 >
 
@@ -152,7 +153,7 @@ export const RegistrationPage = () => {
                     </Typography>
 
                     <form onSubmit={handleSubmit}>
-                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 2,}}>
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center'}}>
 
                             <ValidatedAvatarInput
                                 setAvatarUrl={setAvatarUrl}

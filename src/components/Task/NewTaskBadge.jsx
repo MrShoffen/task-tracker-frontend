@@ -11,13 +11,13 @@ import {sendCreateTask} from "../../services/fetch/tasks/task/SendCreateTask.js"
 import ConflictException from "../../exception/ConflictException.jsx";
 
 
-export function NewTaskBadge({taskCreationLink, addNewTask}) {
+export function NewTaskBadge({taskCreationLink}) {
 
     const handleNewTaskClick = async () => {
         setIsEditing(true);
     }
 
-    const {addNewTaskToCurrentWorkspace} = useTaskOperations();
+    const {addNewTask} = useTaskOperations();
 
     const [isEditing, setIsEditing] = useState(false);
     const typographyRef = useRef(null);

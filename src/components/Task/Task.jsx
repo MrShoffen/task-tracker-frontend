@@ -23,27 +23,27 @@ import {EditableTaskName} from "./EditableTaskName.jsx";
 import {MenuIcon} from "../../assets/icons/MenuIcon.jsx";
 import {TaskMenu} from "./TaskMenu.jsx";
 import {TaskCover} from "./TaskCover.jsx";
+import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 
 export function Task({task, setContentIsLoading}) {
     const [hovered, setHovered] = React.useState(false);
     const theme = useTheme();
 
-    const [currentTask, setCurrentTask] = React.useState(task);
+    const {updateTaskCompletion} = useTaskOperations();
 
-    const [taskCompleted, setTaskCompleted] = React.useState(task.completed);
 
     const handleCompletionClick = async () => {
         try {
-            const profile = await sendEditTask(task.api.links.updateTaskCompletion.href,
-                {completed: !taskCompleted});
-            setTaskCompleted(prev => !prev);
+            const updatedTask = await sendEditTask(task.api.links.updateTaskCompletion.href,
+                {completed: !task.completed});
+            updateTaskCompletion(updatedTask);
         } catch (error) {
             console.log(error);
         }
     }
 
     const updateTask = (updatedTask) => {
-        setCurrentTask(updatedTask);
+        // setCurrentTask(updatedTask);
     }
 
     return (
@@ -59,27 +59,27 @@ export function Task({task, setContentIsLoading}) {
                 flex: 1,
                 // boxShadow: !hovered && 'none',
                 border: '1px solid',
-                borderColor: !hovered ? taskColor(currentTask.color) : 'action.disabled',
+                borderColor: !hovered ? taskColor(task.color) : 'action.disabled',
                 // borderColor: 'action.disabled',
                 borderRadius: 2,
                 position: 'relative',
                 minWidth: '286px',
                 maxWidth: '286px',
                 transition: 'none',
-                backgroundColor: taskColor(currentTask.color),
+                backgroundColor: taskColor(task.color),
                 display: 'flex',
                 flexDirection: 'column',
                 ':hover': {
                     cursor: 'pointer',
                 }
             }}>
-            {currentTask.coverUrl && <TaskCover coverUrl={currentTask.coverUrl}/>}
+            {task.coverUrl && <TaskCover coverUrl={task.coverUrl}/>}
 
             <Box sx={{display: 'flex', flexDirection: 'row'}}>
                 <IconButton
                     onClick={handleCompletionClick}
                     sx={{width: '17px', opacity: 1, height: '17px', p: 0, ml: 1, mt: 1.2,}}>
-                    {!taskCompleted
+                    {!task.completed
                         ? <UncheckedIcon color={theme.palette.taskName} size={"17px"}/>
                         : <CheckedIcon size="17px"/>
                     }
@@ -87,17 +87,15 @@ export function Task({task, setContentIsLoading}) {
 
                 <Box sx={{display: 'flex', flexDirection: 'column'}}>
                     <EditableTaskName
-                        task={currentTask}
+                        task={task}
                         hovered={hovered}
-                        taskCompleted={taskCompleted}
+                        taskCompleted={task.completed}
                     />
                 </Box>
 
                 <TaskMenu
-                    task={currentTask}
-                    updateTask={updateTask}
+                    task={task}
                     hovered={hovered}
-                    taskCompleted={taskCompleted}
                     setContentIsLoading={setContentIsLoading}
                 />
             </Box>

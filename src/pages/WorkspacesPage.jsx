@@ -31,11 +31,11 @@ export default function WorkspacesPage() {
 
             const currentWs = loadedWorkspaces.find(ws => ws.id === workspaceId);
             console.log('current workspace', currentWs);
-            if (currentWs !== null) {
+            // if (currentWs !== null) {
                 const content = await loadFullWorkspace(currentWs);
                 console.log(content);
                 setWorkspaceLoading(false);
-            }
+            // }
         } catch (error) {
             console.log(error);
             navigate("/profile");

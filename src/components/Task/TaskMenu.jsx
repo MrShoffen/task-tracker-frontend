@@ -23,6 +23,9 @@ import {taskColorsPalette} from "../../services/util/Utils.js";
 import {Galka} from "../../assets/icons/Galka.jsx";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 import {DeleteTask} from "../../assets/icons/DeleteTask.jsx";
+import {sendDeleteDesk} from "../../services/fetch/tasks/desk/SendDeleteDesk.js";
+import {sendDeleteTask} from "../../services/fetch/tasks/task/SendDeleteTask.js";
+import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 
 function UploadIcon(props) {
     return null;
@@ -33,10 +36,12 @@ UploadIcon.propTypes = {
     size: PropTypes.string
 };
 
-export function TaskMenu({task, hovered, taskCompleted, setContentIsLoading, updateTask}) {
+export function TaskMenu({task, hovered, setContentIsLoading}) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const theme = useTheme();
+
+    const {deleteTask, updateTaskColor} = useTaskOperations();
 
     const handleMenuClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -89,7 +94,7 @@ export function TaskMenu({task, hovered, taskCompleted, setContentIsLoading, upd
                         newCoverUrl: uploadedImage.imageUrl
                     }
                 );
-                updateTask(updatedTask);
+                // updateTask(updatedTask); //todo обновить
             } catch (error) {
                 console.log(error);
             }
@@ -104,7 +109,7 @@ export function TaskMenu({task, hovered, taskCompleted, setContentIsLoading, upd
                 newCoverUrl: null
             }
         );
-        updateTask(updatedTask);
+        // updateTask(updatedTask); //todo обновить
     }
 
     const handleColorChange = async (newColor) => {
@@ -114,10 +119,21 @@ export function TaskMenu({task, hovered, taskCompleted, setContentIsLoading, upd
                     newColor: newColor
                 }
             );
-            updateTask(updatedTask);
+            updateTaskColor(updatedTask);
         } catch (error) {
             console.log(error);
         }
+    }
+
+    const handleDelete = async () => {
+        try {
+            await sendDeleteTask(task.api.links.deleteTask.href);
+            deleteTask(task);
+            // deleteDesk(desk);
+        } catch (error) {
+            console.log(error);
+        }
+        handleMenuClose()
     }
 
     return (<>
@@ -128,7 +144,7 @@ export function TaskMenu({task, hovered, taskCompleted, setContentIsLoading, upd
                 sx={{
                     width: '17px',
                     height: '17px',
-                    opacity: !taskCompleted ? 1 : (!hovered ? 0.5 : 1),
+                    opacity: !task.completed ? 1 : (!hovered ? 0.5 : 1),
                     p: 0,
                     ml: -2.8,
                     mt: 1
@@ -271,7 +287,7 @@ export function TaskMenu({task, hovered, taskCompleted, setContentIsLoading, upd
                             <ListItem
                                 button={"true"}
                                 disableGutters
-                                onClick={handleCoverDelete}
+                                onClick={handleDelete}
                                 sx={{
                                     px: 1,
                                     py: 1
@@ -282,7 +298,7 @@ export function TaskMenu({task, hovered, taskCompleted, setContentIsLoading, upd
                                     minWidth: '24px !important'
                                 }}
                                 >
-                                    <DeleteTask color={theme.palette.taskName} />
+                                    <DeleteTask color={theme.palette.taskName}/>
 
                                 </ListItemIcon>
                                 <ListItemText sx={{m: 0}} primary="Удалить задачу"/>

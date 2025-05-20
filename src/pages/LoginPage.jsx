@@ -105,7 +105,7 @@ export const LoginPage = () => {
             </Typography>
 
             <form onSubmit={handleSubmit}>
-                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center'}}>
 
                     <Tooltip
                         title={usernameError}

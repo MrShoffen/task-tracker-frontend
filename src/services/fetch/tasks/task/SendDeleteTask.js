@@ -4,15 +4,15 @@ import {throwSpecifyException} from "../../../../exception/ThrowSpecifyException
 import {API_BASE_URL} from "../../../../../UrlConstants.jsx";
 
 
-export const sendEditDesk = async (url, editData) => {
+export const sendDeleteTask = async (url) => {
+    console.log("--------------------")
+    console.log(url);
     let response = await fetch(API_BASE_URL + url, {
-        method: 'PATCH',
+        method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
         },
-        credentials: 'include',
-
-        body: JSON.stringify(editData),
+        credentials: 'include'
     });
 
     if (!response.ok) {
@@ -23,7 +23,7 @@ export const sendEditDesk = async (url, editData) => {
             try {
                 await tryToRefreshJwt();
                 console.log('successfully refreshed - back to logic')
-                return await sendEditDesk(url, editData);
+                await sendDeleteTask(url);
             } catch (in_error) {
                 throw new UnauthorizedException(in_error.detail);
             }
@@ -31,6 +31,4 @@ export const sendEditDesk = async (url, editData) => {
             throwSpecifyException(error);
         }
     }
-
-    return await response.json();
 }

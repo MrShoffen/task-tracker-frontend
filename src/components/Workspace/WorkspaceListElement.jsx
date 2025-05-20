@@ -16,6 +16,10 @@ export default function WorkspaceListElement({workspace}) {
 
     }
 
+    function handleClick() {
+      navigate('workspaces/' + workspace.id);
+    }
+
     return (
 
         <ListItemButton
@@ -23,7 +27,7 @@ export default function WorkspaceListElement({workspace}) {
                 pl: 3,
                 maxHeight: 33
             }}
-            onClick={() => navigate('workspaces/' + workspace.id)}
+            onClick={handleClick}
             selected={location.pathname === ('/workspaces/' + workspace.id)}
         >
             <ListItemIcon>

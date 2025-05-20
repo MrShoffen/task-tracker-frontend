@@ -33,11 +33,11 @@ UploadIcon.propTypes = {
     size: PropTypes.string
 };
 
-export function DeskMenu({desk, updateDeskColor}) {
+export function DeskMenu({desk}) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const theme = useTheme();
-    const {deleteDesk} = useTaskOperations();
+    const {deleteDesk, updateDeskColor} = useTaskOperations();
 
     const handleMenuClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -54,12 +54,12 @@ export function DeskMenu({desk, updateDeskColor}) {
 
     const handleColorChange = async (newColor) => {
         try {
-            const updatedTask = await sendEditDesk(desk.api.links.updateDeskColor.href,
+            const updatedDesk = await sendEditDesk(desk.api.links.updateDeskColor.href,
                 {
                     newColor: newColor
                 }
             );
-            updateDeskColor(newColor);
+            updateDeskColor(updatedDesk);
         } catch (error) {
             console.log(error);
         }
