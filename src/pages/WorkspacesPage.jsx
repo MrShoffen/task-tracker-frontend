@@ -8,6 +8,7 @@ import {useNotification} from "../context/Notification/NotificationProvider.jsx"
 import {TaskDesk} from "../components/Desk/TaskDesk.jsx";
 import {Task} from "../components/Task/Task.jsx";
 
+
 import {NewDeskBadge} from "../components/Desk/NewDeskBadge.jsx";
 import {
     closestCenter, closestCorners,
@@ -18,10 +19,10 @@ import {
     useSensor,
     useSensors
 } from "@dnd-kit/core";
-import {arrayMove, horizontalListSortingStrategy, SortableContext} from "@dnd-kit/sortable";
-import {restrictToHorizontalAxis} from "@dnd-kit/modifiers";
+import {arrayMove, horizontalListSortingStrategy, rectSwappingStrategy, SortableContext} from "@dnd-kit/sortable";
+import {restrictToHorizontalAxis, restrictToWindowEdges} from "@dnd-kit/modifiers";
 import {createPortal} from "react-dom";
-import {calculateNewDeskOrderIndex} from "../services/util/Utils.jsx";
+import {calculateNewOrderIndex} from "../services/util/Utils.jsx";
 import {sendEditDesk} from "../services/fetch/tasks/desk/SendEditDesk.js";
 
 export default function WorkspacesPage() {
@@ -30,12 +31,9 @@ export default function WorkspacesPage() {
         updateDeskOrder,
         workspaces,
         loadFullWorkspace,
+        moveTaskToAnotherDesk,
         loadAllWorkspaces
     } = useTaskOperations();
-
-    const deskIds = useMemo(() => {
-        return fullWorkspaceInformation.desks.map(d => d.id)
-    }, [fullWorkspaceInformation])
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -54,9 +52,13 @@ export default function WorkspacesPage() {
         })
     );
 
-    async function checkAndLoadWorkspace() {
-        const workspaceId = location.pathname.replace("/workspaces/", '');
+    useEffect(() => {
+        checkAndLoadWorkspace();
+    }, [location.pathname]);
 
+    async function checkAndLoadWorkspace() {
+
+        const workspaceId = location.pathname.replace("/workspaces/", '');
         try {
             setWorkspaceLoading(true);
             setOnConcreteWs(true);
@@ -77,11 +79,8 @@ export default function WorkspacesPage() {
             navigate("/profile");
             showWarn("Страница не найдена");
         }
-    }
 
-    useEffect(() => {
-        checkAndLoadWorkspace();
-    }, [location.pathname]);
+    }
 
     function handleDragStart(event) {
         // console.log("DRAG START ", event)
@@ -96,31 +95,94 @@ export default function WorkspacesPage() {
     async function handleDragEnd(event) {
         setDraggingTask(null);
         setDraggingDesk(null);
+        setLastMovedTaskId(null);
         console.log('in handle drop')
         const {active, over} = event;
         if (!over) {
             return;
         }
 
-        const activeDeskId = active.id;
-        const overDeskId = over.id;
+        const activeId = active.id;
+        const overId = over.id;
 
-        if (activeDeskId === overDeskId) {
+        if (activeId === overId) {
             return;
         }
 
-        const activeDeskIndex = fullWorkspaceInformation.desks.findIndex(d => d.id === activeDeskId);
-        const overDeskIndex = fullWorkspaceInformation.desks.findIndex(d => d.id === overDeskId);
+        const isActiveTask = active.data.current?.type === "task";
+        const isOverTask = over.data.current?.type === "task";
+        if (isActiveTask && isOverTask) {
+            const activeTask = active.data.current.task;
+            const overTask = over.data.current.task;
+            const workingDeskI = fullWorkspaceInformation
+                .desks
+                .findIndex(d => d.id === overTask.deskId);
 
-        const deskWithUpdatedOrder = calculateNewDeskOrderIndex(activeDeskIndex, overDeskIndex, fullWorkspaceInformation.desks);
-        updateDeskOrder(activeDeskIndex, deskWithUpdatedOrder);
-        try {
-            await sendEditDesk(deskWithUpdatedOrder.api.links.updateDeskOrder.href,
-                {
-                    updatedIndex: deskWithUpdatedOrder.orderIndex
-                })
-        } catch (error) {
-            showWarn(error.message);
+            const workingDesk = fullWorkspaceInformation.desks[workingDeskI];
+
+            console.log('working desk', workingDesk)
+            // const activeDeskIndex = fullWorkspaceInformation.desks.get() findIndex(d => d.id === activeId);
+            // const overDeskIndex = fullWorkspaceInformation.desks.findIndex(d => d.id === overId);
+            console.log('after drop active ', activeTask)
+            console.log('after drop over ', overTask)
+            return;
+        }
+
+        if (active.data.current?.type === 'desk' &&
+            over.data.current?.type === 'desk') {
+
+            const activeDeskIndex = fullWorkspaceInformation.desks.findIndex(d => d.id === activeId);
+            const overDeskIndex = fullWorkspaceInformation.desks.findIndex(d => d.id === overId);
+
+            const deskWithUpdatedOrder = calculateNewOrderIndex(activeDeskIndex, overDeskIndex, fullWorkspaceInformation.desks);
+            updateDeskOrder(activeDeskIndex, deskWithUpdatedOrder);
+            try {
+                await sendEditDesk(deskWithUpdatedOrder.api.links.updateDeskOrder.href,
+                    {
+                        updatedIndex: deskWithUpdatedOrder.orderIndex
+                    })
+            } catch (error) {
+                showWarn(error.message);
+            }
+        }
+    }
+    const [lastMovedTaskId, setLastMovedTaskId] = useState(null);
+    function onDragOver(event) {
+        const {active, over} = event;
+        if (!over) {
+            return;
+        }
+
+        const activeId = active.id;
+        const overId = over.id;
+
+        if (activeId === overId) {
+            return;
+        }
+
+        const isActiveTask = active.data.current?.type === "task";
+        const isOverTask = over.data.current?.type === "task";
+
+        if (!isActiveTask) {
+            return;
+        }
+
+        if (isActiveTask && isOverTask) {
+            const activeTask = active.data.current.task;
+            const overTask = over.data.current.task;
+            if (activeTask.deskId === overTask.deskId) {
+                return;
+            }
+            if(activeTask.id === overTask.id){
+                return
+            }
+
+            const targetDesk = fullWorkspaceInformation.desks.find(d => d.id === overTask.deskId);
+            if (targetDesk?.tasks.some(t => t.id === activeTask.id)) return;
+            moveTaskToAnotherDesk(activeTask, overTask.deskId);
+            console.log('active task ', activeTask)
+            console.log('over task ', overTask)
+            return;
         }
     }
 
@@ -179,10 +241,13 @@ export default function WorkspacesPage() {
                     py: 2
                 }}>
                     <DndContext
+                        modifiers={[restrictToWindowEdges]}
+
                         sensors={sensors}
                         // collisionDetection={closestCenter}
                         onDragStart={handleDragStart}
                         onDragEnd={handleDragEnd}
+                        onDragOver={onDragOver}
                         // modifiers={[restrictToHorizontalAxis]}
                     >
                         <Box sx={{
@@ -192,7 +257,6 @@ export default function WorkspacesPage() {
                             height: 'fit-content'
                         }}>
                             <SortableContext
-
                                 // strategy={horizontalListSortingStrategy}
                                 items={fullWorkspaceInformation.desks.map(d => d.id)}>
                                 {fullWorkspaceInformation?.desks

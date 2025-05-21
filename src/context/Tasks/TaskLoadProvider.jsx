@@ -71,7 +71,7 @@ export const TaskLoadProvider = ({children}) => {
         }));
     }
 
-    function updateDeskOrder(deskIndex, deskForUpdate){
+    function updateDeskOrder(deskIndex, deskForUpdate) {
         setFullWorkspaceInformation(prevData => {
 
             const updatedDesks = [...prevData.desks];
@@ -111,6 +111,7 @@ export const TaskLoadProvider = ({children}) => {
 
         })
     }
+
     function updateDeskName(deskForUpdate) {
         const deskIdForUpdate = deskForUpdate.id;
         setFullWorkspaceInformation(prevData => {
@@ -126,6 +127,41 @@ export const TaskLoadProvider = ({children}) => {
                 ...updatedDesks[deskIndex],
                 name: deskForUpdate.name
             };
+            console.log(updatedDesks)
+            return {
+                ...prevData,
+                desks: updatedDesks
+            }
+
+        })
+    }
+
+    function moveTaskToAnotherDesk(movingTask, targetDesk) {
+        console.log(movingTask, targetDesk)
+        const deskIdInMovingTask = movingTask.deskId;
+        setFullWorkspaceInformation(prevData => {
+            const movingTaskDeskIndex = prevData.desks.findIndex(desk => desk.id === deskIdInMovingTask);
+            if (movingTaskDeskIndex === -1) {
+                console.error("Desk not found");
+                return prevData;
+            }
+
+            const updatedDesks = [...prevData.desks];
+            updatedDesks[movingTaskDeskIndex] = {
+                ...updatedDesks[movingTaskDeskIndex],
+                tasks: updatedDesks[movingTaskDeskIndex].tasks.filter(t => t.id !== movingTask.id)
+            };
+
+
+            const targetDeskIndex = prevData.desks.findIndex(d => d.id === targetDesk)
+            const newTask = {
+                ...movingTask,
+                deskId: targetDesk
+            }
+            updatedDesks[targetDeskIndex] = {
+                ...updatedDesks[targetDeskIndex],
+                tasks: [...updatedDesks[targetDeskIndex].tasks, newTask]
+            }
             console.log(updatedDesks)
             return {
                 ...prevData,
@@ -282,6 +318,7 @@ export const TaskLoadProvider = ({children}) => {
 
         })
     }
+
 //todo add name updating also heher
     return (
         <TaskLoadContext.Provider value={{
@@ -300,6 +337,7 @@ export const TaskLoadProvider = ({children}) => {
             updateTaskColor,
             updateTaskCompletion,
             updateTaskName,
+            moveTaskToAnotherDesk,
 
             addNewDesk,
             deleteDesk,

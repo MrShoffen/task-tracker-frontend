@@ -56,7 +56,7 @@ export const avatarColor = (email) => {
     return string;
 }
 
-const lightTaskColor = {
+export const lightTaskColor = {
     null: 'white',
     'RED': '#FFB0B0',
     'PINK': '#FFD1D6',
@@ -67,7 +67,7 @@ const lightTaskColor = {
     'PURPLE': '#F9C9F7',
 };
 
-const darkTaskColor = {
+export const darkTaskColor = {
     null: '#333c49',
     'RED': '#703535',
     'PINK': '#713C4F',
@@ -77,16 +77,6 @@ const darkTaskColor = {
     'BLUE': '#304D6F',
     'PURPLE': '#673A76',
 };
-
-export const taskColor = (taskColor) => {
-    const {isDarkMode} = useCustomThemeContext();
-    return !isDarkMode ? lightTaskColor[taskColor] : darkTaskColor[taskColor];
-}
-
-export const taskColorsPalette = () => {
-    const {isDarkMode} = useCustomThemeContext();
-    return !isDarkMode ? lightTaskColor : darkTaskColor;
-}
 
 const lightDeskColor = {
     null: 'rgb(123, 134, 158)',
@@ -123,31 +113,31 @@ export const deskColorsPalette = () => {
 export const randomDeskColor = () =>
     Object.keys(lightDeskColor)[Math.floor(Math.random() * Object.keys(lightDeskColor).length)];
 
-export function calculateNewDeskOrderIndex(movingDeskIndex, targetDeskIndex, desks) {
-    console.log("moving ", desks[movingDeskIndex])
-    console.log("target ", desks[targetDeskIndex])
+export function calculateNewOrderIndex(moving, target, elements) {
+    console.log("moving ", elements[moving])
+    console.log("target ", elements[target])
 
-    const desksNumber = desks.length;
+    const elementsNumber = elements.length;
     let newOrderIndex = 0;
-    if (movingDeskIndex < targetDeskIndex) {
-        if (targetDeskIndex !== desksNumber-1) {
-            console.log(movingDeskIndex)
-            console.log(targetDeskIndex)
-            console.log(desksNumber)
-            newOrderIndex = (desks[targetDeskIndex].orderIndex + desks[targetDeskIndex + 1].orderIndex) / 2;
+    if (moving < target) {
+        if (target !== elementsNumber-1) {
+            console.log(moving)
+            console.log(target)
+            console.log(elementsNumber)
+            newOrderIndex = (elements[target].orderIndex + elements[target + 1].orderIndex) / 2;
         } else {
-            newOrderIndex = desks[targetDeskIndex].orderIndex + 2000000;
+            newOrderIndex = elements[target].orderIndex + 2000000;
         }
     }
-    if (movingDeskIndex > targetDeskIndex) {
-        if (targetDeskIndex <= 0) {
-            newOrderIndex = desks[targetDeskIndex].orderIndex - 2000000;
+    if (moving > target) {
+        if (target <= 0) {
+            newOrderIndex = elements[target].orderIndex - 2000000;
         } else {
-            newOrderIndex = (desks[targetDeskIndex].orderIndex + desks[targetDeskIndex - 1].orderIndex) / 2;
+            newOrderIndex = (elements[target].orderIndex + elements[target - 1].orderIndex) / 2;
         }
     }
     return {
-        ...desks[movingDeskIndex],
+        ...elements[moving],
         orderIndex: newOrderIndex
     }
 }

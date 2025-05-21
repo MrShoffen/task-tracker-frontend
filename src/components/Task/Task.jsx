@@ -1,7 +1,7 @@
 import {Box, Card, IconButton, useTheme} from "@mui/material";
 
 import * as React from "react";
-import {taskColor} from "../../services/util/Utils.jsx";
+import {darkTaskColor, lightTaskColor} from "../../services/util/Utils.jsx";
 import {UncheckedIcon} from "../../assets/icons/UncheckedIcon.jsx";
 import {CheckedIcon} from "../../assets/icons/CheckedIcon.jsx";
 import {sendEditTask} from "../../services/fetch/tasks/task/SendEditTask.js";
@@ -11,12 +11,19 @@ import {TaskCover} from "./TaskCover.jsx";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import {useSortable} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
+import {useCustomThemeContext} from "../../context/GlobalThemeContext/CustomThemeProvider.jsx";
 
 export function Task({task, setContentIsLoading}) {
     const [hovered, setHovered] = React.useState(false);
     const theme = useTheme();
+    const {isDarkMode} = useCustomThemeContext();
 
-    const {updateTaskCompletion} = useTaskOperations();
+
+     const taskColor = (taskColor) => {
+        return !isDarkMode ? lightTaskColor[taskColor] : darkTaskColor[taskColor];
+    }
+
+
 
 
     const {
@@ -24,9 +31,7 @@ export function Task({task, setContentIsLoading}) {
         attributes,
         listeners,
         transform,
-        transition,
         isDragging,
-        rect
     } = useSortable({
         id: task.id,
         data: {
@@ -34,6 +39,9 @@ export function Task({task, setContentIsLoading}) {
             task
         }
     })
+
+
+    const {updateTaskCompletion} = useTaskOperations();
 
 
     const style = {

@@ -1,5 +1,5 @@
 import {
-    Backdrop, Box, CircularProgress,
+    Box,
     ClickAwayListener,
     Divider,
     IconButton,
@@ -8,10 +8,10 @@ import {
     ListItemIcon,
     ListItemText,
     Paper,
-    Popper, useTheme
+    Popper,
+    useTheme
 } from "@mui/material";
 import {MenuIcon} from "../../assets/icons/MenuIcon.jsx";
-import {EditIcon} from "../../assets/icons/EditIcon.jsx";
 import {UploadCover} from "../../assets/icons/UploadCover.jsx";
 import * as React from "react";
 import {useRef, useState} from "react";
@@ -19,13 +19,13 @@ import * as PropTypes from "prop-types";
 import {uploadImage} from "../../services/fetch/unauth/UploadImage.js";
 import {sendEditTask} from "../../services/fetch/tasks/task/SendEditTask.js";
 import {DeleteCover} from "../../assets/icons/DeleteCover.jsx";
-import {taskColorsPalette} from "../../services/util/Utils.jsx";
+import {darkTaskColor, lightTaskColor} from "../../services/util/Utils.jsx";
 import {Galka} from "../../assets/icons/Galka.jsx";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 import {DeleteTask} from "../../assets/icons/DeleteTask.jsx";
-import {sendDeleteDesk} from "../../services/fetch/tasks/desk/SendDeleteDesk.js";
 import {sendDeleteTask} from "../../services/fetch/tasks/task/SendDeleteTask.js";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
+import {useCustomThemeContext} from "../../context/GlobalThemeContext/CustomThemeProvider.jsx";
 
 function UploadIcon(props) {
     return null;
@@ -40,8 +40,13 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const theme = useTheme();
+    const {isDarkMode} = useCustomThemeContext();
 
     const {deleteTask, updateTaskColor} = useTaskOperations();
+
+     const taskColorsPalette = () => {
+        return !isDarkMode ? lightTaskColor : darkTaskColor;
+    }
 
     const handleMenuClick = (event) => {
         setAnchorEl(event.currentTarget);

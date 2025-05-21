@@ -7,7 +7,7 @@ import {NewTaskBadge} from "../Task/NewTaskBadge.jsx";
 import {Task} from "../Task/Task.jsx";
 import {deskColor} from "../../services/util/Utils.jsx";
 import {DeskMenu} from "./DeskMenu.jsx";
-import {SortableContext, useSortable, verticalListSortingStrategy} from "@dnd-kit/sortable";
+import {rectSwappingStrategy, SortableContext, useSortable, verticalListSortingStrategy} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities"
 
 export function TaskDesk({desk, sx}) {
@@ -28,11 +28,9 @@ export function TaskDesk({desk, sx}) {
         }
     })
 
+    const [contentIsLoading, setContentIsLoading] = useState(false);
 
-
-    const taskIds = useMemo(() => {
-        return desk.tasks.map(t => t.id)
-    }, [desk])
+    const {userHasPermission} = useTaskOperations();
 
     const style = {
         // transition,
@@ -40,9 +38,6 @@ export function TaskDesk({desk, sx}) {
         height: 'calc(100vh - 120px)',
     }
 
-    const [contentIsLoading, setContentIsLoading] = useState(false);
-
-    const {userHasPermission} = useTaskOperations();
 
     if (isDragging) {
         return (
@@ -160,7 +155,6 @@ export function TaskDesk({desk, sx}) {
 
                     }}>
                         <SortableContext items={desk.tasks.map(t => t.id)}
-                            strategy={verticalListSortingStrategy}
                         >
                             {desk.tasks && desk.tasks
                                 .sort((a, b) => b.orderIndex - a.orderIndex)
