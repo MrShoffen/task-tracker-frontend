@@ -28,6 +28,8 @@ export function TaskDesk({desk, sx}) {
         }
     })
 
+
+
     const taskIds = useMemo(() => {
         return desk.tasks.map(t => t.id)
     }, [desk])
@@ -53,7 +55,7 @@ export function TaskDesk({desk, sx}) {
                         borderRadius: 3,
                         backdropFilter: 'blur(5px)',
                         WebkitBackdropFilter: 'blur(5px)',
-                        border: '2px dashed',
+                        border: '1px dashed',
                         borderColor: 'taskName',
                         width: '300px',
                         backgroundColor: 'rgba(174,174,174,0.21)',
@@ -71,9 +73,9 @@ export function TaskDesk({desk, sx}) {
             ref={setNodeRef}
             style={style}
             {...attributes}
-            {...listeners}
         >
             <Card
+                {...listeners}
                 elevation={0}
                 sx={{
                     boxShadow: 1,
