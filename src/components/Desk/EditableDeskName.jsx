@@ -11,7 +11,7 @@ import {useNotification} from "../../context/Notification/NotificationProvider.j
 export function EditableDeskName({desk = {name: ''}}) {
     const [hovered, setHovered] = React.useState(false);
 
-    const {userHasPermission} = useTaskOperations();
+    const {userHasPermission, updateDeskName} = useTaskOperations();
 
     const [isEditing, setIsEditing] = useState(false);
     const typographyRef = useRef(null);
@@ -48,11 +48,12 @@ export function EditableDeskName({desk = {name: ''}}) {
         if (newText !== initialText && newText !== '') { // Сравниваем с исходным текстом
             try {
                 const newNameWithDubls = newText + (duplicatedCount === 0 ? '' : (' (' + duplicatedCount + ')'));
-                await sendEditDesk(desk.api.links.updateDeskName.href,
+                const updatedDesk = await sendEditDesk(desk.api.links.updateDeskName.href,
                     {
                         newName: newNameWithDubls
                     });
                 typographyRef.current.textContent = newNameWithDubls + ' ';
+                updateDeskName(updatedDesk);
             } catch (error) {
                 switch (true) {
                     case error instanceof ConflictException:

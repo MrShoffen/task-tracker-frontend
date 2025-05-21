@@ -71,6 +71,23 @@ export const TaskLoadProvider = ({children}) => {
         }));
     }
 
+    function updateDeskOrder(deskIndex, deskForUpdate){
+        setFullWorkspaceInformation(prevData => {
+
+            const updatedDesks = [...prevData.desks];
+            updatedDesks[deskIndex] = {
+                ...updatedDesks[deskIndex],
+                orderIndex: deskForUpdate.orderIndex
+            };
+            console.log(updatedDesks)
+            return {
+                ...prevData,
+                desks: updatedDesks
+            }
+
+        })
+    }
+
     function updateDeskColor(deskForUpdate) {
         const deskIdForUpdate = deskForUpdate.id;
         setFullWorkspaceInformation(prevData => {
@@ -85,6 +102,29 @@ export const TaskLoadProvider = ({children}) => {
             updatedDesks[deskIndex] = {
                 ...updatedDesks[deskIndex],
                 color: deskForUpdate.color
+            };
+            console.log(updatedDesks)
+            return {
+                ...prevData,
+                desks: updatedDesks
+            }
+
+        })
+    }
+    function updateDeskName(deskForUpdate) {
+        const deskIdForUpdate = deskForUpdate.id;
+        setFullWorkspaceInformation(prevData => {
+            const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
+            if (deskIndex === -1) {
+                console.error("Desk not found");
+                return prevData;
+            }
+
+
+            const updatedDesks = [...prevData.desks];
+            updatedDesks[deskIndex] = {
+                ...updatedDesks[deskIndex],
+                name: deskForUpdate.name
             };
             console.log(updatedDesks)
             return {
@@ -177,6 +217,39 @@ export const TaskLoadProvider = ({children}) => {
         })
     }
 
+    function updateTaskName(updatedTask) {
+        const deskIdForUpdate = updatedTask.deskId;
+        setFullWorkspaceInformation(prevData => {
+            const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
+            if (deskIndex === -1) {
+                console.error("Desk not found");
+                return prevData;
+            }
+
+            const updatedDesks = [...prevData.desks];
+
+            const taskForUpdateIndex = updatedDesks[deskIndex].tasks.findIndex(task => task.id === updatedTask.id);
+
+            const updatedTasks = updatedDesks[deskIndex].tasks;
+
+            updatedTasks[taskForUpdateIndex] = {
+                ...updatedTasks[taskForUpdateIndex],
+                name: updatedTask.name
+            }
+
+            updatedDesks[deskIndex] = {
+                ...updatedDesks[deskIndex],
+                tasks: updatedTasks
+            };
+            console.log(updatedDesks)
+            return {
+                ...prevData,
+                desks: updatedDesks
+            }
+
+        })
+    }
+
     function updateTaskCompletion(updatedTask) {
         const deskIdForUpdate = updatedTask.deskId;
         setFullWorkspaceInformation(prevData => {
@@ -209,7 +282,7 @@ export const TaskLoadProvider = ({children}) => {
 
         })
     }
-
+//todo add name updating also heher
     return (
         <TaskLoadContext.Provider value={{
             workspaces,
@@ -217,6 +290,7 @@ export const TaskLoadProvider = ({children}) => {
 
             loadFullWorkspace,
             fullWorkspaceInformation,
+            setFullWorkspaceInformation,
 
             permissions,
             userHasPermission,
@@ -225,10 +299,13 @@ export const TaskLoadProvider = ({children}) => {
             deleteTask,
             updateTaskColor,
             updateTaskCompletion,
+            updateTaskName,
 
             addNewDesk,
+            deleteDesk,
             updateDeskColor,
-            deleteDesk
+            updateDeskOrder,
+            updateDeskName
         }}>
             {children}
         </TaskLoadContext.Provider>

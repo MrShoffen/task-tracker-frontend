@@ -9,7 +9,7 @@ import {useNotification} from "../../context/Notification/NotificationProvider.j
 
 export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
 
-    const {userHasPermission} = useTaskOperations();
+    const {userHasPermission, updateTaskName} = useTaskOperations();
     const theme = useTheme();
     const [isEditing, setIsEditing] = useState(false);
     const typographyRef = useRef(null);
@@ -45,11 +45,12 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
         if (newText !== initialText && newText !== '') { // Сравниваем с исходным текстом
             try {
                 const newNameWithDubls = newText + (duplicatedCount === 0 ? '' : (' (' + duplicatedCount + ')'));
-                const profile = await sendEditTask(task.api.links.updateTaskName.href,
+                const updatedTask = await sendEditTask(task.api.links.updateTaskName.href,
                     {
                         newName: newNameWithDubls
                     });
                 typographyRef.current.textContent = newNameWithDubls + ' ';
+                updateTaskName(updatedTask);
             } catch (error) {
                 switch (true) {
                     case error instanceof ConflictException:

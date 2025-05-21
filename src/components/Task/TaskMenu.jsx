@@ -19,7 +19,7 @@ import * as PropTypes from "prop-types";
 import {uploadImage} from "../../services/fetch/unauth/UploadImage.js";
 import {sendEditTask} from "../../services/fetch/tasks/task/SendEditTask.js";
 import {DeleteCover} from "../../assets/icons/DeleteCover.jsx";
-import {taskColorsPalette} from "../../services/util/Utils.js";
+import {taskColorsPalette} from "../../services/util/Utils.jsx";
 import {Galka} from "../../assets/icons/Galka.jsx";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 import {DeleteTask} from "../../assets/icons/DeleteTask.jsx";

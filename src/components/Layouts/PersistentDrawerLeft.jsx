@@ -19,7 +19,7 @@ import {useCustomThemeContext} from "../../context/GlobalThemeContext/CustomThem
 import ModeNightIcon from '@mui/icons-material/ModeNight';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import {useAuthContext} from "../../context/Auth/AuthContext.jsx";
-import {avatarColor} from "../../services/util/Utils.js";
+import {avatarColor} from "../../services/util/Utils.jsx";
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';

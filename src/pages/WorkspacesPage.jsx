@@ -7,9 +7,29 @@ import WorkspaceHeader from "../components/Workspace/WorkspaceHeader.jsx";
 import {useNotification} from "../context/Notification/NotificationProvider.jsx";
 import {TaskDesk} from "../components/Desk/TaskDesk.jsx";
 import {NewDeskBadge} from "../components/Desk/NewDeskBadge.jsx";
+import {
+    closestCenter,
+    DndContext,
+    DragOverlay,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors
+} from "@dnd-kit/core";
+import {arrayMove, horizontalListSortingStrategy, SortableContext} from "@dnd-kit/sortable";
+import {restrictToHorizontalAxis} from "@dnd-kit/modifiers";
+import {createPortal} from "react-dom";
+import {calculateNewDeskOrderIndex} from "../services/util/Utils.jsx";
+import {sendEditDesk} from "../services/fetch/tasks/desk/SendEditDesk.js";
 
 export default function WorkspacesPage() {
-    const {fullWorkspaceInformation, workspaces, loadFullWorkspace, loadAllWorkspaces} = useTaskOperations();
+    const {
+        fullWorkspaceInformation,
+        updateDeskOrder,
+        workspaces,
+        loadFullWorkspace,
+        loadAllWorkspaces
+    } = useTaskOperations();
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -17,6 +37,15 @@ export default function WorkspacesPage() {
 
     const [onConcreteWs, setOnConcreteWs] = useState(false);
     const [workspaceLoading, setWorkspaceLoading] = useState(true);
+
+    const [draggingDesk, setDraggingDesk] = useState(null);
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 1,
+            },
+        })
+    );
 
     async function checkAndLoadWorkspace() {
         const workspaceId = location.pathname.replace("/workspaces/", '');
@@ -32,9 +61,9 @@ export default function WorkspacesPage() {
             const currentWs = loadedWorkspaces.find(ws => ws.id === workspaceId);
             console.log('current workspace', currentWs);
             // if (currentWs !== null) {
-                const content = await loadFullWorkspace(currentWs);
-                console.log(content);
-                setWorkspaceLoading(false);
+            const content = await loadFullWorkspace(currentWs);
+            console.log(content);
+            setWorkspaceLoading(false);
             // }
         } catch (error) {
             console.log(error);
@@ -43,13 +72,46 @@ export default function WorkspacesPage() {
         }
     }
 
-    const addNewDesk = (newDesk) => {
-
-    }
-
     useEffect(() => {
         checkAndLoadWorkspace();
     }, [location.pathname]);
+
+    function handleDragStart(event) {
+        // console.log("DRAG START ", event)
+        if (event.active.data.current?.type === "desk") {
+            setDraggingDesk(event.active.data.current.desk);
+        }
+    }
+
+    async function handleDragEnd(event) {
+        console.log('in handle drop')
+        const {active, over} = event;
+        if (!over) {
+            return;
+        }
+
+        const activeDeskId = active.id;
+        const overDeskId = over.id;
+
+        if (activeDeskId === overDeskId) {
+            return;
+        }
+
+        const activeDeskIndex = fullWorkspaceInformation.desks.findIndex(d => d.id === activeDeskId);
+        const overDeskIndex = fullWorkspaceInformation.desks.findIndex(d => d.id === overDeskId);
+
+        const deskWithUpdatedOrder = calculateNewDeskOrderIndex(activeDeskIndex, overDeskIndex, fullWorkspaceInformation.desks);
+        updateDeskOrder(activeDeskIndex, deskWithUpdatedOrder);
+        try {
+            await sendEditDesk(deskWithUpdatedOrder.api.links.updateDeskOrder.href,
+            {
+                updatedIndex: deskWithUpdatedOrder.orderIndex
+            })
+        } catch (error){
+            showWarn(error.message);
+
+        }
+    }
 
     if (!onConcreteWs) {
         return (
@@ -105,25 +167,44 @@ export default function WorkspacesPage() {
                     px: 2,
                     py: 2
                 }}>
-                    <Box sx={{
-                        display: 'inline-flex',
-                        gap: 1.5,
-                        alignItems: 'flex-start',
-                        height: 'fit-content'
-                    }}>
-                        {fullWorkspaceInformation?.desks
-                            ?.sort((a, b) => a.orderIndex - b.orderIndex)
-                            .map(desk => (
-                                <TaskDesk
-                                    key={desk.id}
-                                    desk={desk}
-                                    sx={{
-                                        flexShrink: 0
-                                    }}
-                                />
-                            ))}
-                        <NewDeskBadge/>
-                    </Box>
+                    <DndContext
+                        sensors={sensors}
+                        // collisionDetection={closestCenter}
+                        onDragStart={handleDragStart}
+                        onDragEnd={handleDragEnd}
+                        // modifiers={[restrictToHorizontalAxis]}
+                    >
+                        <Box sx={{
+                            display: 'inline-flex',
+                            gap: 1.5,
+                            alignItems: 'flex-start',
+                            height: 'fit-content'
+                        }}>
+                            <SortableContext
+                                // strategy={horizontalListSortingStrategy}
+                                items={fullWorkspaceInformation.desks.map(d => d.id)}>
+                                {fullWorkspaceInformation?.desks
+                                    ?.sort((a, b) => a.orderIndex - b.orderIndex)
+                                    .map(desk => (
+                                        <TaskDesk
+                                            key={desk.id}
+                                            desk={desk}
+                                            sx={{
+                                                flexShrink: 0
+                                            }}
+                                        />
+                                    ))}
+                            </SortableContext>
+                            <NewDeskBadge/>
+                        </Box>
+                        {createPortal(
+                            <DragOverlay>
+                                {draggingDesk &&
+                                    <TaskDesk desk={draggingDesk}/>
+                                }
+                            </DragOverlay>, document.body)
+                        }
+                    </DndContext>
                 </Box>
             </Box>
         </Box>

@@ -1,5 +1,5 @@
 import {Avatar} from "@mui/material";
-import {avatarColor} from "../../services/util/Utils.js";
+import {avatarColor} from "../../services/util/Utils.jsx";
 import * as React from "react";
 
 

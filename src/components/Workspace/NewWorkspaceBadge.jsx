@@ -4,7 +4,7 @@ import * as React from "react";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import {useEffect, useRef, useState} from "react";
 import {sendCreateDesk} from "../../services/fetch/tasks/desk/SendCreateDesk.js";
-import {randomDeskColor} from "../../services/util/Utils.js";
+import {randomDeskColor} from "../../services/util/Utils.jsx";
 import ConflictException from "../../exception/ConflictException.jsx";
 import {EditIcon} from "../../assets/icons/EditIcon.jsx";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";

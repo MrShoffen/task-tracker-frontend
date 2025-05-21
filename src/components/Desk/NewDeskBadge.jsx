@@ -1,5 +1,5 @@
 import {Backdrop, Box, Card, CircularProgress, IconButton, Typography, useTheme} from "@mui/material";
-import {deskColor, randomDeskColor} from "../../services/util/Utils.js";
+import {deskColor, randomDeskColor} from "../../services/util/Utils.jsx";
 import {EditableDeskName} from "./EditableDeskName.jsx";
 import {DeskMenu} from "./DeskMenu.jsx";
 import {NewTaskBadge} from "../Task/NewTaskBadge.jsx";

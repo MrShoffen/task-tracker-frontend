@@ -17,7 +17,7 @@ import {useState} from "react";
 import * as PropTypes from "prop-types";
 import {sendEditTask} from "../../services/fetch/tasks/task/SendEditTask.js";
 import {DeleteCover} from "../../assets/icons/DeleteCover.jsx";
-import {deskColorsPalette} from "../../services/util/Utils.js";
+import {deskColorsPalette} from "../../services/util/Utils.jsx";
 import {Galka} from "../../assets/icons/Galka.jsx";
 import {sendEditDesk} from "../../services/fetch/tasks/desk/SendEditDesk.js";
 import {DeleteTask} from "../../assets/icons/DeleteTask.jsx";

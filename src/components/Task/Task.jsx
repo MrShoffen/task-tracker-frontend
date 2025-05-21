@@ -12,7 +12,7 @@ import {
     Popper, useTheme
 } from "@mui/material";
 import * as React from "react";
-import {taskColor} from "../../services/util/Utils.js";
+import {taskColor} from "../../services/util/Utils.jsx";
 
 import {useState} from "react";
 import {UncheckedIcon} from "../../assets/icons/UncheckedIcon.jsx";

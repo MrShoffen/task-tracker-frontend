@@ -122,3 +122,32 @@ export const deskColorsPalette = () => {
 
 export const randomDeskColor = () =>
     Object.keys(lightDeskColor)[Math.floor(Math.random() * Object.keys(lightDeskColor).length)];
+
+export function calculateNewDeskOrderIndex(movingDeskIndex, targetDeskIndex, desks) {
+    console.log("moving ", desks[movingDeskIndex])
+    console.log("target ", desks[targetDeskIndex])
+
+    const desksNumber = desks.length;
+    let newOrderIndex = 0;
+    if (movingDeskIndex < targetDeskIndex) {
+        if (targetDeskIndex !== desksNumber-1) {
+            console.log(movingDeskIndex)
+            console.log(targetDeskIndex)
+            console.log(desksNumber)
+            newOrderIndex = (desks[targetDeskIndex].orderIndex + desks[targetDeskIndex + 1].orderIndex) / 2;
+        } else {
+            newOrderIndex = desks[targetDeskIndex].orderIndex + 2000000;
+        }
+    }
+    if (movingDeskIndex > targetDeskIndex) {
+        if (targetDeskIndex <= 0) {
+            newOrderIndex = desks[targetDeskIndex].orderIndex / 2;
+        } else {
+            newOrderIndex = (desks[targetDeskIndex].orderIndex + desks[targetDeskIndex - 1].orderIndex) / 2;
+        }
+    }
+    return {
+        ...desks[movingDeskIndex],
+        orderIndex: newOrderIndex
+    }
+}
