@@ -28,7 +28,7 @@ export function TaskDesk({desk, sx}) {
     })
 
     const style = {
-        transition,
+        // transition,
         transform: CSS.Transform.toString(transform),
         height: 'calc(100vh - 120px)',
     }
@@ -45,17 +45,14 @@ export function TaskDesk({desk, sx}) {
                 <Card
                     elevation={0}
                     sx={{
-                        boxShadow: 1,
                         borderRadius: 3,
+                        backdropFilter: 'blur(5px)',
+                        WebkitBackdropFilter: 'blur(5px)',
                         border: '2px dashed',
                         borderColor: 'taskName',
-                        position: 'relative',
                         width: '300px',
-                        backgroundColor: 'transparent',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        height: 'calc(100vh - 120px)', // Ограничение максимальной высоты
-                        ...sx
+                        backgroundColor: 'rgba(174,174,174,0.21)',
+                        height: 'calc(100vh - 124px)', // Ограничение максимальной высоты
                     }}>
                 </Card>
 
@@ -80,7 +77,7 @@ export function TaskDesk({desk, sx}) {
                     backgroundColor: deskColor(desk.color),
                     display: 'flex',
                     flexDirection: 'column',
-                    maxHeight: 'calc(100vh - 120px)', // Ограничение максимальной высоты
+                    maxHeight: 'calc(100vh - 124px)', // Ограничение максимальной высоты
                     ...sx
                 }}>
                 <Backdrop

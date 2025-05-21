@@ -109,7 +109,6 @@ export default function WorkspacesPage() {
             })
         } catch (error){
             showWarn(error.message);
-
         }
     }
 

@@ -141,7 +141,7 @@ export function calculateNewDeskOrderIndex(movingDeskIndex, targetDeskIndex, des
     }
     if (movingDeskIndex > targetDeskIndex) {
         if (targetDeskIndex <= 0) {
-            newOrderIndex = desks[targetDeskIndex].orderIndex / 2;
+            newOrderIndex = desks[targetDeskIndex].orderIndex - 2000000;
         } else {
             newOrderIndex = (desks[targetDeskIndex].orderIndex + desks[targetDeskIndex - 1].orderIndex) / 2;
         }
