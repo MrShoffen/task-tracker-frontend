@@ -68,6 +68,7 @@ export const lightTaskColor = {
 };
 
 export const darkTaskColor = {
+    // null: '#333c49',
     null: '#333c49',
     'RED': '#703535',
     'PINK': '#713C4F',
@@ -80,6 +81,7 @@ export const darkTaskColor = {
 
 const lightDeskColor = {
     null: 'rgb(123, 134, 158)',
+    // 'null': 'rgb(123, 134, 158)',
     'RED': 'rgb(235, 55, 55)',
     'ORANGE': 'rgb(242, 115, 43)',
     'YELLOW': 'rgb(245, 204, 0)',
@@ -114,9 +116,6 @@ export const randomDeskColor = () =>
     Object.keys(lightDeskColor)[Math.floor(Math.random() * Object.keys(lightDeskColor).length)];
 
 export function calculateNewOrderIndex(moving, target, elements) {
-    console.log("moving ", elements[moving])
-    console.log("target ", elements[target])
-
     const elementsNumber = elements.length;
     let newOrderIndex = 0;
     if (moving < target) {
@@ -126,12 +125,39 @@ export function calculateNewOrderIndex(moving, target, elements) {
             console.log(elementsNumber)
             newOrderIndex = (elements[target].orderIndex + elements[target + 1].orderIndex) / 2;
         } else {
-            newOrderIndex = elements[target].orderIndex + 2000000;
+            newOrderIndex = elements[target].orderIndex + 2021839;
         }
     }
     if (moving > target) {
         if (target <= 0) {
-            newOrderIndex = elements[target].orderIndex - 2000000;
+            newOrderIndex = elements[target].orderIndex - 2051839;
+        } else {
+            newOrderIndex = (elements[target].orderIndex + elements[target - 1].orderIndex) / 2;
+        }
+    }
+    return {
+        ...elements[moving],
+        orderIndex: newOrderIndex
+    }
+}
+
+export function calculateNewOrderIndexReversed(moving, target, elements) {
+    console.log(elements);
+    const elementsNumber = elements.length;
+    let newOrderIndex = 0;
+    if (moving < target) {
+        if (target !== elementsNumber-1) {
+            console.log(moving)
+            console.log(target)
+            console.log(elementsNumber)
+            newOrderIndex = (elements[target].orderIndex + elements[target + 1].orderIndex) / 2;
+        } else {
+            newOrderIndex = elements[target].orderIndex - 2051234;
+        }
+    }
+    if (moving > target) {
+        if (target <= 0) {
+            newOrderIndex = elements[target].orderIndex + 2051234;
         } else {
             newOrderIndex = (elements[target].orderIndex + elements[target - 1].orderIndex) / 2;
         }

@@ -154,14 +154,63 @@ export const TaskLoadProvider = ({children}) => {
 
 
             const targetDeskIndex = prevData.desks.findIndex(d => d.id === targetDesk)
+
+            const alreadyExists = updatedDesks[targetDeskIndex].tasks.findIndex(t => t.name === movingTask.name);
+            if (alreadyExists !== -1) {
+                return prevData;
+            }
+
             const newTask = {
                 ...movingTask,
                 deskId: targetDesk
             }
+
             updatedDesks[targetDeskIndex] = {
                 ...updatedDesks[targetDeskIndex],
                 tasks: [...updatedDesks[targetDeskIndex].tasks, newTask]
             }
+            console.log(updatedDesks)
+            return {
+                ...prevData,
+                desks: updatedDesks
+            }
+
+        })
+        return true;
+    }
+
+    function updateLinks(api, newDeskId) {
+        return Object.entries(api.links).map(([key, url]) => [
+                key,
+                url
+            ]
+        );
+    }
+
+    function refreshTask(updatedTask) {
+        const deskIdForUpdate = updatedTask.deskId;
+        setFullWorkspaceInformation(prevData => {
+            const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
+            if (deskIndex === -1) {
+                console.error("Desk not found");
+                return prevData;
+            }
+
+            const updatedDesks = [...prevData.desks];
+
+            const taskForUpdateIndex = updatedDesks[deskIndex].tasks.findIndex(task => task.id === updatedTask.id);
+
+            const updatedTasks = updatedDesks[deskIndex].tasks;
+
+            updatedTasks[taskForUpdateIndex] = {
+                ...updatedTasks[taskForUpdateIndex],
+                api: updatedTask.api
+            }
+
+            updatedDesks[deskIndex] = {
+                ...updatedDesks[deskIndex],
+                tasks: updatedTasks
+            };
             console.log(updatedDesks)
             return {
                 ...prevData,
@@ -238,6 +287,31 @@ export const TaskLoadProvider = ({children}) => {
             updatedTasks[taskForUpdateIndex] = {
                 ...updatedTasks[taskForUpdateIndex],
                 color: updatedTask.color
+            }
+
+            updatedDesks[deskIndex] = {
+                ...updatedDesks[deskIndex],
+                tasks: updatedTasks
+            };
+            console.log(updatedDesks)
+            return {
+                ...prevData,
+                desks: updatedDesks
+            }
+
+        })
+    }
+
+    function updateTaskOrder(deskIndex, taskForUpdateIndex, updatedTask) {
+        setFullWorkspaceInformation(prevData => {
+
+            const updatedDesks = [...prevData.desks];
+
+            const updatedTasks = updatedDesks[deskIndex].tasks;
+
+            updatedTasks[taskForUpdateIndex] = {
+                ...updatedTasks[taskForUpdateIndex],
+                orderIndex: updatedTask.orderIndex
             }
 
             updatedDesks[deskIndex] = {
@@ -338,6 +412,8 @@ export const TaskLoadProvider = ({children}) => {
             updateTaskCompletion,
             updateTaskName,
             moveTaskToAnotherDesk,
+            updateTaskOrder,
+            refreshTask,
 
             addNewDesk,
             deleteDesk,

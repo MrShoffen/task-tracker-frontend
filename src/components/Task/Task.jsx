@@ -46,6 +46,7 @@ export function Task({task, setContentIsLoading}) {
 
     const style = {
         transform: transform ? CSS.Translate.toString(transform) : undefined,
+        paddingBottom: '10px'
     };
 
     const handleCompletionClick = async () => {
@@ -71,7 +72,7 @@ export function Task({task, setContentIsLoading}) {
                 onMouseLeave={() => setHovered(false)}
                 sx={{
                     // mt: '10px',
-                    mb: '10px',
+                    // mb: '10px',
                     ml: '7px',
                     // mb: '5px',
                     flex: 1,
@@ -85,11 +86,19 @@ export function Task({task, setContentIsLoading}) {
                     backgroundColor: isDragging ? 'rgba(174,174,174,0.21)' : taskColor(task.color),
                     // backgroundColor: isDragging ? 'rgba(117,117,117,0.31)' : taskColor(task.color),
                     display: 'flex',
+                    fontSize: '10px',
                     flexDirection: 'column',
                     ':hover': {
                         cursor: 'pointer',
                     }
                 }}>
+                {/*<Box sx={{display: 'flex', flexDirection: 'column'}}*/}
+                {/*>*/}
+                {/*    <span>*/}
+                {/*{'taskOrder ' + task.orderIndex}</span>*/}
+                {/*    <span> {'taskId  ' + task.id}</span>*/}
+                {/*    <span>  {'deskId  ' + task.deskId}</span>*/}
+                {/*</Box>*/}
                 <Box
                 sx={{
                     opacity: isDragging ? 0 : 1

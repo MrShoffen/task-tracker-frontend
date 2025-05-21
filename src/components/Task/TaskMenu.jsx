@@ -26,6 +26,7 @@ import {DeleteTask} from "../../assets/icons/DeleteTask.jsx";
 import {sendDeleteTask} from "../../services/fetch/tasks/task/SendDeleteTask.js";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import {useCustomThemeContext} from "../../context/GlobalThemeContext/CustomThemeProvider.jsx";
+import Typography from "@mui/material/Typography";
 
 function UploadIcon(props) {
     return null;
@@ -44,7 +45,7 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
 
     const {deleteTask, updateTaskColor} = useTaskOperations();
 
-     const taskColorsPalette = () => {
+    const taskColorsPalette = () => {
         return !isDarkMode ? lightTaskColor : darkTaskColor;
     }
 
@@ -248,7 +249,6 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
                                 >
                                     <ListItemText sx={{mb: '5px',}} primary="Цвет задачи"/>
 
-
                                     <Box sx={{
                                         display: 'flex',
                                         gap: '3px', // Расстояние между кружками
@@ -277,9 +277,12 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
                                                     handleColorChange(name);
                                                 }}
                                             >
-                                                {task.color === name &&
+                                                {
+                                                    (name === task.color || (task.color === null && name === "null"))  &&
                                                     <Box sx={{ml: '3px', mt: '-5px'}}>
-                                                        <Galka color={theme.palette.taskName}/>
+
+                                                            <Galka color={theme.palette.taskName}/>
+
                                                     </Box>
                                                 }
                                             </Box>

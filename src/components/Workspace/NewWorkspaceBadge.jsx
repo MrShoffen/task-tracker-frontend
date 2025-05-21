@@ -177,7 +177,6 @@ export function NewWorkspaceBadge() {
                                     whiteSpace: 'nowrap', // Запрещаем перенос строк
                                     overflowX: 'auto',
                                     textOverflow: 'clip', // Добавляем многоточие если текст не помещается
-                                    borderBottom: isEditing ? '1px solid #90caf9' : 'none',
                                     outline: 'none',
                                     width: '250px',
                                     scrollbarWidth: 'none', // Для Firefox

@@ -7,7 +7,13 @@ import {NewTaskBadge} from "../Task/NewTaskBadge.jsx";
 import {Task} from "../Task/Task.jsx";
 import {deskColor} from "../../services/util/Utils.jsx";
 import {DeskMenu} from "./DeskMenu.jsx";
-import {rectSwappingStrategy, SortableContext, useSortable, verticalListSortingStrategy} from "@dnd-kit/sortable";
+import {
+    horizontalListSortingStrategy,
+    rectSwappingStrategy,
+    SortableContext,
+    useSortable,
+    verticalListSortingStrategy
+} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities"
 
 export function TaskDesk({desk, sx}) {
@@ -155,6 +161,8 @@ export function TaskDesk({desk, sx}) {
 
                     }}>
                         <SortableContext items={desk.tasks.map(t => t.id)}
+                                         strategy={verticalListSortingStrategy}
+
                         >
                             {desk.tasks && desk.tasks
                                 .sort((a, b) => b.orderIndex - a.orderIndex)

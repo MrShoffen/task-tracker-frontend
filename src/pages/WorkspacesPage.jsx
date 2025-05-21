@@ -15,15 +15,16 @@ import {
     DndContext,
     DragOverlay,
     KeyboardSensor,
-    PointerSensor,
+    PointerSensor, pointerWithin,
     useSensor,
     useSensors
 } from "@dnd-kit/core";
 import {arrayMove, horizontalListSortingStrategy, rectSwappingStrategy, SortableContext} from "@dnd-kit/sortable";
 import {restrictToHorizontalAxis, restrictToWindowEdges} from "@dnd-kit/modifiers";
 import {createPortal} from "react-dom";
-import {calculateNewOrderIndex} from "../services/util/Utils.jsx";
+import {calculateNewOrderIndex, calculateNewOrderIndexReversed} from "../services/util/Utils.jsx";
 import {sendEditDesk} from "../services/fetch/tasks/desk/SendEditDesk.js";
+import {sendEditTask} from "../services/fetch/tasks/task/SendEditTask.js";
 
 export default function WorkspacesPage() {
     const {
@@ -32,7 +33,9 @@ export default function WorkspacesPage() {
         workspaces,
         loadFullWorkspace,
         moveTaskToAnotherDesk,
-        loadAllWorkspaces
+        loadAllWorkspaces,
+        updateTaskOrder,
+        refreshTask
     } = useTaskOperations();
 
     const navigate = useNavigate();
@@ -44,6 +47,7 @@ export default function WorkspacesPage() {
 
     const [draggingDesk, setDraggingDesk] = useState(null);
     const [draggingTask, setDraggingTask] = useState(null);
+    const [sourceDesk, setSourceDesk] = useState(null);
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
@@ -89,29 +93,75 @@ export default function WorkspacesPage() {
         }
         if (event.active.data.current?.type === "task") {
             setDraggingTask(event.active.data.current.task);
+            setSourceDesk(event.active.data.current.task.deskId);
         }
     }
 
     async function handleDragEnd(event) {
         setDraggingTask(null);
         setDraggingDesk(null);
-        setLastMovedTaskId(null);
+        setSourceDesk(null);
+        // setLastMovedTaskId(null);
         console.log('in handle drop')
         const {active, over} = event;
         if (!over) {
             return;
         }
-
+        console.log('after fist')
         const activeId = active.id;
         const overId = over.id;
 
         if (activeId === overId) {
-            return;
+            console.log(activeId, overId)
+            console.log('this erra')
+            console.log(' desks')
+
+
+            const isActiveTask = active.data.current?.type === "task";
+            const isOverTask = over.data.current?.type === "task";
+            if (isActiveTask && isOverTask) {
+                const overTask = over.data.current.task;
+
+                if (sourceDesk === overTask.deskId) {
+                    return;
+                }
+
+
+                const workingDeskI = fullWorkspaceInformation
+                    .desks
+                    .findIndex(d => d.id === overTask.deskId);
+                const workingDesk = fullWorkspaceInformation.desks[workingDeskI];
+                const activeTIndex = workingDesk.tasks.findIndex(t => t.id === activeId);
+
+                const newOrderTask = calculateNewOrderIndexReversed(5, 0, workingDesk.tasks);
+                // console.error(newOrderTask.orderIndex)
+                updateTaskOrder(workingDeskI, activeTIndex, newOrderTask);
+                console.log('fixxx work - new order ', newOrderTask.orderIndex)
+                sendEditTask(workingDesk.tasks[activeTIndex].api.links.updateTaskDesk.href,
+                    {
+                        newDeskId: workingDesk.tasks[activeTIndex].deskId
+                    })
+                    .then(updatedTask1 =>
+                        sendEditTask(updatedTask1.api.links.updateTaskOrder.href,
+                            {
+                                updatedIndex: workingDesk.tasks[activeTIndex].orderIndex
+                            })
+                    )
+                    .then(updatedTask2 => {
+                            refreshTask(updatedTask2);
+                            console.log('UPDATED AFTER MOVING IN FIX')
+                        }
+                    )
+                return;
+            }
+            // return;
         }
+        console.log('after sec')
 
         const isActiveTask = active.data.current?.type === "task";
         const isOverTask = over.data.current?.type === "task";
         if (isActiveTask && isOverTask) {
+            console.log('source ', sourceDesk)
             const activeTask = active.data.current.task;
             const overTask = over.data.current.task;
             const workingDeskI = fullWorkspaceInformation
@@ -120,12 +170,62 @@ export default function WorkspacesPage() {
 
             const workingDesk = fullWorkspaceInformation.desks[workingDeskI];
 
-            console.log('working desk', workingDesk)
-            // const activeDeskIndex = fullWorkspaceInformation.desks.get() findIndex(d => d.id === activeId);
-            // const overDeskIndex = fullWorkspaceInformation.desks.findIndex(d => d.id === overId);
-            console.log('after drop active ', activeTask)
-            console.log('after drop over ', overTask)
+            const activeTIndex = workingDesk.tasks.findIndex(t => t.id === activeTask.id);
+            const overTIndex = workingDesk.tasks.findIndex(t => t.id === overTask.id);
+
+            const newOrderTask = calculateNewOrderIndexReversed(activeTIndex, overTIndex, workingDesk.tasks);
+            // console.error(newOrderTask.orderIndex)
+            updateTaskOrder(workingDeskI, activeTIndex, newOrderTask);
+
+            try {
+                if (sourceDesk === over.data.current.task.deskId) {
+                    await sendEditTask(activeTask.api.links.updateTaskOrder.href,
+                        {
+                            updatedIndex: newOrderTask.orderIndex
+                        });
+                } else {
+                    console.log('heeere')
+                    sendEditTask(activeTask.api.links.updateTaskDesk.href,
+                        {
+                            newDeskId: newOrderTask.deskId
+                        })
+                        .then(updatedTask1 =>
+                            sendEditTask(updatedTask1.api.links.updateTaskOrder.href,
+                                {
+                                    updatedIndex: newOrderTask.orderIndex
+                                })
+                        )
+                        .then(updatedTask2 => {
+                                refreshTask(updatedTask2);
+                                console.log('UPDATED AFTER MOVING')
+                            }
+                        )
+                }
+            } catch (error) {
+                showWarn(error.message);
+            }
+
             return;
+        }
+
+        if (isActiveTask && over.data.current?.type === 'desk') {
+            const activeTask = active.data.current.task;
+            const overDesk = over.data.current.desk;
+            const newOrderTask = {
+                    ...activeTask,
+                    orderIndex: 2001234
+                }
+            sendEditTask(newOrderTask.api.links.updateTaskDesk.href,
+                {
+                    newDeskId: overId
+                })
+
+                .then(updatedTask2 => {
+                        refreshTask(updatedTask2);
+                        console.log('UPDATED AFTER MOVING IN Empty desk')
+                    }
+                )
+
         }
 
         if (active.data.current?.type === 'desk' &&
@@ -146,7 +246,7 @@ export default function WorkspacesPage() {
             }
         }
     }
-    const [lastMovedTaskId, setLastMovedTaskId] = useState(null);
+
     function onDragOver(event) {
         const {active, over} = event;
         if (!over) {
@@ -173,7 +273,7 @@ export default function WorkspacesPage() {
             if (activeTask.deskId === overTask.deskId) {
                 return;
             }
-            if(activeTask.id === overTask.id){
+            if (activeTask.id === overTask.id) {
                 return
             }
 
@@ -183,6 +283,26 @@ export default function WorkspacesPage() {
             console.log('active task ', activeTask)
             console.log('over task ', overTask)
             return;
+        }
+
+        if (isActiveTask && over.data.current?.type === 'desk') {
+            console.log('moving task to desk');
+            if (sourceDesk === overId) {
+                console.log('same desk shiieeet')
+                return;
+            }
+
+
+            const workingDesk = fullWorkspaceInformation.desks.find(d => d.id === overId);
+            if (workingDesk.tasks.length !== 0) {
+                console.log('not empty desk');
+                return;
+            }
+            console.log('continue to add to empty desk')
+
+            const activeTask = active.data.current.task;
+
+            moveTaskToAnotherDesk(activeTask, workingDesk.id);
         }
     }
 
@@ -241,10 +361,10 @@ export default function WorkspacesPage() {
                     py: 2
                 }}>
                     <DndContext
-                        modifiers={[restrictToWindowEdges]}
+                        // modifiers={[restrictToWindowEdges]}
 
                         sensors={sensors}
-                        // collisionDetection={closestCenter}
+                        collisionDetection={pointerWithin}
                         onDragStart={handleDragStart}
                         onDragEnd={handleDragEnd}
                         onDragOver={onDragOver}
@@ -257,7 +377,7 @@ export default function WorkspacesPage() {
                             height: 'fit-content'
                         }}>
                             <SortableContext
-                                // strategy={horizontalListSortingStrategy}
+                                strategy={horizontalListSortingStrategy}
                                 items={fullWorkspaceInformation.desks.map(d => d.id)}>
                                 {fullWorkspaceInformation?.desks
                                     ?.sort((a, b) => a.orderIndex - b.orderIndex)

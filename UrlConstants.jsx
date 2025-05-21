@@ -1,7 +1,7 @@
 const isProduction = import.meta.env.MODE === "production"; // Определяем режим окружения
 
 
-export const API_BASE_URL = isProduction ? "" :
+export const API_BASE_URL =
         "http://localhost:8080"
     // "http://localhost:8080"
 ;
