@@ -1,14 +1,16 @@
 import {Box, CircularProgress} from "@mui/material";
 import * as React from "react";
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import {useTaskOperations} from "../context/Tasks/TaskLoadProvider.jsx";
 import WorkspaceHeader from "../components/Workspace/WorkspaceHeader.jsx";
 import {useNotification} from "../context/Notification/NotificationProvider.jsx";
 import {TaskDesk} from "../components/Desk/TaskDesk.jsx";
+import {Task} from "../components/Task/Task.jsx";
+
 import {NewDeskBadge} from "../components/Desk/NewDeskBadge.jsx";
 import {
-    closestCenter,
+    closestCenter, closestCorners,
     DndContext,
     DragOverlay,
     KeyboardSensor,
@@ -31,6 +33,10 @@ export default function WorkspacesPage() {
         loadAllWorkspaces
     } = useTaskOperations();
 
+    const deskIds = useMemo(() => {
+        return fullWorkspaceInformation.desks.map(d => d.id)
+    }, [fullWorkspaceInformation])
+
     const navigate = useNavigate();
     const location = useLocation();
     const {showWarn} = useNotification();
@@ -39,6 +45,7 @@ export default function WorkspacesPage() {
     const [workspaceLoading, setWorkspaceLoading] = useState(true);
 
     const [draggingDesk, setDraggingDesk] = useState(null);
+    const [draggingTask, setDraggingTask] = useState(null);
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
@@ -81,9 +88,14 @@ export default function WorkspacesPage() {
         if (event.active.data.current?.type === "desk") {
             setDraggingDesk(event.active.data.current.desk);
         }
+        if (event.active.data.current?.type === "task") {
+            setDraggingTask(event.active.data.current.task);
+        }
     }
 
     async function handleDragEnd(event) {
+        setDraggingTask(null);
+        setDraggingDesk(null);
         console.log('in handle drop')
         const {active, over} = event;
         if (!over) {
@@ -104,10 +116,10 @@ export default function WorkspacesPage() {
         updateDeskOrder(activeDeskIndex, deskWithUpdatedOrder);
         try {
             await sendEditDesk(deskWithUpdatedOrder.api.links.updateDeskOrder.href,
-            {
-                updatedIndex: deskWithUpdatedOrder.orderIndex
-            })
-        } catch (error){
+                {
+                    updatedIndex: deskWithUpdatedOrder.orderIndex
+                })
+        } catch (error) {
             showWarn(error.message);
         }
     }
@@ -180,6 +192,7 @@ export default function WorkspacesPage() {
                             height: 'fit-content'
                         }}>
                             <SortableContext
+
                                 // strategy={horizontalListSortingStrategy}
                                 items={fullWorkspaceInformation.desks.map(d => d.id)}>
                                 {fullWorkspaceInformation?.desks
@@ -199,8 +212,10 @@ export default function WorkspacesPage() {
                         {createPortal(
                             <DragOverlay>
                                 {draggingDesk &&
-                                    <TaskDesk desk={draggingDesk}/>
-                                }
+                                    <TaskDesk desk={draggingDesk}/>}
+
+                                {draggingTask &&
+                                    <Task task={draggingTask}/>}
                             </DragOverlay>, document.body)
                         }
                     </DndContext>

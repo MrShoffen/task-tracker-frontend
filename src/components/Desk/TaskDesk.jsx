@@ -1,13 +1,13 @@
 import {Backdrop, Box, Card, CircularProgress} from "@mui/material";
 import * as React from "react";
-import {useState} from "react";
+import {useMemo, useState} from "react";
 import {EditableDeskName} from "./EditableDeskName.jsx";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import {NewTaskBadge} from "../Task/NewTaskBadge.jsx";
 import {Task} from "../Task/Task.jsx";
 import {deskColor} from "../../services/util/Utils.jsx";
 import {DeskMenu} from "./DeskMenu.jsx";
-import {useSortable} from "@dnd-kit/sortable";
+import {SortableContext, useSortable, verticalListSortingStrategy} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities"
 
 export function TaskDesk({desk, sx}) {
@@ -19,6 +19,7 @@ export function TaskDesk({desk, sx}) {
         transform,
         transition,
         isDragging,
+        rect
     } = useSortable({
         id: desk.id,
         data: {
@@ -27,9 +28,13 @@ export function TaskDesk({desk, sx}) {
         }
     })
 
+    const taskIds = useMemo(() => {
+        return desk.tasks.map(t => t.id)
+    }, [desk])
+
     const style = {
         // transition,
-        transform: CSS.Transform.toString(transform),
+        transform: CSS.Translate.toString(transform),
         height: 'calc(100vh - 120px)',
     }
 
@@ -54,6 +59,7 @@ export function TaskDesk({desk, sx}) {
                         backgroundColor: 'rgba(174,174,174,0.21)',
                         height: 'calc(100vh - 124px)', // Ограничение максимальной высоты
                     }}>
+
                 </Card>
 
             </div>
@@ -80,6 +86,7 @@ export function TaskDesk({desk, sx}) {
                     maxHeight: 'calc(100vh - 124px)', // Ограничение максимальной высоты
                     ...sx
                 }}>
+
                 <Backdrop
                     sx={
                         (theme) => ({
@@ -150,17 +157,20 @@ export function TaskDesk({desk, sx}) {
 
 
                     }}>
-
-                        {desk.tasks && desk.tasks
-                            .sort((a, b) => b.orderIndex - a.orderIndex)
-                            .map(task =>
-                                <Task
-                                    key={task.id}
-                                    task={task}
-                                    setContentIsLoading={setContentIsLoading}
-                                />
-                            )
-                        }
+                        <SortableContext items={desk.tasks.map(t => t.id)}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            {desk.tasks && desk.tasks
+                                .sort((a, b) => b.orderIndex - a.orderIndex)
+                                .map(task =>
+                                    <Task
+                                        key={task.id}
+                                        task={task}
+                                        setContentIsLoading={setContentIsLoading}
+                                    />
+                                )
+                            }
+                        </SortableContext>
                     </Box>
                 </Box>
 
