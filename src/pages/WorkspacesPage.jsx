@@ -1,4 +1,4 @@
-import {Box, CircularProgress} from "@mui/material";
+import {Box, CircularProgress, Drawer} from "@mui/material";
 import * as React from "react";
 import {useEffect, useMemo, useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
@@ -373,6 +373,7 @@ export default function WorkspacesPage() {
                         <Box sx={{
                             display: 'inline-flex',
                             gap: 1.5,
+                            // mr: 200,
                             alignItems: 'flex-start',
                             height: 'fit-content'
                         }}>
@@ -405,6 +406,7 @@ export default function WorkspacesPage() {
                     </DndContext>
                 </Box>
             </Box>
+
         </Box>
     )
 }

@@ -34,6 +34,11 @@ export const TaskLoadProvider = ({children}) => {
         }
     }
 
+    function deleteWorkspace(workspace){
+        setWorkspaces(prev =>
+        prev.filter(w => w.id !== workspace.id))
+    }
+
     async function loadFullWorkspace(workspace) {
         const fullWs = await sendGetFullWsInformation(workspace.api.links.fullAggregatedInfo.href);
         setFullWorkspaceInformation(fullWs)
@@ -402,6 +407,7 @@ export const TaskLoadProvider = ({children}) => {
             loadFullWorkspace,
             fullWorkspaceInformation,
             setFullWorkspaceInformation,
+            deleteWorkspace,
 
             permissions,
             userHasPermission,

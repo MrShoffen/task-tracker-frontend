@@ -60,7 +60,7 @@ export function TaskDesk({desk, sx}) {
                         borderColor: 'taskName',
                         width: '300px',
                         backgroundColor: 'rgba(174,174,174,0.21)',
-                        height: 'calc(100vh - 124px)', // Ограничение максимальной высоты
+                        height: 'calc(100vh - 100px)', // Ограничение максимальной высоты
                     }}>
 
                 </Card>
@@ -86,7 +86,7 @@ export function TaskDesk({desk, sx}) {
                     backgroundColor: deskColor(desk.color),
                     display: 'flex',
                     flexDirection: 'column',
-                    maxHeight: 'calc(100vh - 124px)', // Ограничение максимальной высоты
+                    maxHeight: 'calc(100vh - 100px)', // Ограничение максимальной высоты
                     ...sx
                 }}>
 

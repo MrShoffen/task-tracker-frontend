@@ -3,7 +3,7 @@ import {styled} from "@mui/material/styles";
 import MuiDrawer from "@mui/material/Drawer";
 import {
     Avatar,
-    Box,
+    Box, Button, Card,
     Collapse,
     Divider,
     IconButton,
@@ -11,7 +11,7 @@ import {
     ListItem,
     ListItemButton,
     ListItemIcon,
-    ListItemText,
+    ListItemText, Modal, Slide,
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -28,6 +28,7 @@ import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import AddIcon from '@mui/icons-material/Add';
 import WorkspaceListElement from "../Workspace/WorkspaceListElement.jsx";
 import {NewWorkspaceBadge} from "../Workspace/NewWorkspaceBadge.jsx";
+import Typography from "@mui/material/Typography";
 
 
 const drawerWidth = 180;
@@ -120,161 +121,183 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
             width: '100vw',
             minHeight: '100vh'
         }}>
-            {
-                auth.isAuthenticated &&
-
-                <Drawer variant="permanent" open={open}
-                        slotProps={{
-                            paper: {
-                                sx: {
-                                    backgroundColor: 'drawer',
-                                    backdropFilter: 'blur(5px)',
-                                    WebkitBackdropFilter: 'blur(5px)',
-                                }
-                            }
-                        }}
-                >
-                    <DrawerHeader>
-                        <IconButton onClick={handleDrawerClick}>
-                            {!open ? <ChevronRightIcon/> : <ChevronLeftIcon/>}
-                        </IconButton>
-                    </DrawerHeader>
-                    <Divider sx={{ml: open ? 1 : 0, mr: open ? 1 : 0}}/>
-
-                    <List>
-
-                        <ListItem disablePadding sx={{display: "block"}}>
-                            <ListItemButton
-                                selected={location.pathname === '/profile'}
-                                sx={{
-                                    maxHeight: 40,
-                                    justifyContent: open ? "initial" : "center",
-                                }}
-                                onClick={() => navigate('/profile')}
-                            >
-                                <ListItemIcon
-                                    sx={{
-                                        minWidth: 0,
-                                        mr: open ? 3 : 0,
-                                        p: 0,
-                                        width: 12,
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    <Avatar sx={{
-                                        fontSize: "13px",
-                                        color: 'white',
-                                        border: '2px solid ',
-                                        borderColor: 'action.selected',
-                                        backgroundColor: auth.isAuthenticated ? avatarColor(auth.user.email) : 'black',
-                                        fontWeight: "500", m: 0
-                                    }}
-                                            alt={auth.isAuthenticated ? auth.user.email : ''}
-                                            style={{width: 34, height: 34}}
-                                            src={auth.user.avatarUrl}
-                                    >
-                                        {/*{*/}
-                                        {/*auth.isAuthenticated ?*/}
-                                        {/*    auth.user.email.slice(0, 3) : 'te'}*/}
-                                    </Avatar>
-                                </ListItemIcon>
-                                <ListItemText primary="Профиль" sx={{
-                                    opacity: open ? 1 : 0,
-                                    '& .MuiTypography-root': {
-                                        fontSize: '0.9rem',
-                                    }
-                                }}/>
-                            </ListItemButton>
-
-
-                        </ListItem>
-
-                        <Divider sx={{ml: open ? 1 : 0, mr: open ? 1 : 0}}/>
-                        <ListItem disablePadding sx={{display: "block"}}
-                        >
-                            <ListItemButton
-                                sx={{
-                                    maxHeight: 40,
-                                    justifyContent: open ? "initial" : "center",
-                                    px: 2.5,
-                                }}
-                                selected={location.pathname === '/project'}
-                                onClick={handleProjectsOpen}
-                            >
-
-                                <ListItemIcon
-                                    sx={{
-                                        minWidth: 0,
-                                        mr: open ? 3 : "auto",
-                                        width: 10,
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    <PlaylistAddCheckIcon sx={{fontSize: "24px"}}/>
-                                </ListItemIcon>
-                                <ListItemText primary={"Проекты"} sx={{
-                                    opacity: open ? 1 : 0,
-                                    '& .MuiTypography-root': {
-                                        fontSize: '0.9rem',
-                                    }
-                                }}/>
-                                {open && (openSubmenu ? <ExpandLess/> : <ExpandMore/>)}
-                            </ListItemButton>
-                            <Collapse in={openSubmenu} timeout="auto" unmountOnExit>
-                                <List disablePadding component="div">
-                                    <NewWorkspaceBadge/>
-
-                                    {workspaces
-                                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                                        .map(ws => <WorkspaceListElement workspace={ws}/>)}
-                                </List>
-                            </Collapse>
-                        </ListItem>
-                        <Divider sx={{ml: open ? 1 : 0, mr: open ? 1 : 0}}/>
-
-                        <ListItem disablePadding sx={{display: "block"}}>
-                            <ListItemButton
-                                sx={{
-                                    maxHeight: 40,
-                                    justifyContent: open ? "initial" : "center",
-                                    px: 2.5,
-                                }}
-                                onClick={toggleTheme}
-                            >
-
-                                <ListItemIcon
-                                    sx={{
-                                        minWidth: 0,
-                                        mr: open ? 3 : "auto",
-                                        width: 10,
-
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    {!isDarkMode ? <ModeNightIcon sx={{fontSize: "20px"}}/> :
-                                        <LightModeIcon sx={{fontSize: "20px"}}/>}
-                                </ListItemIcon>
-                                <ListItemText primary={"Сменить тему"} sx={{
-                                    opacity: open ? 1 : 0,
-                                    '& .MuiTypography-root': {
-                                        ml: 0,
-                                        fontSize: '0.9rem',
-                                    }
-                                }}/>
-                            </ListItemButton>
-                        </ListItem>
-
-                    </List>
-                </Drawer>
-            }
             <Box sx={{
-                width: '100%',
-                margin: '0',
-                flex: 1
+                display: "flex",
+                width: '100vw',
+                minHeight: '100vh'
             }}>
-                {/*<DrawerHeader/>*/}
-                {children}
+                {
+                    auth.isAuthenticated &&
+
+                    <Drawer variant="permanent" open={open}
+                            slotProps={{
+                                paper: {
+                                    sx: {
+                                        backgroundColor: 'drawer',
+                                        backdropFilter: 'blur(5px)',
+                                        WebkitBackdropFilter: 'blur(5px)',
+                                    }
+                                }
+                            }}
+                    >
+                        <DrawerHeader>
+                            <IconButton onClick={handleDrawerClick}>
+                                {!open ? <ChevronRightIcon/> : <ChevronLeftIcon/>}
+                            </IconButton>
+                        </DrawerHeader>
+                        <Divider sx={{ml: open ? 1 : 0, mr: open ? 1 : 0}}/>
+
+                        <List>
+
+                            <ListItem disablePadding sx={{display: "block"}}>
+                                <ListItemButton
+                                    selected={location.pathname === '/profile'}
+                                    sx={{
+                                        maxHeight: 40,
+                                        justifyContent: open ? "initial" : "center",
+                                    }}
+                                    onClick={() => navigate('/profile')}
+                                >
+                                    <ListItemIcon
+                                        sx={{
+                                            minWidth: 0,
+                                            mr: open ? 3 : 0,
+                                            p: 0,
+                                            width: 12,
+                                            justifyContent: "center",
+                                        }}
+                                    >
+                                        <Avatar sx={{
+                                            fontSize: "13px",
+                                            color: 'white',
+                                            border: '2px solid ',
+                                            borderColor: 'action.selected',
+                                            backgroundColor: auth.isAuthenticated ? avatarColor(auth.user.email) : 'black',
+                                            fontWeight: "500", m: 0
+                                        }}
+                                                alt={auth.isAuthenticated ? auth.user.email : ''}
+                                                style={{width: 34, height: 34}}
+                                                src={auth.user.avatarUrl}
+                                        >
+                                            {/*{*/}
+                                            {/*auth.isAuthenticated ?*/}
+                                            {/*    auth.user.email.slice(0, 3) : 'te'}*/}
+                                        </Avatar>
+                                    </ListItemIcon>
+                                    <ListItemText primary="Профиль" sx={{
+                                        opacity: open ? 1 : 0,
+                                        '& .MuiTypography-root': {
+                                            fontSize: '0.9rem',
+                                        }
+                                    }}/>
+                                </ListItemButton>
+
+
+                            </ListItem>
+
+                            <Divider sx={{ml: open ? 1 : 0, mr: open ? 1 : 0}}/>
+                            <ListItem disablePadding sx={{display: "block"}}
+                            >
+                                <ListItemButton
+                                    sx={{
+                                        maxHeight: 40,
+                                        justifyContent: open ? "initial" : "center",
+                                        px: 2.5,
+                                    }}
+                                    selected={location.pathname === '/project'}
+                                    onClick={handleProjectsOpen}
+                                >
+
+                                    <ListItemIcon
+                                        sx={{
+                                            minWidth: 0,
+                                            mr: open ? 3 : "auto",
+                                            width: 10,
+                                            justifyContent: "center",
+                                        }}
+                                    >
+                                        <PlaylistAddCheckIcon sx={{fontSize: "24px"}}/>
+                                    </ListItemIcon>
+                                    <ListItemText primary={"Проекты"} sx={{
+                                        opacity: open ? 1 : 0,
+                                        '& .MuiTypography-root': {
+                                            fontSize: '0.9rem',
+                                        }
+                                    }}/>
+                                    {open && (openSubmenu ? <ExpandLess/> : <ExpandMore/>)}
+                                </ListItemButton>
+                                <Collapse in={openSubmenu} timeout="auto" unmountOnExit>
+                                    <List disablePadding component="div">
+                                        <NewWorkspaceBadge/>
+
+                                        {workspaces
+                                            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                                            .map(ws => <WorkspaceListElement workspace={ws}/>)}
+                                    </List>
+                                </Collapse>
+                            </ListItem>
+                            <Divider sx={{ml: open ? 1 : 0, mr: open ? 1 : 0}}/>
+
+                            <ListItem disablePadding sx={{display: "block"}}>
+                                <ListItemButton
+                                    sx={{
+                                        maxHeight: 40,
+                                        justifyContent: open ? "initial" : "center",
+                                        px: 2.5,
+                                    }}
+                                    onClick={toggleTheme}
+                                >
+
+                                    <ListItemIcon
+                                        sx={{
+                                            minWidth: 0,
+                                            mr: open ? 3 : "auto",
+                                            width: 10,
+
+                                            justifyContent: "center",
+                                        }}
+                                    >
+                                        {!isDarkMode ? <ModeNightIcon sx={{fontSize: "20px"}}/> :
+                                            <LightModeIcon sx={{fontSize: "20px"}}/>}
+                                    </ListItemIcon>
+                                    <ListItemText primary={"Сменить тему"} sx={{
+                                        opacity: open ? 1 : 0,
+                                        '& .MuiTypography-root': {
+                                            ml: 0,
+                                            fontSize: '0.9rem',
+                                        }
+                                    }}/>
+                                </ListItemButton>
+                            </ListItem>
+
+                        </List>
+                    </Drawer>
+                }
+                <Box sx={{
+                    width: '100%',
+                    margin: '0',
+                    flex: 1
+                }}>
+                    {/*<DrawerHeader/>*/}
+                    {children}
+                </Box>
+
             </Box>
+
+            {/*<Card*/}
+            {/*    variant='permanent'*/}
+            {/*    anchor="right"*/}
+            {/*    open={true}*/}
+            {/*    // onClose={toggleChat}*/}
+            {/*    sx={{*/}
+
+            {/*            width: '600px', // Ширина чата*/}
+            {/*            height: "100vh",*/}
+            {/*            boxShadow: 3,*/}
+
+            {/*    }}*/}
+            {/*>*/}
+            {/*</Card>*/}
         </Box>
     );
 };

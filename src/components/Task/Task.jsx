@@ -12,6 +12,7 @@ import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import {useSortable} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
 import {useCustomThemeContext} from "../../context/GlobalThemeContext/CustomThemeProvider.jsx";
+import {TaskPlugins} from "./TaskPlugins.jsx";
 
 export function Task({task, setContentIsLoading}) {
     const [hovered, setHovered] = React.useState(false);
@@ -19,11 +20,9 @@ export function Task({task, setContentIsLoading}) {
     const {isDarkMode} = useCustomThemeContext();
 
 
-     const taskColor = (taskColor) => {
+    const taskColor = (taskColor) => {
         return !isDarkMode ? lightTaskColor[taskColor] : darkTaskColor[taskColor];
     }
-
-
 
 
     const {
@@ -100,9 +99,9 @@ export function Task({task, setContentIsLoading}) {
                 {/*    <span>  {'deskId  ' + task.deskId}</span>*/}
                 {/*</Box>*/}
                 <Box
-                sx={{
-                    opacity: isDragging ? 0 : 1
-                }}
+                    sx={{
+                        opacity: isDragging ? 0 : 1
+                    }}
                 >
                     {task.coverUrl && <TaskCover coverUrl={task.coverUrl}/>}
 
@@ -122,6 +121,7 @@ export function Task({task, setContentIsLoading}) {
                                 hovered={hovered}
                                 taskCompleted={task.completed}
                             />
+                            <TaskPlugins task={task} hovered={hovered}/>
                         </Box>
 
                         <TaskMenu
