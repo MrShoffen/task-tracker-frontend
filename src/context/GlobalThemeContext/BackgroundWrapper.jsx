@@ -19,7 +19,14 @@ export const BackgroundWrapper = styled(Stack)(({theme}) => ({
             ? ' linear-gradient(90deg, #06212D, #22202D)'
             : ' linear-gradient(70deg, #B9DEED, #EFEFEF);',
         // backgroundRepeat: '',
-        backgroundAttachment: 'scroll',
+        // backgroundAttachment: 'scroll',
+
+        // backgroundImage: `url('https://i.ibb.co/M5DtFwM8/i.webp)`, // Путь к изображению
+        backgroundSize: 'cover', // или 'contain' в зависимости от потребностей
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed', // Фиксированный фон при скролле
+        // filter: theme.palette.mode === 'dark' ? 'brightness(0.7)' : 'none'
     },
 
     '& > *': {

@@ -3,10 +3,17 @@ import Typography from "@mui/material/Typography";
 import * as React from "react";
 import SettingsIcon from '@mui/icons-material/Settings';
 import {UsersAvatarStack} from "../Users/UsersAvatarStack.jsx";
+import WorkspaceEditModal from "../Modals/WorkspaceEditModal.jsx";
 
 export default function WorkspaceHeader({workspace}) {
 
-
+    const [workspaceEditOpen, setWorkspaceEditOpen] = React.useState(false);
+    const handleWorkspaceOpen = () => {
+        setWorkspaceEditOpen(true);
+    }
+    const closeWsModal = () => {
+        setWorkspaceEditOpen(false);
+    }
     return (
         <Box sx={{
             backdropFilter: 'blur(5px)',
@@ -32,11 +39,15 @@ export default function WorkspaceHeader({workspace}) {
             }}>
                 {workspace.name}
             </Typography>
-            <IconButton sx={{ml: 1, mr: 2}}>
+            <IconButton
+                onClick={handleWorkspaceOpen}
+                sx={{ml: 1, mr: 2}}>
                 <SettingsIcon/>
             </IconButton>
 
             <UsersAvatarStack users={workspace.usersAndPermissions}/>
+
+            <WorkspaceEditModal workspace={workspace} onClose={closeWsModal} open={workspaceEditOpen}/>
         </Box>
     )
 }

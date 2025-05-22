@@ -92,7 +92,6 @@ export default function WorkspaceListElement({workspace}) {
                                     width: '16px',
                                     opacity: 1, height: '16px',
                                     p: 0,
-                                    backgroundColor: 'desk',
                                     mr: -1.6
                                 }}>
                         <DeleteTask color={'rgba(193,9,9,0.9)'}/>

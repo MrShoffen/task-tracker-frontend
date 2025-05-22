@@ -61,7 +61,7 @@ export const CustomThemeProvider = ({children}) => {
 
                 palette: {
                     mode: isDarkMode ? 'dark' : 'light',
-                    drawer: isDarkMode ? "rgba(34,34,44,0.71)" : "rgba(221,221,221,0.5)",
+                    drawer: isDarkMode ? "rgba(37,53,71,0.7)" : "rgba(143,156,182,0.6)",
                     searchInput: isDarkMode ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.3)",
                     menu: isDarkMode ? 'rgba(0,0,0,0.8)' : "white",
                     modal: isDarkMode ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.89)",

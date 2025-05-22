@@ -1,10 +1,9 @@
 import {Box, IconButton, ListItemButton, ListItemIcon, ListItemText, Typography, useTheme} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import * as React from "react";
-import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import {useEffect, useRef, useState} from "react";
-import {sendCreateDesk} from "../../services/fetch/tasks/desk/SendCreateDesk.js";
-import {randomDeskColor} from "../../services/util/Utils.jsx";
+import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
+import {workspaceCovers} from "../../services/util/Utils.jsx";
 import ConflictException from "../../exception/ConflictException.jsx";
 import {EditIcon} from "../../assets/icons/EditIcon.jsx";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
@@ -25,6 +24,9 @@ export function NewWorkspaceBadge() {
     const [initialText, setInitialText] = useState("desk.name");
     const theme = useTheme();
 
+     function getRandomCover() {
+        return workspaceCovers[Math.floor(Math.random() * workspaceCovers.length)];
+    }
     // Сохраняем выделение перед обновлением
     const saveSelection = () => {
         const selection = window.getSelection();
@@ -58,7 +60,8 @@ export function NewWorkspaceBadge() {
                 let newWs = await sendCreateWs(
                     {
                         name: newNameWithDubls,
-                        isPublic: false
+                        isPublic: false,
+                        coverUrl: getRandomCover()
                     });
                 await loadAllWorkspaces();
             } catch (error) {

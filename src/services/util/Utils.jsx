@@ -119,7 +119,7 @@ export function calculateNewOrderIndex(moving, target, elements) {
     const elementsNumber = elements.length;
     let newOrderIndex = 0;
     if (moving < target) {
-        if (target !== elementsNumber-1) {
+        if (target !== elementsNumber - 1) {
             console.log(moving)
             console.log(target)
             console.log(elementsNumber)
@@ -146,7 +146,7 @@ export function calculateNewOrderIndexReversed(moving, target, elements) {
     const elementsNumber = elements.length;
     let newOrderIndex = 0;
     if (moving < target) {
-        if (target !== elementsNumber-1) {
+        if (target !== elementsNumber - 1) {
             console.log(moving)
             console.log(target)
             console.log(elementsNumber)
@@ -167,3 +167,27 @@ export function calculateNewOrderIndexReversed(moving, target, elements) {
         orderIndex: newOrderIndex
     }
 }
+
+export const workspaceCovers = [
+    "https://i.ibb.co/FLH4hCBW/mounts.jpg",
+    "https://i.ibb.co/pBd9K2Rn/pole.jpg",
+    "https://i.ibb.co/gZY0mGrc/rauma-river-norway-korabli-lodki-shlyupk-708609.jpg",
+    "https://i.ibb.co/B2S6Hkp5/skripka.jpg",
+    "https://i.ibb.co/qLSNKSYY/les.webp",
+    "https://i.ibb.co/PvW5pRfd/doroga.jpg",
+    "https://i.ibb.co/8Dpgm5zM/kanion.jpg",
+    "https://i.ibb.co/W4x0m5Np/bambuk.jpg",
+    "https://i.ibb.co/jkd9p4nY/gorod.jpg",
+    "https://i.ibb.co/M5DtFwM8/i.webp",
+    "https://i.ibb.co/tpDjgHLn/pshen.jpg",
+    "https://i.ibb.co/Qvk9JwTH/plyazh.jpg",
+    "https://i.ibb.co/vxvgG8VV/korgi.jpg",
+    "https://i.ibb.co/8DPxNtWs/osen.jpg",
+    "https://i.ibb.co/3YzyMwY1/oblaka.jpg",
+    "https://i.ibb.co/8D5w1NHq/maki.jpg",
+    "https://i.ibb.co/4wQ4c1Lc/afrika.jpg",
+    "https://i.ibb.co/wNQDXmXh/pagoda.jpg",
+    "https://i.ibb.co/GrdyLbL/mayak.jpg",
+    "https://i.ibb.co/HL8StHnr/shari.jpg"
+]
+

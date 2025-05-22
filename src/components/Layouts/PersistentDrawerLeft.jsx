@@ -119,7 +119,8 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
         <Box sx={{
             display: "flex",
             width: '100vw',
-            minHeight: '100vh'
+            minHeight: '100vh',
+
         }}>
             <Box sx={{
                 display: "flex",
@@ -134,8 +135,8 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                                 paper: {
                                     sx: {
                                         backgroundColor: 'drawer',
-                                        backdropFilter: 'blur(5px)',
-                                        WebkitBackdropFilter: 'blur(5px)',
+                                        backdropFilter: 'blur(8px)',
+                                        WebkitBackdropFilter: 'blur(8px)',
                                     }
                                 }
                             }}

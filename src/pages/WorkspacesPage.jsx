@@ -212,9 +212,9 @@ export default function WorkspacesPage() {
             const activeTask = active.data.current.task;
             const overDesk = over.data.current.desk;
             const newOrderTask = {
-                    ...activeTask,
-                    orderIndex: 2001234
-                }
+                ...activeTask,
+                orderIndex: 2001234
+            }
             sendEditTask(newOrderTask.api.links.updateTaskDesk.href,
                 {
                     newDeskId: overId
@@ -313,12 +313,39 @@ export default function WorkspacesPage() {
     }
 
     return (
-        <Box sx={{
+        <Box
+
+            sx={theme => ({
             display: 'flex',
             flexDirection: 'column',
             height: '100vh',
-            overflow: 'hidden'
-        }}>
+            overflow: 'hidden',
+            ...(fullWorkspaceInformation.coverUrl !== null && {
+                '&::before': {
+                    content: '""',
+                    position: 'fixed',
+                    zIndex: 0,
+                    bottom: 0,
+                    left: 0,
+
+                    width: '100%',
+                    height: '100%',
+                    // backgroundImage: ' linear-gradient(70deg, #B9DE0D, #EFEFEF);',
+                    // backgroundRepeat: '',
+                    // backgroundAttachment: 'scroll',
+
+                    backgroundImage: `url(${fullWorkspaceInformation.coverUrl})`, // Путь к изображению
+                    backgroundSize: 'cover', // или 'contain' в зависимости от потребностей
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundAttachment: 'fixed', // Фиксированный фон при скролле
+                    filter: theme.palette.mode === 'dark' ? 'brightness(0.7)' : 'none'
+                }
+            })
+
+        })
+
+        }>
             {/* Хедер - фиксированная высота */}
             {workspaceLoading ? (
                 <Box sx={{
