@@ -16,8 +16,8 @@ export default function WorkspaceHeader({workspace}) {
     }
     return (
         <Box sx={{
-            backdropFilter: 'blur(5px)',
-            WebkitBackdropFilter: 'blur(5px)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
             height: '65px',
             backgroundColor: 'header',
             position: 'sticky',
@@ -36,6 +36,7 @@ export default function WorkspaceHeader({workspace}) {
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
+                userSelect: 'none'
             }}>
                 {workspace.name}
             </Typography>

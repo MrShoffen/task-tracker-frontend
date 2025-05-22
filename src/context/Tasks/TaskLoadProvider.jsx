@@ -57,6 +57,28 @@ export const TaskLoadProvider = ({children}) => {
         return permissions.includes(permission);
     }
 
+    function updateWsName(newWs){
+        setFullWorkspaceInformation(prev =>({
+            ...prev,
+            name: newWs.name
+        }))
+        loadAllWorkspaces();
+    }
+
+    function updateWsAccess(newWs){
+        setFullWorkspaceInformation(prev =>({
+            ...prev,
+            isPublic: newWs.isPublic
+        }))
+    }
+
+    function updateWsCover(newCoverUrl){
+        setFullWorkspaceInformation(prev =>({
+            ...prev,
+            coverUrl: newCoverUrl
+        }))
+    }
+
     function addNewDesk(newDesk) {
         const fullDesk = {
             ...newDesk,
@@ -408,6 +430,9 @@ export const TaskLoadProvider = ({children}) => {
             fullWorkspaceInformation,
             setFullWorkspaceInformation,
             deleteWorkspace,
+            updateWsName,
+            updateWsAccess,
+            updateWsCover,
 
             permissions,
             userHasPermission,

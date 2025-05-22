@@ -61,7 +61,7 @@ export const CustomThemeProvider = ({children}) => {
 
                 palette: {
                     mode: isDarkMode ? 'dark' : 'light',
-                    drawer: isDarkMode ? "rgba(37,53,71,0.7)" : "rgba(143,156,182,0.6)",
+                    drawer: isDarkMode ? "rgba(58,58,58,0.87)" : "rgba(255,255,255,0.93)",
                     searchInput: isDarkMode ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.3)",
                     menu: isDarkMode ? 'rgba(0,0,0,0.8)' : "white",
                     modal: isDarkMode ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.89)",
@@ -70,7 +70,7 @@ export const CustomThemeProvider = ({children}) => {
                     taskName: !isDarkMode ? "#121b2e" : "#d2d4d6",
                     menuPopup: isDarkMode ? "#252b35" : 'white',
                     card: isDarkMode ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.51)",
-                    header: isDarkMode ? "rgba(46,46,46,0.52)" : "rgba(207,207,207,0.34)",
+                    header: isDarkMode ? "rgba(46,46,46,0.7)" : "rgba(230,228,228,0.76)",
                     objectHover: isDarkMode ? "rgba(45,58,112,0.6)" : "rgba(202,202,202,0.7)",
                     objectSelected: isDarkMode ? "rgba(45,86,197,0.35)" : "rgba(126,126,126,0.7)",
                     selectHeader: isDarkMode ? "rgb(18,18,18)" : "rgb(209,209,209)",

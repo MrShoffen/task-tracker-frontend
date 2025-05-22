@@ -2,36 +2,33 @@ import {useAuthContext} from "../../context/Auth/AuthContext.jsx";
 import * as React from "react";
 import {useState} from "react";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
-import UnauthorizedException from "../../exception/UnauthorizedException.jsx";
-import {useNavigate} from "react-router-dom";
 import {
     Box,
     Button,
     Card,
-    Divider, Grid,
+    Divider,
+    Grid,
     IconButton,
-    Modal, Paper,
+    Modal,
+    Paper,
     Slide,
     ToggleButton,
-    ToggleButtonGroup,
-    Tooltip
+    ToggleButtonGroup
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
-import ValidatedEmailTextField from "../InputElements/TextField/ValidatedEmailTextField.jsx";
-import {sendEditEmail} from "../../services/fetch/user/SendEditEmail.js";
-import ConflictException from "../../exception/ConflictException.jsx";
-import AnimatedElement from "../InputElements/AnimatedElement.jsx";
 import ValidatedProfileField from "../InputElements/TextField/ValidatedProfileField.jsx";
-import {sendEditEmailConfirm} from "../../services/fetch/user/SendEditEmailConfirmCode.js";
-import {checkJwt} from "../../services/fetch/jwt/CheckJwt.js";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import {workspaceCovers} from "../../services/util/Utils.jsx";
+import {sendEditWs} from "../../services/fetch/tasks/ws/SendEditWs.js";
+import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
+import DoDisturbIcon from '@mui/icons-material/DoDisturb';
 
 export default function WorkspaceEditModal({workspace, open, onClose}) {
     const {auth, login} = useAuthContext();
 
     const [wsName, setWsName] = useState(workspace.name);
+    const {updateWsName, updateWsAccess, updateWsCover} = useTaskOperations();
 
     const [isPublic, setIsPublic] = useState(workspace.isPublic)
     const handleChange = (event, type) => {
@@ -40,57 +37,59 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
 
     const [selectedImage, setSelectedImage] = useState(workspace.coverUrl);
 
-    const handleImageClick = (imageUrl) => {
-        setSelectedImage(imageUrl);
+    const {showWarn, showSuccess} = useNotification();
+
+    const handleImageClick = async (imageUrl) => {
+        if (imageUrl === selectedImage) {
+            return;
+        }
+        try {
+            updateWsCover(imageUrl);
+            await sendEditWs(workspace.api.links.updateWorkspaceCover.href, {
+                newCoverUrl: imageUrl
+            });
+            setSelectedImage(imageUrl);
+            showSuccess("Обложка обновлена!")
+        } catch (error) {
+            updateWsCover(selectedImage);
+            showWarn(error.message);
+        }
         // onSelect(imageUrl); // Передаем выбранное изображение в родительский компонент
     };
-
-    const [username, setUsername] = useState('');
-    const [usernameError, setUsernameError] = useState('');
-
-    const [loading, setLoading] = useState(false);
-
-    const [codeSent, setCodeSent] = useState(false);
-    const [code, setCode] = useState('');
-
-    const navigate = useNavigate();
-
-    const {showSuccess, showWarn} = useNotification();
-    const handleEmailConfirmationSendCode = async () => {
-        try {
-            setLoading(true);
-            const editInformation = {newEmail: username}
-            await sendEditEmail(editInformation);
-            setCodeSent(true);
-            // logout();
-            // setTimeout(() => {
-            //     navigate("/login");
-            //     showSuccess("Пароль изменен", 4000);
-            // }, 400);
-        } catch (error) {
-            console.log(error);
-            switch (true) {
-                case error instanceof ConflictException:
-                    showWarn(error.message);
-                    setUsernameError(error.message);
-                    break;
-                case error instanceof UnauthorizedException:
-                    showWarn(error.message);
-                    setUsernameError(error.message);
-                    break;
-                default:
-                    console.log('Unknown error occurred! ');
-            }
-        }
-        setLoading(false);
-    };
-
 
     const clearFields = () => {
         setWsName(workspace.name);
         setIsPublic(workspace.isPublic);
         setSelectedImage(workspace.coverUrl)
     };
+
+    async function handleNameSave() {
+        try {
+            const updatedWs = await sendEditWs(workspace.api.links.updateWorkspaceName.href,
+                {
+                    newName: wsName
+                });
+            updateWsName(updatedWs);
+            showSuccess("Имя обновлено")
+
+        } catch (error) {
+            showWarn(error.message);
+        }
+    }
+
+    async function handleAccessSave() {
+        try {
+            const updatedWs = await sendEditWs(workspace.api.links.updateWorkspaceAccess.href,
+                {
+                    isPublic: isPublic
+                });
+            updateWsAccess(updatedWs);
+            showSuccess("Уровень доступа обновлен")
+
+        } catch (error) {
+            showWarn(error.message);
+        }
+    }
 
     if (auth.isAuthenticated) {
         return (
@@ -153,19 +152,20 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
                                         id={"wsName"}
                                     />
                                     <Button disableRipple sx={{mb: 1}}
+                                            onClick={handleNameSave}
                                             disabled={workspace.name === wsName || wsName.trim() === ''}
                                     >сохранить</Button>
                                 </Box>
                                 <Divider/>
                                 <Box
-                                sx={{
-                                    backgroundColor: 'action.hover',
-                                    borderRadius: 2,
-                                    width: '300px',
-                                    p: '3px',
-                                    border: '1px solid',
-                                    borderColor: 'action.disabled'
-                                }}
+                                    sx={{
+                                        backgroundColor: 'action.hover',
+                                        borderRadius: 2,
+                                        width: '300px',
+                                        p: '3px',
+                                        border: '1px solid',
+                                        borderColor: 'action.disabled'
+                                    }}
                                 >
                                     <Typography textAlign='center' variant='body2'>
                                         Уровень доступа к пространству
@@ -196,6 +196,7 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
                                             value='private'>Приватный</ToggleButton>
                                     </ToggleButtonGroup>
                                     <Button
+                                        onClick={handleAccessSave}
                                         disabled={isPublic && workspace.isPublic || !isPublic && !workspace.isPublic}
                                         disableRipple sx={{mb: 3, pl: 1}}
 
@@ -242,17 +243,36 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
                                                     }}
                                                     onClick={() => handleImageClick(imageUrl)}
                                                 >
-                                                    <Box
-                                                        component="img"
-                                                        src={imageUrl}
-                                                        alt="Cover"
-                                                        sx={{
-                                                            width: '130px',
-                                                            height: '120px',
-                                                            objectFit: 'cover',
-                                                            display: 'block'
-                                                        }}
-                                                    />
+
+                                                    {imageUrl ?
+                                                        <Box
+                                                            component="img"
+                                                            src={imageUrl}
+                                                            alt="Cover"
+                                                            sx={{
+                                                                width: '130px',
+                                                                height: '120px',
+                                                                objectFit: 'cover',
+                                                                display: 'block'
+                                                            }}
+                                                        /> :
+                                                        <Box
+                                                            // component="img"
+                                                            // src={imageUrl}
+                                                            // alt="Cover"
+                                                            sx={{
+                                                                width: '130px',
+                                                                height: '120px',
+                                                                objectFit: 'cover',
+                                                                display: 'block',
+                                                                // alignItems: 'center',
+                                                                alignContent: 'center',
+                                                                // m: 'auto'
+                                                            }}
+                                                        >
+                                                            <DoDisturbIcon sx={{fontSize: '70px', mt: 1,ml: '30px'}}/>
+                                                        </Box>
+                                                    }
                                                     {selectedImage === imageUrl && (
                                                         <IconButton
                                                             sx={{

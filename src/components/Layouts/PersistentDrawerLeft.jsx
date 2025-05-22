@@ -79,7 +79,7 @@ const Drawer = styled(MuiDrawer)(({theme, open}) => ({
 export const PersistentDrawerLeft = ({children, open, setOpen}) => {
     const {auth} = useAuthContext();
 
-    const {workspaces, loadAllWorkspaces} = useTaskOperations();
+    const {workspaces, loadAllWorkspaces, } = useTaskOperations();
 
     const {isDarkMode, toggleTheme} = useCustomThemeContext();
     const [openSubmenu, setOpenSubmenu] = React.useState(false);
@@ -156,6 +156,11 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                                     sx={{
                                         maxHeight: 40,
                                         justifyContent: open ? "initial" : "center",
+                                        '&.Mui-selected': {
+                                            border: '1px solid',
+                                            borderLeft: 'none',
+                                            borderRight: 'none'
+                                        }
                                     }}
                                     onClick={() => navigate('/profile')}
                                 >
@@ -204,6 +209,11 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                                         maxHeight: 40,
                                         justifyContent: open ? "initial" : "center",
                                         px: 2.5,
+                                        '&.Mui-selected': {
+                                            border: '1px solid',
+                                            borderLeft: 'none',
+                                            borderRight: 'none'
+                                        }
                                     }}
                                     selected={location.pathname === '/project'}
                                     onClick={handleProjectsOpen}

@@ -9,6 +9,7 @@ import WorkspacesPage from "./pages/WorkspacesPage.jsx";
 import AvailableAfterLoginRoute from "./context/Auth/AvailableAfterLoginRoute.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
+import PublicWsPage from "./pages/PublicWsPage.jsx";
 
 function App() {
 
@@ -18,7 +19,7 @@ function App() {
                 <Routes>
                     <Route element={<BaseLayout/>}>
 
-                        <Route path="*" element={<ErrorPage />}/>
+                        <Route path="*" element={<ErrorPage/>}/>
 
 
                         {/*available before login only*/}
@@ -43,6 +44,9 @@ function App() {
                                    </AvailableAfterLoginRoute>
                                }/>
 
+                        <Route path="public-workspaces/*"
+                               element={<PublicWsPage/>}
+                        />
 
 
                         <Route path="profile"

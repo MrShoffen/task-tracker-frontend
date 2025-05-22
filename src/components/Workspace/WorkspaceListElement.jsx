@@ -64,7 +64,12 @@ export default function WorkspaceListElement({workspace}) {
 
             sx={{
                 pl: 3,
-                maxHeight: 33
+                maxHeight: 33,
+                '&.Mui-selected': {
+                    border: '1px solid',
+                    borderLeft: 'none',
+                    borderRight: 'none'
+                }
             }}
             onClick={handleClick}
             selected={location.pathname === ('/workspaces/' + workspace.id)}
