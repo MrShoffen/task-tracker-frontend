@@ -97,12 +97,14 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
     const handleProjectsOpen = async () => {
         if (open) {
             if (!openSubmenu) {
-                const loadAllWorkspaces1 = await loadAllWorkspaces();
-                console.log(loadAllWorkspaces1)
+             await loadAllWorkspaces();
             }
             setOpenSubmenu(prev => !prev);
         } else {
             setOpen(true);
+            if (!openSubmenu) {
+                await loadAllWorkspaces();
+            }
             setOpenSubmenu(true);
         }
     };
@@ -295,20 +297,6 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
 
             </Box>
 
-            {/*<Card*/}
-            {/*    variant='permanent'*/}
-            {/*    anchor="right"*/}
-            {/*    open={true}*/}
-            {/*    // onClose={toggleChat}*/}
-            {/*    sx={{*/}
-
-            {/*            width: '600px', // Ширина чата*/}
-            {/*            height: "100vh",*/}
-            {/*            boxShadow: 3,*/}
-
-            {/*    }}*/}
-            {/*>*/}
-            {/*</Card>*/}
         </Box>
     );
 };

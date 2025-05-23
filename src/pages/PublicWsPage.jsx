@@ -343,7 +343,8 @@ export default function PublicWsPage() {
                     boxShadow: 3
                 }}>
                     <Typography variant="h6" sx={{
-                        ml: 2, width: '250px', textAlign: 'left',
+                        ml: 2,
+                        maxWidth: '250px', textAlign: 'left',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',

@@ -34,9 +34,9 @@ export const TaskLoadProvider = ({children}) => {
         }
     }
 
-    function deleteWorkspace(workspace){
+    function deleteWorkspace(workspace) {
         setWorkspaces(prev =>
-        prev.filter(w => w.id !== workspace.id))
+            prev.filter(w => w.id !== workspace.id))
     }
 
     async function loadFullWorkspace(workspace) {
@@ -57,23 +57,23 @@ export const TaskLoadProvider = ({children}) => {
         return permissions.includes(permission);
     }
 
-    function updateWsName(newWs){
-        setFullWorkspaceInformation(prev =>({
+    function updateWsName(newWs) {
+        setFullWorkspaceInformation(prev => ({
             ...prev,
             name: newWs.name
         }))
         loadAllWorkspaces();
     }
 
-    function updateWsAccess(newWs){
-        setFullWorkspaceInformation(prev =>({
+    function updateWsAccess(newWs) {
+        setFullWorkspaceInformation(prev => ({
             ...prev,
             isPublic: newWs.isPublic
         }))
     }
 
-    function updateWsCover(newCoverUrl){
-        setFullWorkspaceInformation(prev =>({
+    function updateWsCover(newCoverUrl) {
+        setFullWorkspaceInformation(prev => ({
             ...prev,
             coverUrl: newCoverUrl
         }))
@@ -115,27 +115,18 @@ export const TaskLoadProvider = ({children}) => {
         })
     }
 
-    function updateDeskColor(deskForUpdate) {
-        const deskIdForUpdate = deskForUpdate.id;
+    function updateDeskColor(deskIdForUpdate, newColor) {
         setFullWorkspaceInformation(prevData => {
             const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
-            if (deskIndex === -1) {
-                console.error("Desk not found");
-                return prevData;
-            }
-
-
             const updatedDesks = [...prevData.desks];
             updatedDesks[deskIndex] = {
                 ...updatedDesks[deskIndex],
-                color: deskForUpdate.color
+                color: newColor
             };
-            console.log(updatedDesks)
             return {
                 ...prevData,
                 desks: updatedDesks
             }
-
         })
     }
 

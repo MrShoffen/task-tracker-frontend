@@ -48,11 +48,18 @@ export const AuthProvider = ({children}) => {
                 login(user);
             }
         } catch (error) {
-            logout();
-            setTimeout(() => {
-                navigate("/login");
-                showError("Session is expired! Please login again", 4000)
-            }, 300)
+            switch (true) {
+                case error instanceof UnauthorizedException:
+                    logout();
+                    setTimeout(() => {
+                        navigate("/login");
+                        showError("Refresh токен просрочен", 4000)
+                    }, 300)
+                    break;
+                default:
+                    console.log(error)
+            }
+
         }
     };
 
@@ -66,9 +73,11 @@ export const AuthProvider = ({children}) => {
     }, [urlLocation.pathname]);
 
 
-    // useEffect(() => {
-    //     validateJwt();
-    // }, []);
+    useEffect(() => {
+        if (auth.isAuthenticated) {
+            validateJwt();
+        }
+    }, []);
 
 
     return (

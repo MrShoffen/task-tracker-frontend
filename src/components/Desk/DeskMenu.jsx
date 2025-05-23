@@ -14,9 +14,6 @@ import {
 import {MenuIcon} from "../../assets/icons/MenuIcon.jsx";
 import * as React from "react";
 import {useState} from "react";
-import * as PropTypes from "prop-types";
-import {sendEditTask} from "../../services/fetch/tasks/task/SendEditTask.js";
-import {DeleteCover} from "../../assets/icons/DeleteCover.jsx";
 import {deskColorsPalette} from "../../services/util/Utils.jsx";
 import {Galka} from "../../assets/icons/Galka.jsx";
 import {sendEditDesk} from "../../services/fetch/tasks/desk/SendEditDesk.js";
@@ -24,14 +21,6 @@ import {DeleteTask} from "../../assets/icons/DeleteTask.jsx";
 import {sendDeleteDesk} from "../../services/fetch/tasks/desk/SendDeleteDesk.js";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 
-function UploadIcon(props) {
-    return null;
-}
-
-UploadIcon.propTypes = {
-    color: PropTypes.string,
-    size: PropTypes.string
-};
 
 export function DeskMenu({desk}) {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -48,18 +37,16 @@ export function DeskMenu({desk}) {
     };
 
     const handleEditClick = () => {
-        handleMenuClose(); // Закрываем меню
+        handleMenuClose();
     };
 
 
     const handleColorChange = async (newColor) => {
         try {
-            const updatedDesk = await sendEditDesk(desk.api.links.updateDeskColor.href,
-                {
-                    newColor: newColor
-                }
+            updateDeskColor(desk.id, newColor);
+            await sendEditDesk(desk.api.links.updateDeskColor.href,
+                {newColor: newColor}
             );
-            updateDeskColor(updatedDesk);
         } catch (error) {
             console.log(error);
         }
@@ -67,8 +54,8 @@ export function DeskMenu({desk}) {
 
     const handleDeleteDesk = async () => {
         try {
-            await sendDeleteDesk(desk.api.links.deleteDesk.href);
             deleteDesk(desk);
+            await sendDeleteDesk(desk.api.links.deleteDesk.href);
         } catch (error) {
             console.log(error);
         }
@@ -76,7 +63,6 @@ export function DeskMenu({desk}) {
     }
 
     return (<>
-
             <IconButton
                 disableRipple
                 onClick={handleMenuClick}
@@ -98,10 +84,7 @@ export function DeskMenu({desk}) {
                 open={open}
                 onClose={handleMenuClose}
                 placement="right"
-                sx={{
-                    zIndex: 1300, // Убедитесь, что поверх других элементов
-                }}
-
+                sx={{zIndex: 1300,}}
             >
                 <ClickAwayListener onClickAway={handleMenuClose}>
                     <Paper
@@ -122,22 +105,11 @@ export function DeskMenu({desk}) {
                             <ListItem
                                 disableGutters
                                 onClick={handleEditClick}
-                                sx={{
-                                    px: 1,
-                                    py: 1
-                                }}
+                                sx={{px: 1, py: 1}}
                             >
-                                <Box
-                                    sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}
-                                >
+                                <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                                     <ListItemText sx={{mb: '5px',}} primary="Цвет доски"/>
-
-
-                                    <Box sx={{
-                                        display: 'flex',
-                                        gap: '3px', // Расстояние между кружками
-                                        ml: '1px'   // Отступ от текста
-                                    }}>
+                                    <Box sx={{display: 'flex', gap: '3px', ml: '1px'}}>
                                         {Object.entries(deskColorsPalette()).map(([name, color]) => (
                                             <Box
                                                 key={color}
@@ -145,7 +117,7 @@ export function DeskMenu({desk}) {
                                                     backgroundColor: color,
                                                     height: '17px',
                                                     width: '17px',
-                                                    borderRadius: '50%', // Делаем круглую форму
+                                                    borderRadius: '50%',
                                                     border: '1px solid',
                                                     borderColor: 'divider',
                                                     cursor: 'pointer',
@@ -177,18 +149,10 @@ export function DeskMenu({desk}) {
                                 button={"true"}
                                 disableGutters
                                 onClick={handleDeleteDesk}
-                                sx={{
-                                    px: 1,
-                                    py: 1
-                                }}
+                                sx={{px: 1, py: 1}}
                             >
-                                <ListItemIcon sx={{
-                                    m: 0,
-                                    minWidth: '24px !important'
-                                }}
-                                >
+                                <ListItemIcon sx={{m: 0, minWidth: '24px !important'}}>
                                     <DeleteTask color={theme.palette.taskName} size="16px"/>
-
                                 </ListItemIcon>
                                 <ListItemText sx={{m: 0}} primary="Удалить доску"/>
                             </ListItem>

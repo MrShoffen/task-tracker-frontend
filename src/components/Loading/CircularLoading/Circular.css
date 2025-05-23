@@ -1,10 +1,10 @@
 #tick {
-    strokeWidth: 8;
+    stroke-width: 8;
     transition: all 1s;
 }
 
 #circle {
-    strokeWidth: 8;
+    stroke-width: 8;
     transform-origin: 50px 50px 0;
     transition: all 1s;
 }

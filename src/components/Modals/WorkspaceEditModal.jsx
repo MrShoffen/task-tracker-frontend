@@ -23,6 +23,7 @@ import {workspaceCovers} from "../../services/util/Utils.jsx";
 import {sendEditWs} from "../../services/fetch/tasks/ws/SendEditWs.js";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import DoDisturbIcon from '@mui/icons-material/DoDisturb';
+import CopyLinkButton from "../InputElements/CopyLinkButton.jsx";
 
 export default function WorkspaceEditModal({workspace, open, onClose}) {
     const {auth, login} = useAuthContext();
@@ -201,6 +202,10 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
                                         disableRipple sx={{mb: 3, pl: 1}}
 
                                     >сохранить</Button>
+                                    {workspace.isPublic &&
+                                        <CopyLinkButton
+                                            linkToCopy={window.location.host + '/public-workspaces/' + workspace.id}/>
+                                    }
                                 </Box>
                                 <Divider/>
 
@@ -270,7 +275,7 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
                                                                 // m: 'auto'
                                                             }}
                                                         >
-                                                            <DoDisturbIcon sx={{fontSize: '70px', mt: 1,ml: '30px'}}/>
+                                                            <DoDisturbIcon sx={{fontSize: '70px', mt: 1, ml: '30px'}}/>
                                                         </Box>
                                                     }
                                                     {selectedImage === imageUrl && (
