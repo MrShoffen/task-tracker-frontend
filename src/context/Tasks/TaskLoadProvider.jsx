@@ -130,8 +130,7 @@ export const TaskLoadProvider = ({children}) => {
         })
     }
 
-    function updateDeskName(deskForUpdate) {
-        const deskIdForUpdate = deskForUpdate.id;
+    function updateDeskName(deskIdForUpdate, newName) {
         setFullWorkspaceInformation(prevData => {
             const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
             if (deskIndex === -1) {
@@ -143,7 +142,7 @@ export const TaskLoadProvider = ({children}) => {
             const updatedDesks = [...prevData.desks];
             updatedDesks[deskIndex] = {
                 ...updatedDesks[deskIndex],
-                name: deskForUpdate.name
+                name: newName
             };
             console.log(updatedDesks)
             return {

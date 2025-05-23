@@ -1,31 +1,22 @@
 import {Backdrop, Box, Card, CircularProgress} from "@mui/material";
 import * as React from "react";
-import {useMemo, useState} from "react";
+import {useState} from "react";
 import {EditableDeskName} from "./EditableDeskName.jsx";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import {NewTaskBadge} from "../Task/NewTaskBadge.jsx";
 import {Task} from "../Task/Task.jsx";
 import {deskColor} from "../../services/util/Utils.jsx";
 import {DeskMenu} from "./DeskMenu.jsx";
-import {
-    horizontalListSortingStrategy,
-    rectSwappingStrategy,
-    SortableContext,
-    useSortable,
-    verticalListSortingStrategy
-} from "@dnd-kit/sortable";
+import {SortableContext, useSortable, verticalListSortingStrategy} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities"
 
 export function TaskDesk({desk, sx}) {
-
     const {
         setNodeRef,
         attributes,
         listeners,
         transform,
-        transition,
         isDragging,
-        rect
     } = useSortable({
         id: desk.id,
         data: {
@@ -39,7 +30,6 @@ export function TaskDesk({desk, sx}) {
     const {userHasPermission} = useTaskOperations();
 
     const style = {
-        // transition,
         transform: CSS.Translate.toString(transform),
         height: 'calc(100vh - 120px)',
     }
@@ -60,7 +50,7 @@ export function TaskDesk({desk, sx}) {
                         borderColor: 'taskName',
                         width: '300px',
                         backgroundColor: 'rgba(174,174,174,0.21)',
-                        height: 'calc(100vh - 100px)', // Ограничение максимальной высоты
+                        height: 'calc(100vh - 100px)',
                     }}>
 
                 </Card>
@@ -86,7 +76,7 @@ export function TaskDesk({desk, sx}) {
                     backgroundColor: deskColor(desk.color),
                     display: 'flex',
                     flexDirection: 'column',
-                    maxHeight: 'calc(100vh - 100px)', // Ограничение максимальной высоты
+                    maxHeight: 'calc(100vh - 100px)',
                     ...sx
                 }}>
 
@@ -117,7 +107,6 @@ export function TaskDesk({desk, sx}) {
                         borderRadius: 12.5,
                         position: 'absolute',
                         height: '9000px',
-                        // zIndex: 200,
                     }}
                 />
                 <Box sx={{
@@ -125,7 +114,6 @@ export function TaskDesk({desk, sx}) {
                     flexDirection: 'column',
                     pb: 1.5
 
-                    // flexShrink: 0, // Фиксированная высота
                 }}>
                     <EditableDeskName desk={desk} hovered={true}/>
                     <DeskMenu desk={desk}/>
@@ -138,10 +126,9 @@ export function TaskDesk({desk, sx}) {
                 <Box sx={{
                     display: 'flex',
                     flexDirection: 'column',
-                    overflow: 'hidden', // Скрываем переполнение
+                    overflow: 'hidden',
                     position: 'relative',
                 }}>
-                    {/* Внутренний контейнер с прокруткой */}
                     <Box sx={{
                         overflowY: 'auto',
                         flex: 1,
@@ -151,11 +138,11 @@ export function TaskDesk({desk, sx}) {
                         '&::-webkit-scrollbar-thumb': {
                             backgroundColor: 'action.disabled',
                             borderRadius: '3px',
-                            visibility: 'hidden', // Скрываем по умолчанию
+                            visibility: 'hidden',
                             transition: 'visibility 0.6s ease',
                         },
                         '&:hover::-webkit-scrollbar-thumb': {
-                            visibility: 'visible', // Показываем при наведении на область прокрутки
+                            visibility: 'visible',
                         }
 
 

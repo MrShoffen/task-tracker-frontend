@@ -1,13 +1,9 @@
-import {Backdrop, Box, Card, CircularProgress, IconButton, Typography, useTheme} from "@mui/material";
-import {deskColor, randomDeskColor} from "../../services/util/Utils.jsx";
-import {EditableDeskName} from "./EditableDeskName.jsx";
-import {DeskMenu} from "./DeskMenu.jsx";
-import {NewTaskBadge} from "../Task/NewTaskBadge.jsx";
-import {Task} from "../Task/Task.jsx";
+import {Box, Card, IconButton, Typography, useTheme} from "@mui/material";
+import {randomDeskColor} from "../../services/util/Utils.jsx";
 import * as React from "react";
+import {useEffect, useRef, useState} from "react";
 import {EditIcon} from "../../assets/icons/EditIcon.jsx";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
-import {useEffect, useRef, useState} from "react";
 import {NewDeskIcon} from "../../assets/icons/NewDesk.jsx";
 import {sendCreateDesk} from "../../services/fetch/tasks/desk/SendCreateDesk.js";
 import ConflictException from "../../exception/ConflictException.jsx";
@@ -26,7 +22,6 @@ export const NewDeskBadge = () => {
     const [initialText, setInitialText] = useState("desk.name");
     const theme = useTheme();
 
-    // Сохраняем выделение перед обновлением
     const saveSelection = () => {
         const selection = window.getSelection();
         if (selection.rangeCount > 0) {
@@ -34,7 +29,6 @@ export const NewDeskBadge = () => {
         }
     };
 
-    // Восстанавливаем выделение после обновления
     const restoreSelection = () => {
         if (lastSelectionRef.current) {
             const selection = window.getSelection();
@@ -53,7 +47,7 @@ export const NewDeskBadge = () => {
         saveSelection();
         setHovered(false);
         const newText = typographyRef.current?.textContent.trim() || '';
-        if (newText !== initialText && newText !== '') { // Сравниваем с исходным текстом
+        if (newText !== initialText && newText !== '') {
             try {
                 const newNameWithDubls = newText + (duplicatedCount === 0 ? '' : (' (' + duplicatedCount + ')'));
                 let newDesk = await sendCreateDesk(fullWorkspaceInformation.api.links.createDesk.href,
@@ -91,14 +85,12 @@ export const NewDeskBadge = () => {
 
     const handleInput = () => {
         saveSelection();
-        // Не используем setText, чтобы избежать лишних ререндеров
     };
 
     useEffect(() => {
         if (isEditing && typographyRef.current) {
             typographyRef.current.focus();
 
-            // Помещаем курсор в конец текста только при первом открытии
             if (!lastSelectionRef.current) {
                 const range = document.createRange();
                 range.selectNodeContents(typographyRef.current);
@@ -141,7 +133,6 @@ export const NewDeskBadge = () => {
                             cursor: 'pointer',
                             color: hovered ? 'rgb(0,137,246)' : 'taskName',
                             flexDirection: 'column',
-                            // maxHeight: 'calc(100vh - 97px)', // Ограничиваем высоту карточки
 
                         }}>
                         <Box sx={{
@@ -170,15 +161,12 @@ export const NewDeskBadge = () => {
                             backgroundColor: 'desk',
                             display: 'flex',
                             flexDirection: 'column',
-                            // maxHeight: 'calc(100vh - 97px)', // Ограничиваем высоту карточки
 
                         }}>
                         <Box sx={{display: 'flex', alignItems: 'center'}}
                         >
                             <Typography
                                 component="div"
-                                // onMouseEnter={() => setHovered(true)}
-                                // onMouseLeave={() => setHovered(false)}
                                 ref={typographyRef}
                                 contentEditable={isEditing}
                                 suppressContentEditableWarning
@@ -190,7 +178,6 @@ export const NewDeskBadge = () => {
                                     ml: 2,
                                     zIndex: 2,
                                     color: 'taskName',
-                                    // backgroundColor: 'desk',
                                     fontSize: '18px',
                                     fontWeight: '500',
                                     alignSelf: 'start',

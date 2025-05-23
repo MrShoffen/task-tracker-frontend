@@ -129,7 +129,6 @@ export function DeskMenu({desk}) {
                                                 }}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    console.log('Selected color:', name);
                                                     handleColorChange(name);
                                                 }}
                                             >
