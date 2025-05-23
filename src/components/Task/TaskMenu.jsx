@@ -43,7 +43,7 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
     const theme = useTheme();
     const {isDarkMode} = useCustomThemeContext();
 
-    const {deleteTask, updateTaskColor} = useTaskOperations();
+    const {deleteTask, updateTaskField} = useTaskOperations();
 
     const taskColorsPalette = () => {
         return !isDarkMode ? lightTaskColor : darkTaskColor;
@@ -95,37 +95,37 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
 
             try {
                 const uploadedImage = await uploadImage(formData);
-                const updatedTask = await sendEditTask(task.api.links.updateTaskCover.href,
+                updateTaskField(task.deskId, task.id, 'coverUrl', uploadedImage.imageUrl);
+                await sendEditTask(task.api.links.updateTaskCover.href,
                     {
                         newCoverUrl: uploadedImage.imageUrl
                     }
                 );
-                // updateTask(updatedTask); //todo обновить
             } catch (error) {
                 console.log(error);
             }
         }
-        setTimeout(() => setContentIsLoading(false), 1000);
+        setTimeout(() => setContentIsLoading(false), 800);
     };
 
     const handleCoverDelete = async (e) => {
         handleMenuClose();
-        const updatedTask = await sendEditTask(task.api.links.updateTaskCover.href,
+        updateTaskField(task.deskId, task.id, 'coverUrl', null);
+        await sendEditTask(task.api.links.updateTaskCover.href,
             {
                 newCoverUrl: null
             }
         );
-        // updateTask(updatedTask); //todo обновить
     }
 
     const handleColorChange = async (newColor) => {
         try {
-            const updatedTask = await sendEditTask(task.api.links.updateTaskColor.href,
+            updateTaskField(task.deskId, task.id, 'color', newColor);
+            await sendEditTask(task.api.links.updateTaskColor.href,
                 {
                     newColor: newColor
                 }
             );
-            updateTaskColor(updatedTask);
         } catch (error) {
             console.log(error);
         }
@@ -278,10 +278,10 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
                                                 }}
                                             >
                                                 {
-                                                    (name === task.color || (task.color === null && name === "null"))  &&
+                                                    (name === task.color || (task.color === null && name === "null")) &&
                                                     <Box sx={{ml: '3px', mt: '-5px'}}>
 
-                                                            <Galka color={theme.palette.taskName}/>
+                                                        <Galka color={theme.palette.taskName}/>
 
                                                     </Box>
                                                 }

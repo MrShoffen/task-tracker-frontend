@@ -35,7 +35,7 @@ export default function WorkspacesPage() {
         moveTaskToAnotherDesk,
         loadAllWorkspaces,
         updateTaskOrder,
-        refreshTask
+        updateTaskField
     } = useTaskOperations();
 
     const navigate = useNavigate();
@@ -148,7 +148,7 @@ export default function WorkspacesPage() {
                             })
                     )
                     .then(updatedTask2 => {
-                            refreshTask(updatedTask2);
+                            updateTaskField(updatedTask2.deskId, updatedTask2.id, 'api', updatedTask2.api);
                             console.log('UPDATED AFTER MOVING IN FIX')
                         }
                     )
@@ -196,8 +196,9 @@ export default function WorkspacesPage() {
                                 })
                         )
                         .then(updatedTask2 => {
-                                refreshTask(updatedTask2);
-                                console.log('UPDATED AFTER MOVING')
+                            updateTaskField(updatedTask2.deskId, updatedTask2.id, 'api', updatedTask2.api);
+
+                            console.log('UPDATED AFTER MOVING')
                             }
                         )
                 }
@@ -221,8 +222,9 @@ export default function WorkspacesPage() {
                 })
 
                 .then(updatedTask2 => {
-                        refreshTask(updatedTask2);
-                        console.log('UPDATED AFTER MOVING IN Empty desk')
+                    updateTaskField(updatedTask2.deskId, updatedTask2.id, 'api', updatedTask2.api);
+
+                    console.log('UPDATED AFTER MOVING IN Empty desk')
                     }
                 )
 

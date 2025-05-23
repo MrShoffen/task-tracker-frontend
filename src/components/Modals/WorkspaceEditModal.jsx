@@ -1,4 +1,3 @@
-import {useAuthContext} from "../../context/Auth/AuthContext.jsx";
 import * as React from "react";
 import {useState} from "react";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
@@ -11,7 +10,6 @@ import {
     IconButton,
     Modal,
     Paper,
-    Slide,
     ToggleButton,
     ToggleButtonGroup
 } from "@mui/material";
@@ -26,7 +24,6 @@ import DoDisturbIcon from '@mui/icons-material/DoDisturb';
 import CopyLinkButton from "../InputElements/CopyLinkButton.jsx";
 
 export default function WorkspaceEditModal({workspace, open, onClose}) {
-    const {auth, login} = useAuthContext();
 
     const [wsName, setWsName] = useState(workspace.name);
     const {updateWsName, updateWsAccess, updateWsCover} = useTaskOperations();
@@ -55,7 +52,6 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
             updateWsCover(selectedImage);
             showWarn(error.message);
         }
-        // onSelect(imageUrl); // Передаем выбранное изображение в родительский компонент
     };
 
     const clearFields = () => {
@@ -92,219 +88,211 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
         }
     }
 
-    if (auth.isAuthenticated) {
-        return (
-            <>
-                <Modal open={open}
-                       onClose={() => {
-                           onClose();
-                           clearFields()
-                       }}>
-                    <Slide in={open} direction={'right'} style={{transform: "translate(-50%, 0%)", marginTop: "70px",}}>
-                        <Card variant="outlined"
-                              sx={{
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  minWidth: {sm: '800px', xs: '100%'},
-                                  maxWidth: {sm: '800px', xs: '100%'},
-                                  maxHeight: '85%',
-                                  padding: 2,
-                                  gap: 2,
-                                  margin: 'auto',
-                                  backgroundColor: "modal",
-                                  backdropFilter: 'blur(16px)',
-                                  WebkitBackdropFilter: 'blur(16px)',
-                                  boxShadow: 5,
-                                  borderRadius: 2,
-                                  position: "relative",
-                              }}
+    return (
+            <Modal open={open}
+                   onClose={() => {
+                       onClose();
+                       clearFields()
+                   }}>
+                    <Card variant="outlined"
+                          sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              minWidth: {sm: '800px', xs: '100%'},
+                              maxWidth: {sm: '800px', xs: '100%'},
+                              maxHeight: '85%',
+                              padding: 2,
+                              gap: 2,
+                              margin: 'auto',
+                              transform: "translate(0%, 0%)", marginTop: "70px",
+                              backgroundColor: "modal",
+                              backdropFilter: 'blur(16px)',
+                              WebkitBackdropFilter: 'blur(16px)',
+                              boxShadow: 5,
+                              borderRadius: 2,
+                              position: "relative",
+                          }}
+                    >
+
+
+                        <IconButton
+                            aria-label="close"
+                            size="small"
+                            onClick={() => {
+                                onClose();
+                                clearFields()
+                            }}
+                            sx={{
+                                position: 'absolute',
+                                top: 5,
+                                right: 5,
+                                width: '25px',
+                                height: '25px',
+                            }}
                         >
+                            <CloseIcon sx={{fontSize: '25px'}}/>
+                        </IconButton>
+
+                        <Typography variant="h6" textAlign="center" sx={{width: '100%', mb: 1}}>
+                            Настройка пространства
+                        </Typography>
 
 
-                            <IconButton
-                                aria-label="close"
-                                size="small"
-                                onClick={() => {
-                                    onClose();
-                                    clearFields()
-                                }}
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
+                            <Box sx={{display: 'flex', flexDirection: 'row'}}>
+                                <ValidatedProfileField
+                                    label={"Имя"}
+                                    name={wsName}
+                                    setName={setWsName}
+                                    id={"wsName"}
+                                />
+                                <Button disableRipple sx={{mb: 1}}
+                                        onClick={handleNameSave}
+                                        disabled={workspace.name === wsName || wsName.trim() === ''}
+                                >сохранить</Button>
+                            </Box>
+                            <Divider/>
+                            <Box
                                 sx={{
-                                    position: 'absolute',
-                                    top: 5,
-                                    right: 5,
-                                    width: '25px',
-                                    height: '25px',
+                                    backgroundColor: 'action.hover',
+                                    borderRadius: 2,
+                                    width: '300px',
+                                    p: '3px',
+                                    border: '1px solid',
+                                    borderColor: 'action.disabled'
                                 }}
                             >
-                                <CloseIcon sx={{fontSize: '25px'}}/>
-                            </IconButton>
-
-                            <Typography variant="h6" textAlign="center" sx={{width: '100%', mb: 1}}>
-                                Настройка пространства
-                            </Typography>
-
-
-                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
-                                <Box sx={{display: 'flex', flexDirection: 'row'}}>
-                                    <ValidatedProfileField
-                                        label={"Имя"}
-                                        name={wsName}
-                                        setName={setWsName}
-                                        id={"wsName"}
-                                    />
-                                    <Button disableRipple sx={{mb: 1}}
-                                            onClick={handleNameSave}
-                                            disabled={workspace.name === wsName || wsName.trim() === ''}
-                                    >сохранить</Button>
-                                </Box>
-                                <Divider/>
-                                <Box
-                                    sx={{
-                                        backgroundColor: 'action.hover',
-                                        borderRadius: 2,
-                                        width: '300px',
-                                        p: '3px',
-                                        border: '1px solid',
-                                        borderColor: 'action.disabled'
-                                    }}
-                                >
-                                    <Typography textAlign='center' variant='body2'>
-                                        Уровень доступа к пространству
-                                    </Typography>
-                                </Box>
-                                <Box sx={{display: 'flex', flexDirection: 'row', mt: 1}}>
-                                    <ToggleButtonGroup
-                                        color="primary"
-                                        // value={storagePlan}
-                                        exclusive
-                                        onChange={handleChange}
-                                        sx={{
-                                            alignItems: 'center',
-                                            width: '25%',
-                                            borderRadius: 2,
-
-                                            mb: 2,
-                                            mt: -1
-                                        }}
-                                    >
-                                        <ToggleButton
-                                            selected={isPublic}
-                                            sx={{width: '50%', height: '30px', fontSize: '0.6rem', borderRadius: 3}}
-                                            value='public'>Публичный</ToggleButton>
-                                        <ToggleButton
-                                            selected={!isPublic}
-                                            sx={{width: '50%', height: '30px', fontSize: '0.6rem', borderRadius: 3}}
-                                            value='private'>Приватный</ToggleButton>
-                                    </ToggleButtonGroup>
-                                    <Button
-                                        onClick={handleAccessSave}
-                                        disabled={isPublic && workspace.isPublic || !isPublic && !workspace.isPublic}
-                                        disableRipple sx={{mb: 3, pl: 1}}
-
-                                    >сохранить</Button>
-                                    {workspace.isPublic &&
-                                        <CopyLinkButton
-                                            linkToCopy={window.location.host + '/public-workspaces/' + workspace.id}/>
-                                    }
-                                </Box>
-                                <Divider/>
-
-                                <Box
-                                    sx={{
-                                        backgroundColor: 'action.hover',
-                                        borderRadius: 2,
-                                        // width: '300px',
-                                        p: '3px',
-                                        border: '1px solid',
-                                        borderColor: 'action.disabled'
-                                    }}
-                                >
-                                    <Typography variant='body2' textAlign='center'>
-                                        Обложка
-                                    </Typography>
-                                </Box>
-                                <Box sx={{
-                                    maxHeight: '300px',
-                                    overflowY: 'auto',
-                                    padding: 2,
-                                    // backgroundColor: (theme) => theme.palette.background.paper,
-                                    borderRadius: 1
-                                }}>
-                                    <Grid container spacing={2}>
-                                        {workspaceCovers.map((imageUrl) => (
-                                            <Grid item xs={6} sm={4} md={3} key={imageUrl}>
-                                                <Paper
-                                                    elevation={3}
-                                                    sx={{
-                                                        position: 'relative',
-                                                        cursor: 'pointer',
-                                                        borderRadius: 2,
-                                                        overflow: 'hidden',
-                                                        '&:hover': {
-                                                            boxShadow: 6
-                                                        },
-                                                        border: selectedImage === imageUrl ? '2px solid' : 'none',
-                                                        borderColor: 'success.main'
-                                                    }}
-                                                    onClick={() => handleImageClick(imageUrl)}
-                                                >
-
-                                                    {imageUrl ?
-                                                        <Box
-                                                            component="img"
-                                                            src={imageUrl}
-                                                            alt="Cover"
-                                                            sx={{
-                                                                width: '130px',
-                                                                height: '120px',
-                                                                objectFit: 'cover',
-                                                                display: 'block'
-                                                            }}
-                                                        /> :
-                                                        <Box
-                                                            // component="img"
-                                                            // src={imageUrl}
-                                                            // alt="Cover"
-                                                            sx={{
-                                                                width: '130px',
-                                                                height: '120px',
-                                                                objectFit: 'cover',
-                                                                display: 'block',
-                                                                // alignItems: 'center',
-                                                                alignContent: 'center',
-                                                                // m: 'auto'
-                                                            }}
-                                                        >
-                                                            <DoDisturbIcon sx={{fontSize: '70px', mt: 1, ml: '30px'}}/>
-                                                        </Box>
-                                                    }
-                                                    {selectedImage === imageUrl && (
-                                                        <IconButton
-                                                            sx={{
-                                                                position: 'absolute',
-                                                                top: 5,
-                                                                right: 5,
-                                                                color: 'white',
-                                                                backgroundColor: 'success.main',
-
-                                                            }}
-                                                        >
-                                                            <CheckCircleOutlineIcon/>
-                                                        </IconButton>
-                                                    )}
-                                                </Paper>
-                                            </Grid>
-                                        ))}
-                                    </Grid>
-                                </Box>
-
+                                <Typography textAlign='center' variant='body2'>
+                                    Уровень доступа к пространству
+                                </Typography>
                             </Box>
-                        </Card>
-                    </Slide>
+                            <Box sx={{display: 'flex', flexDirection: 'row', mt: 1}}>
+                                <ToggleButtonGroup
+                                    color="primary"
+                                    exclusive
+                                    onChange={handleChange}
+                                    sx={{
+                                        alignItems: 'center',
+                                        width: '25%',
+                                        borderRadius: 2,
 
-                </Modal>
+                                        mb: 2,
+                                        mt: -1
+                                    }}
+                                >
+                                    <ToggleButton
+                                        selected={isPublic}
+                                        sx={{width: '50%', height: '30px', fontSize: '0.6rem', borderRadius: 3}}
+                                        value='public'>Публичный</ToggleButton>
+                                    <ToggleButton
+                                        selected={!isPublic}
+                                        sx={{width: '50%', height: '30px', fontSize: '0.6rem', borderRadius: 3}}
+                                        value='private'>Приватный</ToggleButton>
+                                </ToggleButtonGroup>
+                                <Button
+                                    onClick={handleAccessSave}
+                                    disabled={isPublic && workspace.isPublic || !isPublic && !workspace.isPublic}
+                                    disableRipple sx={{mb: 3, pl: 1}}
 
-            </>
-        )
-    }
+                                >сохранить</Button>
+                                {workspace.isPublic &&
+                                    <CopyLinkButton
+                                        linkToCopy={window.location.host + '/public-workspaces/' + workspace.id}/>
+                                }
+                            </Box>
+                            <Divider/>
+
+                            <Box
+                                sx={{
+                                    backgroundColor: 'action.hover',
+                                    borderRadius: 2,
+                                    // width: '300px',
+                                    p: '3px',
+                                    border: '1px solid',
+                                    borderColor: 'action.disabled'
+                                }}
+                            >
+                                <Typography variant='body2' textAlign='center'>
+                                    Обложка
+                                </Typography>
+                            </Box>
+                            <Box sx={{
+                                maxHeight: '300px',
+                                overflowY: 'auto',
+                                padding: 2,
+                                // backgroundColor: (theme) => theme.palette.background.paper,
+                                borderRadius: 1
+                            }}>
+                                <Grid container spacing={2}>
+                                    {workspaceCovers.map((imageUrl) => (
+                                        <Grid item xs={6} sm={4} md={3} key={imageUrl}>
+                                            <Paper
+                                                elevation={3}
+                                                sx={{
+                                                    position: 'relative',
+                                                    cursor: 'pointer',
+                                                    borderRadius: 2,
+                                                    overflow: 'hidden',
+                                                    '&:hover': {
+                                                        boxShadow: 6
+                                                    },
+                                                    border: selectedImage === imageUrl ? '2px solid' : 'none',
+                                                    borderColor: 'success.main'
+                                                }}
+                                                onClick={() => handleImageClick(imageUrl)}
+                                            >
+
+                                                {imageUrl ?
+                                                    <Box
+                                                        component="img"
+                                                        src={imageUrl}
+                                                        alt="Cover"
+                                                        sx={{
+                                                            width: '130px',
+                                                            height: '120px',
+                                                            objectFit: 'cover',
+                                                            display: 'block'
+                                                        }}
+                                                    /> :
+                                                    <Box
+                                                        // component="img"
+                                                        // src={imageUrl}
+                                                        // alt="Cover"
+                                                        sx={{
+                                                            width: '130px',
+                                                            height: '120px',
+                                                            objectFit: 'cover',
+                                                            display: 'block',
+                                                            // alignItems: 'center',
+                                                            alignContent: 'center',
+                                                            // m: 'auto'
+                                                        }}
+                                                    >
+                                                        <DoDisturbIcon sx={{fontSize: '70px', mt: 1, ml: '30px'}}/>
+                                                    </Box>
+                                                }
+                                                {selectedImage === imageUrl && (
+                                                    <IconButton
+                                                        sx={{
+                                                            position: 'absolute',
+                                                            top: 5,
+                                                            right: 5,
+                                                            color: 'white',
+                                                            backgroundColor: 'success.main',
+
+                                                        }}
+                                                    >
+                                                        <CheckCircleOutlineIcon/>
+                                                    </IconButton>
+                                                )}
+                                            </Paper>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </Box>
+
+                        </Box>
+                    </Card>
+            </Modal>
+    )
 };

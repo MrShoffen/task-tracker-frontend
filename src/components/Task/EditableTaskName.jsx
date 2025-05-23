@@ -1,15 +1,15 @@
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
+import * as React from "react";
 import {useEffect, useRef, useState} from "react";
 import {sendEditTask} from "../../services/fetch/tasks/task/SendEditTask.js";
 import {Box, IconButton, Typography, useTheme} from "@mui/material";
 import {EditIcon} from "../../assets/icons/EditIcon.jsx";
-import * as React from "react";
 import ConflictException from "../../exception/ConflictException.jsx";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 
 export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
 
-    const {userHasPermission, updateTaskName} = useTaskOperations();
+    const {userHasPermission, updateTaskField} = useTaskOperations();
     const theme = useTheme();
     const [isEditing, setIsEditing] = useState(false);
     const typographyRef = useRef(null);
@@ -17,7 +17,6 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
     const [initialText, setInitialText] = useState(task.name);
     const {showWarn} = useNotification();
 
-    // Сохраняем выделение перед обновлением
     const saveSelection = () => {
         const selection = window.getSelection();
         if (selection.rangeCount > 0) {
@@ -25,7 +24,6 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
         }
     };
 
-    // Восстанавливаем выделение после обновления
     const restoreSelection = () => {
         if (lastSelectionRef.current) {
             const selection = window.getSelection();
@@ -38,19 +36,18 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
         setIsEditing(true);
     };
 
-
     const handleBlur = async (event, duplicatedCount = 0) => {
         saveSelection();
         const newText = typographyRef.current?.textContent.trim() || '';
-        if (newText !== initialText && newText !== '') { // Сравниваем с исходным текстом
+        if (newText !== initialText && newText !== '') {
             try {
                 const newNameWithDubls = newText + (duplicatedCount === 0 ? '' : (' (' + duplicatedCount + ')'));
-                const updatedTask = await sendEditTask(task.api.links.updateTaskName.href,
+               await sendEditTask(task.api.links.updateTaskName.href,
                     {
                         newName: newNameWithDubls
                     });
                 typographyRef.current.textContent = newNameWithDubls + ' ';
-                updateTaskName(updatedTask);
+                updateTaskField(task.deskId, task.id, 'name', newNameWithDubls);
             } catch (error) {
                 switch (true) {
                     case error instanceof ConflictException:
@@ -81,14 +78,12 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
 
     const handleInput = () => {
         saveSelection();
-        // Не используем setText, чтобы избежать лишних ререндеров
     };
 
     useEffect(() => {
         if (isEditing && typographyRef.current) {
             typographyRef.current.focus();
 
-            // Помещаем курсор в конец текста только при первом открытии
             if (!lastSelectionRef.current) {
                 const range = document.createRange();
                 range.selectNodeContents(typographyRef.current);

@@ -87,148 +87,137 @@ export default function PasswordChangeModal({open, onClose}) {
                     onClose();
                     clearFields()
                 }}>
-                    <Slide in={open} direction={'right'} style={{transform: "translate(-50%, 0%)", marginTop: "70px",}}>
-                        <Card variant="outlined"
-                              sx={{
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  width: {sm: '400px', xs: '100%'},
-                                  maxWidth: {sm: '330px', xs: '90%'},
-                                  padding: 2,
-                                  gap: 2,
-                                  margin: 'auto',
-                                  backgroundColor: "modal",
-                                  backdropFilter: 'blur(16px)',
-                                  WebkitBackdropFilter: 'blur(16px)',
-                                  boxShadow: 5,
-                                  borderRadius: 2,
-                                  position: "relative",
-                              }}
+                    <Card variant="outlined"
+                          sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              width: {sm: '400px', xs: '100%'},
+                              maxWidth: {sm: '330px', xs: '90%'},
+                              padding: 2,
+                              gap: 2,
+                              margin: 'auto',
+                              marginTop: "70px",
+                              backgroundColor: "modal",
+                              backdropFilter: 'blur(16px)',
+                              WebkitBackdropFilter: 'blur(16px)',
+                              boxShadow: 5,
+                              borderRadius: 2,
+                              position: "relative",
+                          }}
+                    >
+
+
+                        <IconButton
+                            aria-label="close"
+                            size="small"
+                            onClick={() => {
+                                onClose();
+                                clearFields()
+                            }}
+                            sx={{
+                                position: 'absolute',
+                                top: 5,
+                                right: 5,
+                                width: '25px',
+                                height: '25px',
+                            }}
                         >
+                            <CloseIcon sx={{fontSize: '25px'}}/>
+                        </IconButton>
+
+                        <Typography variant="h6" textAlign="center" sx={{width: '100%', mb: 1}}>
+                            Смена пароля
+                        </Typography>
 
 
-                            <IconButton
-                                aria-label="close"
-                                size="small"
-                                onClick={() => {
-                                    onClose();
-                                    clearFields()
-                                }}
-                                sx={{
-                                    position: 'absolute',
-                                    top: 5,
-                                    right: 5,
-                                    width: '25px',
-                                    height: '25px',
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 1,}}>
+
+                            <Tooltip
+                                title={oldPasswordError}
+                                placement="bottom"
+                                arrow
+                                slotProps={{
+                                    arrow: {sx: {color: 'error.main',}},
+                                    tooltip: {
+                                        sx: {
+                                            fontSize: 13,
+                                            backgroundColor: 'error.main',
+                                            border: 'error.dark',
+                                            borderRadius: 2,
+                                        }
+                                    }
                                 }}
                             >
-                                <CloseIcon sx={{fontSize: '25px'}}/>
-                            </IconButton>
-
-                            <Typography variant="h5" textAlign="center" sx={{width: '100%', mb: 1}}>
-                                Смена пароля
-                            </Typography>
-
-
-                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 2,}}>
-
-                                <Tooltip
-                                    title={oldPasswordError}
-                                    placement="bottom"
-                                    arrow
-                                    slotProps={{
-                                        arrow: {
-                                            sx: {
-                                                color: 'error.main', // светло-красный фон
-                                            }
-                                        },
-                                        tooltip: {
-                                            sx: {
-                                                fontSize: 13,
-                                                backgroundColor: 'error.main', // светло-красный фон
-                                                // color: '#d32f2f',            // красный текст
-                                                border: 'error.dark',  // красная рамка
-                                                borderRadius: 2,
-                                            }
-                                        }
-                                    }}
-                                >
-                                    <Box>
-                                        <ValidatedPasswordField
-                                            password={oldPassword}
-                                            setPassword={setOldPassword}
-                                            passwordError={oldPasswordError}
-                                            setPasswordError={setOldPasswordError}
-                                            label="Текущий пароль"
-                                        />
-                                    </Box>
-                                </Tooltip>
-
-
-                                <Tooltip
-                                    title={newPasswordError}
-                                    placement="bottom"
-                                    arrow
-                                    slotProps={{
-                                        arrow: {
-                                            sx: {
-                                                color: 'error.main', // светло-красный фон
-                                            }
-                                        },
-                                        tooltip: {
-                                            sx: {
-                                                fontSize: 13,
-                                                backgroundColor: 'error.main', // светло-красный фон
-                                                // color: '#d32f2f',            // красный текст
-                                                border: 'error.dark',  // красная рамка
-                                                borderRadius: 2,
-                                            }
-                                        }
-                                    }}
-                                >
-                                    <Box>
-                                        <AnimatedElement condition={!oldPasswordError && oldPassword.length > 0}>
-                                            <ValidatedPasswordField
-                                                password={newPassword}
-                                                setPassword={setNewPassword}
-                                                passwordError={newPasswordError}
-                                                setPasswordError={setNewPasswordError}
-                                                label="Новый пароль"
-                                            />
-                                        </AnimatedElement>
-                                    </Box>
-                                </Tooltip>
-
-                                <AnimatedElement
-                                    condition={!oldPasswordError && oldPassword.length > 0 && !newPasswordError && newPassword.length > 0}>
-                                    <ValidatedPasswordConfirmField
-                                        confirmPassword={confirmPassword}
-                                        setConfirmPassword={setConfirmPassword}
-                                        confirmPasswordError={confirmPasswordError}
-                                        setConfirmPasswordError={setConfirmPasswordError}
-                                        originalPassword={newPassword}
-                                        label="Подтверждение пароля"
+                                <Box>
+                                    <ValidatedPasswordField
+                                        password={oldPassword}
+                                        setPassword={setOldPassword}
+                                        passwordError={oldPasswordError}
+                                        setPasswordError={setOldPasswordError}
+                                        label="Текущий пароль"
                                     />
-                                </AnimatedElement>
-
-                                <Box display="flex" justifyContent="flex-end" gap={2}>
-                                    <Button size="small" variant="outlined" onClick={() => {
-                                        onClose();
-                                        clearFields()
-                                    }}>
-                                        Отмена
-                                    </Button>
-
-                                    <Button variant="contained" size="small" onClick={handlePasswordClick}
-                                            loading={loading}
-                                            disabled={oldPasswordError || oldPassword.length === 0 || newPasswordError || newPassword.length === 0 || confirmPasswordError || confirmPassword.length === 0}
-                                    >
-                                        Сменить пароль
-                                    </Button>
                                 </Box>
+                            </Tooltip>
+
+
+                            <Tooltip
+                                title={newPasswordError}
+                                placement="bottom"
+                                arrow
+                                slotProps={{
+                                    arrow: {sx: {color: 'error.main',}},
+                                    tooltip: {
+                                        sx: {
+                                            fontSize: 13,
+                                            backgroundColor: 'error.main',
+                                            border: 'error.dark',
+                                            borderRadius: 2,
+                                        }
+                                    }
+                                }}
+                            >
+                                <Box>
+                                    <AnimatedElement condition={!oldPasswordError && oldPassword.length > 0}>
+                                        <ValidatedPasswordField
+                                            password={newPassword}
+                                            setPassword={setNewPassword}
+                                            passwordError={newPasswordError}
+                                            setPasswordError={setNewPasswordError}
+                                            label="Новый пароль"
+                                        />
+                                    </AnimatedElement>
+                                </Box>
+                            </Tooltip>
+
+                            <AnimatedElement
+                                condition={!oldPasswordError && oldPassword.length > 0 && !newPasswordError && newPassword.length > 0}>
+                                <ValidatedPasswordConfirmField
+                                    confirmPassword={confirmPassword}
+                                    setConfirmPassword={setConfirmPassword}
+                                    confirmPasswordError={confirmPasswordError}
+                                    setConfirmPasswordError={setConfirmPasswordError}
+                                    originalPassword={newPassword}
+                                    label="Подтверждение пароля"
+                                />
+                            </AnimatedElement>
+
+                            <Box display="flex" justifyContent="flex-end" gap={2}>
+                                <Button size="small" variant="outlined" onClick={() => {
+                                    onClose();
+                                    clearFields()
+                                }}>
+                                    Отмена
+                                </Button>
+
+                                <Button variant="contained" size="small" onClick={handlePasswordClick}
+                                        loading={loading}
+                                        disabled={oldPasswordError || oldPassword.length === 0 || newPasswordError || newPassword.length === 0 || confirmPasswordError || confirmPassword.length === 0}
+                                >
+                                    Сменить пароль
+                                </Button>
                             </Box>
-                        </Card>
-                    </Slide>
+                        </Box>
+                    </Card>
 
                 </Modal>
 
@@ -239,37 +228,39 @@ export default function PasswordChangeModal({open, onClose}) {
                     aria-labelledby="confirm-delete-modal"
                     aria-describedby="confirm-delete-modal-description"
                 >
-                    <Slide in={changeConfirmModal} direction={'down'} style={{margin: 'auto', marginTop: "170px",}}>
-                        <Card variant="outlined"
-                              sx={{
-                                  backgroundColor: "background.paper",
-                                  width: 300,
-                                  boxShadow: 24,
-                                  p: 4,
-                                  borderRadius: 2,
-                              }}
+                    <Card variant="outlined"
+                          sx={{
+                              backgroundColor: "background.paper",
+                              width: 300,
+                              boxShadow: 24,
+                              margin: 'auto',
+                              marginTop: "70px",
+
+                              p: 4,
+                              borderRadius: 2,
+                          }}
+                    >
+                        <Typography
+                            component="h2"
+                            variant="h6"
+                            sx={{textAlign: "center", mb: 1}}
                         >
-                            <Typography
-                                component="h2"
-                                variant="h6"
-                                sx={{textAlign: "center", mb: 1}}
-                            >
-                                Вы уверены, что хотите сменить пароль?
-                            </Typography>
-                            <Typography variant="body2" sx={{mb: 2, color: 'text.secondary'}}>
-                                После смены пароля необходимо будет снова зайти в аккаунт. Все активные сессии будут
-                                завершены.
-                            </Typography>
-                            <Box display="flex" justifyContent="space-between" mt={2}>
-                                <Button variant="outlined" onClick={handlePasswordCancel}>
-                                    Нет
-                                </Button>
-                                <Button variant="contained" color="error" onClick={handlePasswordConfirm}>
-                                    Да
-                                </Button>
-                            </Box>
-                        </Card>
-                    </Slide>
+                            Вы уверены, что хотите сменить пароль?
+                        </Typography>
+                        <Typography variant="body2" sx={{mb: 2, color: 'text.secondary'}}>
+                            После смены пароля необходимо будет снова зайти в аккаунт. Все активные сессии будут
+                            завершены.
+                        </Typography>
+                        <Box display="flex" justifyContent="space-between" mt={2}>
+                            <Button variant="outlined" onClick={handlePasswordCancel}>
+                                Нет
+                            </Button>
+                            <Button variant="contained" color="error" onClick={handlePasswordConfirm}>
+                                Да
+                            </Button>
+                        </Box>
+                    </Card>
+
                 </Modal>
             </>
         )

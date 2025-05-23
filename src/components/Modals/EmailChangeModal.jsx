@@ -3,7 +3,6 @@ import * as React from "react";
 import {useState} from "react";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 import UnauthorizedException from "../../exception/UnauthorizedException.jsx";
-import {useNavigate} from "react-router-dom";
 import {Box, Button, Card, IconButton, Modal, Slide, Tooltip} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
@@ -26,8 +25,6 @@ export default function EmailChangeModal({open, onClose}) {
     const [codeSent, setCodeSent] = useState(false);
     const [code, setCode] = useState('');
 
-    const navigate = useNavigate();
-
     const {showSuccess, showWarn} = useNotification();
     const handleEmailConfirmationSendCode = async () => {
         try {
@@ -35,11 +32,7 @@ export default function EmailChangeModal({open, onClose}) {
             const editInformation = {newEmail: username}
             await sendEditEmail(editInformation);
             setCodeSent(true);
-            // logout();
-            // setTimeout(() => {
-            //     navigate("/login");
-            //     showSuccess("Пароль изменен", 4000);
-            // }, 400);
+
         } catch (error) {
             console.log(error);
             switch (true) {
@@ -101,12 +94,10 @@ export default function EmailChangeModal({open, onClose}) {
 
     if (auth.isAuthenticated) {
         return (
-            <>
                 <Modal open={open} onClose={() => {
                     onClose();
                     clearFields()
                 }}>
-                    <Slide in={open} direction={'right'} style={{transform: "translate(-50%, 0%)", marginTop: "70px",}}>
                         <Card variant="outlined"
                               sx={{
                                   display: 'flex',
@@ -116,6 +107,7 @@ export default function EmailChangeModal({open, onClose}) {
                                   padding: 2,
                                   gap: 2,
                                   margin: 'auto',
+                                  marginTop: "70px",
                                   backgroundColor: "modal",
                                   backdropFilter: 'blur(16px)',
                                   WebkitBackdropFilter: 'blur(16px)',
@@ -144,12 +136,12 @@ export default function EmailChangeModal({open, onClose}) {
                                 <CloseIcon sx={{fontSize: '25px'}}/>
                             </IconButton>
 
-                            <Typography variant="h5" textAlign="center" sx={{width: '100%', mb: 1}}>
+                            <Typography variant="h6" textAlign="center" sx={{width: '100%', mb: 1}}>
                                 Смена почты
                             </Typography>
 
 
-                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 2,}}>
+                            <Box sx={{display: 'flex', flexDirection: 'column', gap: 1,}}>
 
                                 <Tooltip
                                     title={usernameError}
@@ -233,11 +225,7 @@ export default function EmailChangeModal({open, onClose}) {
 
                             </Box>
                         </Card>
-                    </Slide>
-
                 </Modal>
-
-            </>
         )
     }
 };

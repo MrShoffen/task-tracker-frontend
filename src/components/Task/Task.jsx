@@ -18,12 +18,9 @@ export function Task({task, setContentIsLoading}) {
     const [hovered, setHovered] = React.useState(false);
     const theme = useTheme();
     const {isDarkMode} = useCustomThemeContext();
-
-
     const taskColor = (taskColor) => {
         return !isDarkMode ? lightTaskColor[taskColor] : darkTaskColor[taskColor];
     }
-
 
     const {
         setNodeRef,
@@ -39,9 +36,7 @@ export function Task({task, setContentIsLoading}) {
         }
     })
 
-
-    const {updateTaskCompletion} = useTaskOperations();
-
+    const {updateTaskField} = useTaskOperations();
 
     const style = {
         transform: transform ? CSS.Translate.toString(transform) : undefined,
@@ -50,9 +45,9 @@ export function Task({task, setContentIsLoading}) {
 
     const handleCompletionClick = async () => {
         try {
-            const updatedTask = await sendEditTask(task.api.links.updateTaskCompletion.href,
+            updateTaskField(task.deskId, task.id, 'completed', !task.completed);
+            await sendEditTask(task.api.links.updateTaskCompletion.href,
                 {completed: !task.completed});
-            updateTaskCompletion(updatedTask);
         } catch (error) {
             console.log(error);
         }
@@ -70,10 +65,7 @@ export function Task({task, setContentIsLoading}) {
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
                 sx={{
-                    // mt: '10px',
-                    // mb: '10px',
                     ml: '7px',
-                    // mb: '5px',
                     flex: 1,
                     border: isDragging ? '1px dashed' : '1px solid',
                     borderColor: isDragging ? 'info.main' : !hovered ? taskColor(task.color) : 'action.disabled',
@@ -83,7 +75,6 @@ export function Task({task, setContentIsLoading}) {
                     maxWidth: '286px',
                     transition: 'none',
                     backgroundColor: isDragging ? 'rgba(174,174,174,0.21)' : taskColor(task.color),
-                    // backgroundColor: isDragging ? 'rgba(117,117,117,0.31)' : taskColor(task.color),
                     display: 'flex',
                     fontSize: '10px',
                     flexDirection: 'column',

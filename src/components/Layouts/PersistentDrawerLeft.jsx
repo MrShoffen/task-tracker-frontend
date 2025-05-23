@@ -3,7 +3,7 @@ import {styled} from "@mui/material/styles";
 import MuiDrawer from "@mui/material/Drawer";
 import {
     Avatar,
-    Box, Button, Card,
+    Box,
     Collapse,
     Divider,
     IconButton,
@@ -11,7 +11,7 @@ import {
     ListItem,
     ListItemButton,
     ListItemIcon,
-    ListItemText, Modal, Slide,
+    ListItemText,
 } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -23,12 +23,10 @@ import {avatarColor} from "../../services/util/Utils.jsx";
 import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import {useNavigate, useNavigation} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
-import AddIcon from '@mui/icons-material/Add';
 import WorkspaceListElement from "../Workspace/WorkspaceListElement.jsx";
 import {NewWorkspaceBadge} from "../Workspace/NewWorkspaceBadge.jsx";
-import Typography from "@mui/material/Typography";
 
 
 const drawerWidth = 180;
@@ -187,9 +185,6 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                                                 style={{width: 34, height: 34}}
                                                 src={auth.user.avatarUrl}
                                         >
-                                            {/*{*/}
-                                            {/*auth.isAuthenticated ?*/}
-                                            {/*    auth.user.email.slice(0, 3) : 'te'}*/}
                                         </Avatar>
                                     </ListItemIcon>
                                     <ListItemText primary="Профиль" sx={{
@@ -291,7 +286,6 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                     margin: '0',
                     flex: 1
                 }}>
-                    {/*<DrawerHeader/>*/}
                     {children}
                 </Box>
 

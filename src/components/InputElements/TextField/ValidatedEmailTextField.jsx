@@ -10,7 +10,7 @@ export default function ValidatedEmailTextField({username, setUsername, username
         let errMessage = '';
 
         if (value && value.length < 5) {
-            errMessage = 'Имя пользователя должно быть длинее 4 символов. ';
+            errMessage = 'Почта должна быть длинее 4 символов. ';
             isValid = false;
         }
         if (value && !/^(?!\.)[A-Za-z0-9+_.-]+(?<!\.)@(?!\.)[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(value)) {
@@ -18,7 +18,7 @@ export default function ValidatedEmailTextField({username, setUsername, username
             isValid = false;
         }
         if (value && value.length > 200) {
-            errMessage += 'Имя пользователя должно быть короче 200 символов. ';
+            errMessage += 'Почта должна быть короче 200 символов. ';
             isValid = false;
         }
 

@@ -5,6 +5,7 @@ import {API_BASE_URL} from "../../../../../UrlConstants.jsx";
 
 
 export const sendEditTask = async (url, editData) => {
+    console.log('updating task ', url, ' ', editData)
     let response = await fetch(API_BASE_URL + url, {
         method: 'PATCH',
         headers: {
