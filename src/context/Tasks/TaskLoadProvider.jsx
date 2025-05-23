@@ -115,22 +115,7 @@ export const TaskLoadProvider = ({children}) => {
         })
     }
 
-    function updateDeskColor(deskIdForUpdate, newColor) {
-        setFullWorkspaceInformation(prevData => {
-            const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
-            const updatedDesks = [...prevData.desks];
-            updatedDesks[deskIndex] = {
-                ...updatedDesks[deskIndex],
-                color: newColor
-            };
-            return {
-                ...prevData,
-                desks: updatedDesks
-            }
-        })
-    }
-
-    function updateDeskName(deskIdForUpdate, newName) {
+    function updateDeskField(deskIdForUpdate, field, newVal) {
         setFullWorkspaceInformation(prevData => {
             const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
             if (deskIndex === -1) {
@@ -138,13 +123,11 @@ export const TaskLoadProvider = ({children}) => {
                 return prevData;
             }
 
-
             const updatedDesks = [...prevData.desks];
             updatedDesks[deskIndex] = {
                 ...updatedDesks[deskIndex],
-                name: newName
+                [field]: newVal
             };
-            console.log(updatedDesks)
             return {
                 ...prevData,
                 desks: updatedDesks
@@ -196,14 +179,6 @@ export const TaskLoadProvider = ({children}) => {
         return true;
     }
 
-    function updateLinks(api, newDeskId) {
-        return Object.entries(api.links).map(([key, url]) => [
-                key,
-                url
-            ]
-        );
-    }
-
     function addNewTask(newTask) {
         console.log(newTask);
         console.log(fullWorkspaceInformation)
@@ -214,7 +189,6 @@ export const TaskLoadProvider = ({children}) => {
                 console.error("Desk not found");
                 return prevData;
             }
-
 
             const updatedDesks = [...prevData.desks];
             updatedDesks[deskIndex] = {
@@ -338,9 +312,8 @@ export const TaskLoadProvider = ({children}) => {
 
             addNewDesk,
             deleteDesk,
-            updateDeskColor,
+            updateDeskField,
             updateDeskOrder,
-            updateDeskName
         }}>
             {children}
         </TaskLoadContext.Provider>

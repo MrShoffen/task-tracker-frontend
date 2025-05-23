@@ -26,7 +26,7 @@ export function DeskMenu({desk}) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const theme = useTheme();
-    const {deleteDesk, updateDeskColor} = useTaskOperations();
+    const {deleteDesk, updateDeskField} = useTaskOperations();
 
     const handleMenuClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -43,7 +43,7 @@ export function DeskMenu({desk}) {
 
     const handleColorChange = async (newColor) => {
         try {
-            updateDeskColor(desk.id, newColor);
+            updateDeskField(desk.id, 'color', newColor);
             await sendEditDesk(desk.api.links.updateDeskColor.href,
                 {newColor: newColor}
             );

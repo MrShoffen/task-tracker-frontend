@@ -10,7 +10,7 @@ import {useNotification} from "../../context/Notification/NotificationProvider.j
 export function EditableDeskName({desk = {name: ''}}) {
     const [hovered, setHovered] = React.useState(false);
 
-    const {userHasPermission, updateDeskName} = useTaskOperations();
+    const {userHasPermission, updateDeskField} = useTaskOperations();
 
     const [isEditing, setIsEditing] = useState(false);
     const typographyRef = useRef(null);
@@ -49,7 +49,7 @@ export function EditableDeskName({desk = {name: ''}}) {
                     {
                         newName: newNameWithDubls.trim()
                     });
-                updateDeskName(desk.id, newNameWithDubls);
+                updateDeskField(desk.id, 'name', newNameWithDubls);
                 typographyRef.current.textContent = newNameWithDubls + ' ';
             } catch (error) {
                 switch (true) {

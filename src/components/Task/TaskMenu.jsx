@@ -26,7 +26,6 @@ import {DeleteTask} from "../../assets/icons/DeleteTask.jsx";
 import {sendDeleteTask} from "../../services/fetch/tasks/task/SendDeleteTask.js";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import {useCustomThemeContext} from "../../context/GlobalThemeContext/CustomThemeProvider.jsx";
-import Typography from "@mui/material/Typography";
 
 function UploadIcon(props) {
     return null;
@@ -58,7 +57,7 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
     };
 
     const handleEditClick = () => {
-        handleMenuClose(); // Закрываем меню
+        handleMenuClose();
     };
 
     const fileInputRef = useRef(null);
@@ -86,7 +85,6 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
 
         if (file && validateCover(file)) {
             setContentIsLoading(true);
-            // setContentIsLoading(true);
             const reader = new FileReader();
             reader.readAsDataURL(file);
 
@@ -135,7 +133,6 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
         try {
             await sendDeleteTask(task.api.links.deleteTask.href);
             deleteTask(task);
-            // deleteDesk(desk);
         } catch (error) {
             console.log(error);
         }
@@ -166,7 +163,7 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
                 onClose={handleMenuClose}
                 placement="right"
                 sx={{
-                    zIndex: 1300, // Убедитесь, что поверх других элементов
+                    zIndex: 1300,
                 }}
 
             >
@@ -251,8 +248,8 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
 
                                     <Box sx={{
                                         display: 'flex',
-                                        gap: '3px', // Расстояние между кружками
-                                        ml: '1px'   // Отступ от текста
+                                        gap: '3px',
+                                        ml: '1px'
                                     }}>
                                         {Object.entries(taskColorsPalette()).map(([name, color]) => (
                                             <Box
@@ -261,7 +258,7 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
                                                     backgroundColor: color,
                                                     height: '17px',
                                                     width: '17px',
-                                                    borderRadius: '50%', // Делаем круглую форму
+                                                    borderRadius: '50%',
                                                     border: '1px solid',
                                                     borderColor: 'divider',
                                                     cursor: 'pointer',
@@ -273,7 +270,6 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
                                                 }}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    console.log('Selected color:', name);
                                                     handleColorChange(name);
                                                 }}
                                             >
