@@ -26,7 +26,7 @@ export function DeskMenu({desk}) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const theme = useTheme();
-    const {deleteDesk, updateDeskField} = useTaskOperations();
+    const {deleteDesk, userHasPermission, updateDeskField} = useTaskOperations();
 
     const handleMenuClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -63,102 +63,113 @@ export function DeskMenu({desk}) {
     }
 
     return (<>
-            <IconButton
-                disableRipple
-                onClick={handleMenuClick}
-                sx={{
-                    width: '17px',
-                    height: '17px',
-                    p: 0,
-                    position: 'absolute',
-                    right: '14px',
-                    top: '23px'
-                }}>
-                <MenuIcon color={theme.palette.taskName} size={"17px"}/>
-
-            </IconButton>
-
-            <Popper
-                id="edit-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleMenuClose}
-                placement="right"
-                sx={{zIndex: 1300,}}
-            >
-                <ClickAwayListener onClickAway={handleMenuClose}>
-                    <Paper
-                        elevation={1}
+            {(userHasPermission("UPDATE_DESK_COLOR")
+                    || userHasPermission("DELETE_DESK")
+                ) &&
+                <>
+                    <IconButton
+                        disableRipple
+                        onClick={handleMenuClick}
                         sx={{
-                            width: '175px',
-                            border: '1px solid',
-                            borderColor: 'action.selected',
-                            borderRadius: 3,
-                            overflow: 'hidden',
-                            backgroundColor: 'menuPopup',
-                            '&:hover': {
-                                cursor: 'pointer',
-                            }
-                        }}
-                    >
-                        <List disablePadding dense>
-                            <ListItem
-                                disableGutters
-                                onClick={handleEditClick}
-                                sx={{px: 1, py: 1}}
-                            >
-                                <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                                    <ListItemText sx={{mb: '5px',}} primary="Цвет доски"/>
-                                    <Box sx={{display: 'flex', gap: '3px', ml: '1px'}}>
-                                        {Object.entries(deskColorsPalette()).map(([name, color]) => (
-                                            <Box
-                                                key={color}
-                                                sx={{
-                                                    backgroundColor: color,
-                                                    height: '17px',
-                                                    width: '17px',
-                                                    borderRadius: '50%',
-                                                    border: '1px solid',
-                                                    borderColor: 'divider',
-                                                    cursor: 'pointer',
-                                                    transition: 'transform 0.2s',
-                                                    '&:hover': {
-                                                        transform: 'scale(1.1)',
-                                                        boxShadow: 1
-                                                    }
-                                                }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleColorChange(name);
-                                                }}
-                                            >
-                                                {desk.color === name &&
-                                                    <Box sx={{ml: '3px', mt: '-5px'}}>
-                                                        <Galka color={theme.palette.taskName}/>
-                                                    </Box>
-                                                }
-                                            </Box>
-                                        ))}
-                                    </Box>
-                                </Box>
-                            </ListItem>
+                            width: '17px',
+                            height: '17px',
+                            p: 0,
+                            position: 'absolute',
+                            right: '14px',
+                            top: '23px'
+                        }}>
+                        <MenuIcon color={theme.palette.taskName} size={"17px"}/>
 
-                            <Divider/>
-                            <ListItem
-                                button={"true"}
-                                disableGutters
-                                onClick={handleDeleteDesk}
-                                sx={{px: 1, py: 1}}
+                    </IconButton>
+
+                    <Popper
+                        id="edit-menu"
+                        anchorEl={anchorEl}
+                        open={open}
+                        onClose={handleMenuClose}
+                        placement="right"
+                        sx={{zIndex: 1300,}}
+                    >
+                        <ClickAwayListener onClickAway={handleMenuClose}>
+                            <Paper
+                                elevation={1}
+                                sx={{
+                                    width: '175px',
+                                    border: '1px solid',
+                                    borderColor: 'action.selected',
+                                    borderRadius: 3,
+                                    overflow: 'hidden',
+                                    backgroundColor: 'menuPopup',
+                                    '&:hover': {
+                                        cursor: 'pointer',
+                                    }
+                                }}
                             >
-                                <ListItemIcon sx={{m: 0, minWidth: '24px !important'}}>
-                                    <DeleteTask color={theme.palette.taskName} size="16px"/>
-                                </ListItemIcon>
-                                <ListItemText sx={{m: 0}} primary="Удалить доску"/>
-                            </ListItem>
-                        </List>
-                    </Paper>
-                </ClickAwayListener>
-            </Popper>
+                                <List disablePadding dense>
+                                    {userHasPermission("UPDATE_DESK_COLOR") &&
+                                        <ListItem
+                                            disableGutters
+                                            onClick={handleEditClick}
+                                            sx={{px: 1, py: 1}}
+                                        >
+                                            <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                                                <ListItemText sx={{mb: '5px',}} primary="Цвет доски"/>
+                                                <Box sx={{display: 'flex', gap: '3px', ml: '1px'}}>
+                                                    {Object.entries(deskColorsPalette()).map(([name, color]) => (
+                                                        <Box
+                                                            key={color}
+                                                            sx={{
+                                                                backgroundColor: color,
+                                                                height: '17px',
+                                                                width: '17px',
+                                                                borderRadius: '50%',
+                                                                border: '1px solid',
+                                                                borderColor: 'divider',
+                                                                cursor: 'pointer',
+                                                                transition: 'transform 0.2s',
+                                                                '&:hover': {
+                                                                    transform: 'scale(1.1)',
+                                                                    boxShadow: 1
+                                                                }
+                                                            }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleColorChange(name);
+                                                            }}
+                                                        >
+                                                            {desk.color === name &&
+                                                                <Box sx={{ml: '3px', mt: '-5px'}}>
+                                                                    <Galka color={theme.palette.taskName}/>
+                                                                </Box>
+                                                            }
+                                                        </Box>
+                                                    ))}
+                                                </Box>
+                                            </Box>
+                                        </ListItem>
+                                    }
+                                    {userHasPermission("DELETE_DESK") &&
+                                        <>
+                                            <Divider/>
+                                            <ListItem
+                                                button={"true"}
+                                                disableGutters
+                                                onClick={handleDeleteDesk}
+                                                sx={{px: 1, py: 1}}
+                                            >
+                                                <ListItemIcon sx={{m: 0, minWidth: '24px !important'}}>
+                                                    <DeleteTask color={theme.palette.taskName} size="16px"/>
+                                                </ListItemIcon>
+                                                <ListItemText sx={{m: 0}} primary="Удалить доску"/>
+                                            </ListItem>
+                                        </>}
+                                </List>
+
+                            </Paper>
+                        </ClickAwayListener>
+                    </Popper>
+                </>
+            }
         </>
     )
 }

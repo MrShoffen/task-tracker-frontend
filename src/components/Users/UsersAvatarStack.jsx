@@ -4,15 +4,29 @@ import {useAuthContext} from "../../context/Auth/AuthContext.jsx";
 import {UserAvatar} from "./UserAvatar.jsx";
 import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
+import SettingsIcon from '@mui/icons-material/Settings';
+import {useState} from "react";
+import PermissionsModal from "../Modals/PermissionsModal.jsx";
 
 
-export function UsersAvatarStack({users}) {
+export function UsersAvatarStack({workspace}) {
     const {auth} = useAuthContext();
-    if(!users){
+
+    const [permissionsModalOpen, setPermissionsModalOpen] = useState(false);
+    const handlePermOpen = () => {
+        setPermissionsModalOpen(true);
+    }
+    const closePermModal = () => {
+        setPermissionsModalOpen(false);
+    }
+
+    if (!workspace) {
         return null;
     }
 
-    const overflow = users.length - 4;
+    const uap = workspace.usersAndPermissions;
+
+    const overflow = uap.length - 4;
 
     return (
         <Box
@@ -26,11 +40,11 @@ export function UsersAvatarStack({users}) {
                 p: 1
             }}
         >
-            <UserAvatar userInfo={users.find(user => user.info.email === auth.user.email).info}
+            <UserAvatar userInfo={uap.find(usr => usr.userId === workspace.userId).info}
             />
 
-            {users
-                .filter(user => user.info.email !== auth.user.email)
+            {uap
+                .filter(user => user.userId !== workspace.userId)
                 .slice(0, 3)
                 .map(user =>
                     <UserAvatar userInfo={user.info}
@@ -55,18 +69,22 @@ export function UsersAvatarStack({users}) {
                 </Typography>
             }
 
-            <IconButton sx={{
-                width: '30px',
-                height: '30px',
-                ml: 1,
-                mt: '5px',
-                color: 'success.main',
-                // border: '2px solid',
+            <IconButton
+                onClick={handlePermOpen}
+                sx={{
+                    width: '30px',
+                    height: '30px',
+                    ml: 1,
+                    mt: '5px',
+                    // border: '2px solid',
 
-                // borderColor: 'success.main',
-            }}>
-                <AddIcon sx={{fontSize: '30px'}}/>
+                    // borderColor: 'success.main',
+                }}>
+                <AddIcon sx={{fontSize: '24px'}}/>
             </IconButton>
+
+            <PermissionsModal open={permissionsModalOpen} onClose={closePermModal}
+                              workspace={workspace}/>
         </Box>
     )
 }

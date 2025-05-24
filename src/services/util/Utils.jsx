@@ -13,11 +13,6 @@ export const formatDate = (dateString) => {
     }).format(date).replace(",", ""); // Удаляем лишнюю запятую
 };
 
-export const extractSimpleName = (path) => {
-    let sep = path.lastIndexOf("/", path.length - 2);
-    return path.substring(sep + 1);
-
-}
 
 export function getCurrentDateTime() {
     const now = new Date();

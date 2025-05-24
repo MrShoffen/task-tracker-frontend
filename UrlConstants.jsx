@@ -27,6 +27,6 @@ export const API_ALL_WORKSPACES = API_BASE_URL + API_CONTEXT + '/workspaces';
 
 //autofill cities api and image upload api
 
-export const API_IMAGE_UPLOAD = isProduction ? '/image-upload-api' : 'http://localhost:8079/image-upload-api';
+export const API_IMAGE_UPLOAD = 'http://localhost:8079/image-upload-api';
 
-export const API_PREVIEW = isProduction ? '/preview/' : 'http://192.168.0.125:9000/user-files/';
+export const API_PREVIEW =  'http://192.168.0.125:9000/user-files/';

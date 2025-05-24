@@ -42,7 +42,7 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
     const theme = useTheme();
     const {isDarkMode} = useCustomThemeContext();
 
-    const {deleteTask, updateTaskField} = useTaskOperations();
+    const {deleteTask, updateTaskField, userHasPermission} = useTaskOperations();
 
     const taskColorsPalette = () => {
         return !isDarkMode ? lightTaskColor : darkTaskColor;
@@ -183,130 +183,145 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
                         }}
                     >
                         <List disablePadding dense>
-                            <ListItem
-                                button={"true"}
-                                disableGutters
-                                onClick={() => fileInputRef.current.click()}
-                                sx={{
-                                    px: 1,
-                                    py: 1
-                                }}
-                            >
 
-                                <ListItemIcon sx={{
-                                    m: 0,
-                                    minWidth: '24px !important'
-                                }}
-                                >
-                                    <UploadCover color={theme.palette.taskName} size="16px"/>
-                                </ListItemIcon>
-                                <ListItemText sx={{m: 0}} primary="Загрузить обложку"/>
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="image/jpeg, image/png, image/jpg"
-                                    style={{display: "none"}}
-                                    id="cover-upload"
-                                    onChange={handleCoverUpload}
-                                />
-                            </ListItem>
+                            {userHasPermission("UPDATE_TASK_COVER") &&
+                                <>
 
-                            {task.coverUrl &&
-                                <ListItem
-                                    button={"true"}
-                                    disableGutters
-                                    onClick={handleCoverDelete}
-                                    sx={{
-                                        px: 1,
-                                        py: 1
-                                    }}
-                                >
-                                    <ListItemIcon sx={{
-                                        m: 0,
-                                        minWidth: '24px !important'
-                                    }}
+                                    <ListItem
+                                        button={"true"}
+                                        disableGutters
+                                        onClick={() => fileInputRef.current.click()}
+                                        sx={{
+                                            px: 1,
+                                            py: 1
+                                        }}
                                     >
-                                        <DeleteCover color={theme.palette.taskName} size="16px"/>
 
-                                    </ListItemIcon>
-                                    <ListItemText sx={{m: 0}} primary="Удалить обложку"/>
-                                </ListItem>
-                            }
-                            <Divider/>
-                            <ListItem
-                                disableGutters
-                                onClick={handleEditClick}
-                                sx={{
-                                    px: 1,
-                                    py: 1
-                                }}
-                            >
-                                <Box
-                                    sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}
-                                >
-                                    <ListItemText sx={{mb: '5px',}} primary="Цвет задачи"/>
+                                        <ListItemIcon sx={{
+                                            m: 0,
+                                            minWidth: '24px !important'
+                                        }}
+                                        >
+                                            <UploadCover color={theme.palette.taskName} size="16px"/>
+                                        </ListItemIcon>
+                                        <ListItemText sx={{m: 0}} primary="Загрузить обложку"/>
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept="image/jpeg, image/png, image/jpg"
+                                            style={{display: "none"}}
+                                            id="cover-upload"
+                                            onChange={handleCoverUpload}
+                                        />
+                                    </ListItem>
 
-                                    <Box sx={{
-                                        display: 'flex',
-                                        gap: '3px',
-                                        ml: '1px'
-                                    }}>
-                                        {Object.entries(taskColorsPalette()).map(([name, color]) => (
-                                            <Box
-                                                key={color}
-                                                sx={{
-                                                    backgroundColor: color,
-                                                    height: '17px',
-                                                    width: '17px',
-                                                    borderRadius: '50%',
-                                                    border: '1px solid',
-                                                    borderColor: 'divider',
-                                                    cursor: 'pointer',
-                                                    transition: 'transform 0.2s',
-                                                    '&:hover': {
-                                                        transform: 'scale(1.1)',
-                                                        boxShadow: 1
-                                                    }
-                                                }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleColorChange(name);
-                                                }}
+                                    {task.coverUrl &&
+                                        <ListItem
+                                            button={"true"}
+                                            disableGutters
+                                            onClick={handleCoverDelete}
+                                            sx={{
+                                                px: 1,
+                                                py: 1
+                                            }}
+                                        >
+                                            <ListItemIcon sx={{
+                                                m: 0,
+                                                minWidth: '24px !important'
+                                            }}
                                             >
-                                                {
-                                                    (name === task.color || (task.color === null && name === "null")) &&
-                                                    <Box sx={{ml: '3px', mt: '-5px'}}>
+                                                <DeleteCover color={theme.palette.taskName} size="16px"/>
 
-                                                        <Galka color={theme.palette.taskName}/>
+                                            </ListItemIcon>
+                                            <ListItemText sx={{m: 0}} primary="Удалить обложку"/>
+                                        </ListItem>
+                                    }
+                                </>
+                            }
 
+                            {userHasPermission("UPDATE_TASK_COLOR") &&
+                                <>
+                                    <Divider/>
+                                    <ListItem
+                                        disableGutters
+                                        onClick={handleEditClick}
+                                        sx={{
+                                            px: 1,
+                                            py: 1
+                                        }}
+                                    >
+                                        <Box
+                                            sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}
+                                        >
+                                            <ListItemText sx={{mb: '5px',}} primary="Цвет задачи"/>
+
+                                            <Box sx={{
+                                                display: 'flex',
+                                                gap: '3px',
+                                                ml: '1px'
+                                            }}>
+                                                {Object.entries(taskColorsPalette()).map(([name, color]) => (
+                                                    <Box
+                                                        key={color}
+                                                        sx={{
+                                                            backgroundColor: color,
+                                                            height: '17px',
+                                                            width: '17px',
+                                                            borderRadius: '50%',
+                                                            border: '1px solid',
+                                                            borderColor: 'divider',
+                                                            cursor: 'pointer',
+                                                            transition: 'transform 0.2s',
+                                                            '&:hover': {
+                                                                transform: 'scale(1.1)',
+                                                                boxShadow: 1
+                                                            }
+                                                        }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleColorChange(name);
+                                                        }}
+                                                    >
+                                                        {
+                                                            (name === task.color || (task.color === null && name === "null")) &&
+                                                            <Box sx={{ml: '3px', mt: '-5px'}}>
+
+                                                                <Galka color={theme.palette.taskName}/>
+
+                                                            </Box>
+                                                        }
                                                     </Box>
-                                                }
+                                                ))}
                                             </Box>
-                                        ))}
-                                    </Box>
-                                </Box>
-                            </ListItem>
+                                        </Box>
+                                    </ListItem>
 
-                            <Divider/>
-                            <ListItem
-                                button={"true"}
-                                disableGutters
-                                onClick={handleDelete}
-                                sx={{
-                                    px: 1,
-                                    py: 1
-                                }}
-                            >
-                                <ListItemIcon sx={{
-                                    m: 0,
-                                    minWidth: '24px !important'
-                                }}
-                                >
-                                    <DeleteTask color={theme.palette.taskName}/>
+                                </>
+                            }
 
-                                </ListItemIcon>
-                                <ListItemText sx={{m: 0}} primary="Удалить задачу"/>
-                            </ListItem>
+                            {userHasPermission("DELETE_TASK") &&
+                                <>
+                                    <Divider/>
+                                    <ListItem
+                                        button={"true"}
+                                        disableGutters
+                                        onClick={handleDelete}
+                                        sx={{
+                                            px: 1,
+                                            py: 1
+                                        }}
+                                    >
+                                        <ListItemIcon sx={{
+                                            m: 0,
+                                            minWidth: '24px !important'
+                                        }}
+                                        >
+                                            <DeleteTask color={theme.palette.taskName}/>
+
+                                        </ListItemIcon>
+                                        <ListItemText sx={{m: 0}} primary="Удалить задачу"/>
+                                    </ListItem>
+                                </>}
                         </List>
                     </Paper>
                 </ClickAwayListener>

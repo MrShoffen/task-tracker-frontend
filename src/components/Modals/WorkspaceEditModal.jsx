@@ -25,8 +25,10 @@ import CopyLinkButton from "../InputElements/CopyLinkButton.jsx";
 
 export default function WorkspaceEditModal({workspace, open, onClose}) {
 
+    const {userHasPermission} = useTaskOperations();
+
     const [wsName, setWsName] = useState(workspace.name);
-    const {updateWsName, updateWsAccess, updateWsCover} = useTaskOperations();
+    const {updateWsField, loadAllWorkspaces} = useTaskOperations();
 
     const [isPublic, setIsPublic] = useState(workspace.isPublic)
     const handleChange = (event, type) => {
@@ -42,14 +44,14 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
             return;
         }
         try {
-            updateWsCover(imageUrl);
+            updateWsField('coverUrl', imageUrl);
             await sendEditWs(workspace.api.links.updateWorkspaceCover.href, {
                 newCoverUrl: imageUrl
             });
             setSelectedImage(imageUrl);
             showSuccess("Обложка обновлена!")
         } catch (error) {
-            updateWsCover(selectedImage);
+            updateWsField('coverUrl', selectedImage);
             showWarn(error.message);
         }
     };
@@ -61,26 +63,30 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
     };
 
     async function handleNameSave() {
+        const oldName = workspace.name;
         try {
-            const updatedWs = await sendEditWs(workspace.api.links.updateWorkspaceName.href,
+            updateWsField('name', wsName);
+            await sendEditWs(workspace.api.links.updateWorkspaceName.href,
                 {
                     newName: wsName
                 });
-            updateWsName(updatedWs);
+            loadAllWorkspaces();
             showSuccess("Имя обновлено")
 
         } catch (error) {
+            updateWsField('name', oldName);
+            setWsName(oldName);
             showWarn(error.message);
         }
     }
 
     async function handleAccessSave() {
         try {
-            const updatedWs = await sendEditWs(workspace.api.links.updateWorkspaceAccess.href,
+            updateWsField('isPublic', isPublic);
+            await sendEditWs(workspace.api.links.updateWorkspaceAccess.href,
                 {
                     isPublic: isPublic
                 });
-            updateWsAccess(updatedWs);
             showSuccess("Уровень доступа обновлен")
 
         } catch (error) {
@@ -89,56 +95,75 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
     }
 
     return (
-            <Modal open={open}
-                   onClose={() => {
-                       onClose();
-                       clearFields()
-                   }}>
-                    <Card variant="outlined"
-                          sx={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              minWidth: {sm: '800px', xs: '100%'},
-                              maxWidth: {sm: '800px', xs: '100%'},
-                              maxHeight: '85%',
-                              padding: 2,
-                              gap: 2,
-                              margin: 'auto',
-                              transform: "translate(0%, 0%)", marginTop: "70px",
-                              backgroundColor: "modal",
-                              backdropFilter: 'blur(16px)',
-                              WebkitBackdropFilter: 'blur(16px)',
-                              boxShadow: 5,
-                              borderRadius: 2,
-                              position: "relative",
-                          }}
-                    >
+        <Modal open={open}
+               onClose={() => {
+                   onClose();
+                   clearFields()
+               }}>
+            <Card variant="outlined"
+                  sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      minWidth: {sm: '800px', xs: '100%'},
+                      maxWidth: {sm: '800px', xs: '100%'},
+                      maxHeight: '85%',
+                      padding: 2,
+                      pt: 1,
+                      gap: 1,
+                      margin: 'auto',
+                      transform: "translate(0%, 0%)", marginTop: "70px",
+                      backgroundColor: "modal",
+                      backdropFilter: 'blur(16px)',
+                      WebkitBackdropFilter: 'blur(16px)',
+                      boxShadow: 5,
+                      borderRadius: 2,
+                      position: "relative",
+                  }}
+            >
 
 
-                        <IconButton
-                            aria-label="close"
-                            size="small"
-                            onClick={() => {
-                                onClose();
-                                clearFields()
-                            }}
-                            sx={{
-                                position: 'absolute',
-                                top: 5,
-                                right: 5,
-                                width: '25px',
-                                height: '25px',
-                            }}
-                        >
-                            <CloseIcon sx={{fontSize: '25px'}}/>
-                        </IconButton>
+                <IconButton
+                    aria-label="close"
+                    size="small"
+                    onClick={() => {
+                        onClose();
+                        clearFields()
+                    }}
+                    sx={{
+                        position: 'absolute',
+                        top: 5,
+                        right: 5,
+                        width: '25px',
+                        height: '25px',
+                    }}
+                >
+                    <CloseIcon sx={{fontSize: '25px'}}/>
+                </IconButton>
 
-                        <Typography variant="h6" textAlign="center" sx={{width: '100%', mb: 1}}>
-                            Настройка пространства
-                        </Typography>
+                <Typography variant="h6" textAlign="center" sx={{width: '100%', mb: 1}}>
+                    Настройка проекта
+                </Typography>
+
+                <Divider/>
 
 
-                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
+                    {userHasPermission("UPDATE_WORKSPACE_NAME") &&
+                        <>
+                            <Box
+                                sx={{
+                                    backgroundColor: 'action.hover',
+                                    borderRadius: 2,
+                                    // width: '300px',
+                                    p: '3px',
+                                    border: '1px solid',
+                                    borderColor: 'action.disabled'
+                                }}
+                            >
+                                <Typography textAlign='center' variant='body2'>
+                                    Имя пространства
+                                </Typography>
+                            </Box>
                             <Box sx={{display: 'flex', flexDirection: 'row'}}>
                                 <ValidatedProfileField
                                     label={"Имя"}
@@ -152,11 +177,17 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
                                 >сохранить</Button>
                             </Box>
                             <Divider/>
+
+                        </>
+                    }
+
+                    {userHasPermission("UPDATE_WORKSPACE_ACCESS") &&
+                        <>
                             <Box
                                 sx={{
                                     backgroundColor: 'action.hover',
                                     borderRadius: 2,
-                                    width: '300px',
+                                    // width: '300px',
                                     p: '3px',
                                     border: '1px solid',
                                     borderColor: 'action.disabled'
@@ -201,7 +232,10 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
                                 }
                             </Box>
                             <Divider/>
+                        </>}
 
+                    {userHasPermission("UPDATE_WORKSPACE_COVER") &&
+                        <>
                             <Box
                                 sx={{
                                     backgroundColor: 'action.hover',
@@ -225,7 +259,7 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
                             }}>
                                 <Grid container spacing={2}>
                                     {workspaceCovers.map((imageUrl) => (
-                                        <Grid item xs={6} sm={4} md={3} key={imageUrl}>
+                                        <Grid key={imageUrl}>
                                             <Paper
                                                 elevation={3}
                                                 sx={{
@@ -290,9 +324,12 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
                                     ))}
                                 </Grid>
                             </Box>
+                        </>
+                    }
 
-                        </Box>
-                    </Card>
-            </Modal>
+
+                </Box>
+            </Card>
+        </Modal>
     )
 };

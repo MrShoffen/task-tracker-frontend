@@ -24,10 +24,10 @@ export function NewWorkspaceBadge() {
     const [initialText, setInitialText] = useState("desk.name");
     const theme = useTheme();
 
-     function getRandomCover() {
+    function getRandomCover() {
         return workspaceCovers[Math.floor(Math.random() * workspaceCovers.length)];
     }
-    // Сохраняем выделение перед обновлением
+
     const saveSelection = () => {
         const selection = window.getSelection();
         if (selection.rangeCount > 0) {
@@ -35,7 +35,7 @@ export function NewWorkspaceBadge() {
         }
     };
 
-    // Восстанавливаем выделение после обновления
+
     const restoreSelection = () => {
         if (lastSelectionRef.current) {
             const selection = window.getSelection();
@@ -54,7 +54,7 @@ export function NewWorkspaceBadge() {
         saveSelection();
         setHovered(false);
         const newText = typographyRef.current?.textContent.trim() || '';
-        if (newText !== initialText && newText !== '') { // Сравниваем с исходным текстом
+        if (newText !== initialText && newText !== '') {
             try {
                 const newNameWithDubls = newText + (duplicatedCount === 0 ? '' : (' (' + duplicatedCount + ')'));
                 let newWs = await sendCreateWs(
@@ -93,14 +93,14 @@ export function NewWorkspaceBadge() {
 
     const handleInput = () => {
         saveSelection();
-        // Не используем setText, чтобы избежать лишних ререндеров
+
     };
 
     useEffect(() => {
         if (isEditing && typographyRef.current) {
             typographyRef.current.focus();
 
-            // Помещаем курсор в конец текста только при первом открытии
+
             if (!lastSelectionRef.current) {
                 const range = document.createRange();
                 range.selectNodeContents(typographyRef.current);
@@ -124,13 +124,13 @@ export function NewWorkspaceBadge() {
 
                 <Box
                     sx={{
-                        display: 'inline-flex',           // горизонтально, по размеру контента
-                        alignItems: 'center',            // выравнивание вертикально
+                        display: 'inline-flex',
+                        alignItems: 'center',
                         border: '1px solid',
-                        borderColor: 'info.dark',     // цвет рамки из темы MUI
+                        borderColor: 'info.dark',
                         borderRadius: 3,
                         pr: 5,
-                        width: '100%',// внутренние отступы
+                        width: '100%',
                         maxHeight: 28,
                     }}
                 >
@@ -156,8 +156,8 @@ export function NewWorkspaceBadge() {
                             </ListItemIcon>
                             <Typography
                                 component="div"
-                                // onMouseEnter={() => setHovered(true)}
-                                // onMouseLeave={() => setHovered(false)}
+
+
                                 ref={typographyRef}
                                 contentEditable={isEditing}
                                 suppressContentEditableWarning
@@ -170,24 +170,24 @@ export function NewWorkspaceBadge() {
                                     p: 1,
                                     ml: -4,
                                     color: 'taskName',
-                                    // backgroundColor: 'desk',
+
                                     fontSize: '0.8rem',
                                     fontWeight: '400',
                                     alignSelf: 'start',
                                     minHeight: '30px',
                                     maxWidth: '100px',
                                     userSelect: "none",
-                                    whiteSpace: 'nowrap', // Запрещаем перенос строк
+                                    whiteSpace: 'nowrap',
                                     overflowX: 'auto',
-                                    textOverflow: 'clip', // Добавляем многоточие если текст не помещается
+                                    textOverflow: 'clip',
                                     outline: 'none',
                                     width: '250px',
-                                    scrollbarWidth: 'none', // Для Firefox
+                                    scrollbarWidth: 'none',
                                     '&::-webkit-scrollbar': {
-                                        display: 'none' // Для Chrome, Safari, Edge
+                                        display: 'none'
                                     },
-                                    // Альтернативный вариант - полностью скрыть скролл
-                                    msOverflowStyle: 'none' // Для IE и Edge (старые версии)
+
+                                    msOverflowStyle: 'none'
                                 }}
                             >
                                 {userHasPermission('CREATE_DESK') && hovered && !isEditing && (

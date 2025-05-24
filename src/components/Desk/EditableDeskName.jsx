@@ -7,7 +7,7 @@ import ConflictException from "../../exception/ConflictException.jsx";
 import {sendEditDesk} from "../../services/fetch/tasks/desk/SendEditDesk.js";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 
-export function EditableDeskName({desk = {name: ''}}) {
+export function EditableDeskName({desk = {name: ''}, disableDragging}) {
     const [hovered, setHovered] = React.useState(false);
 
     const {userHasPermission, updateDeskField} = useTaskOperations();
@@ -35,6 +35,7 @@ export function EditableDeskName({desk = {name: ''}}) {
 
     const handleEditClick = () => {
         setIsEditing(true);
+        disableDragging(true);
     };
 
     const {showWarn} = useNotification();
@@ -67,6 +68,7 @@ export function EditableDeskName({desk = {name: ''}}) {
             typographyRef.current.textContent = initialText;
         }
         setIsEditing(false);
+        disableDragging(false);
     };
 
     const handleKeyDown = async (e) => {
@@ -133,7 +135,7 @@ export function EditableDeskName({desk = {name: ''}}) {
                     width: '250px',
                 }}
             >
-                {desk.name} {userHasPermission('UPDATE_DESK') && hovered && !isEditing && (
+                {desk.name} {userHasPermission('UPDATE_DESK_NAME') && hovered && !isEditing && (
                 <IconButton
                     disableRipple
                     sx={{width: '16px', height: '16px', p: 0, mb: '2px', ml: '2px'}}

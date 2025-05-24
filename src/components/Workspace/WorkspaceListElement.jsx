@@ -1,14 +1,11 @@
 import {Box, IconButton, ListItemButton, ListItemIcon, ListItemText} from "@mui/material";
 import * as React from "react";
+import {useState} from "react";
 import DeskIcon from '@mui/icons-material/Desk';
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import {useNavigate} from "react-router-dom";
-import UnauthorizedException from "../../exception/UnauthorizedException.jsx";
-import NotFoundException from "../../exception/NotFoundException.jsx";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
-import {CommentsIcon} from "../../assets/icons/Comments.jsx";
 import {DeleteTask} from "../../assets/icons/DeleteTask.jsx";
-import {useState} from "react";
 import DoDisturbIcon from '@mui/icons-material/DoDisturb';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import {sendDeleteWs} from "../../services/fetch/tasks/ws/SendDeleteWs.js";
@@ -25,13 +22,12 @@ export default function WorkspaceListElement({workspace}) {
     const [deleting, setDeleting] = useState(false);
 
     const handleDeleteClick = (e) => {
-        e.stopPropagation(); // Важно!
+        e.stopPropagation();
         setAttemptToDelete(true);
     };
 
     const handleConfirmDelete = async (e) => {
-        e.stopPropagation(); // Важно!
-        // Логика подтверждения удаления
+        e.stopPropagation();
         setDeleting(true);
         try {
             await sendDeleteWs(workspace.api.links.deleteWorkspace.href)
@@ -44,7 +40,7 @@ export default function WorkspaceListElement({workspace}) {
     };
 
     const handleCancelDelete = (e) => {
-        e.stopPropagation(); // Важно!
+        e.stopPropagation();
         setAttemptToDelete(false);
     };
 
@@ -82,10 +78,10 @@ export default function WorkspaceListElement({workspace}) {
                 '& .MuiTypography-root': {
                     ml: -4,
                     fontSize: '0.8rem',
-                    maxWidth: '150px', // Фиксированная ширина
+                    maxWidth: '150px',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
-                    textOverflow: 'ellipsis', // Добавляет "..." если текст не помещается
+                    textOverflow: 'ellipsis',
                 }
             }}/>
             <Box>
@@ -104,7 +100,6 @@ export default function WorkspaceListElement({workspace}) {
                 }
 
                 {hovered && attemptToDelete && location.pathname !== ('/workspaces/' + workspace.id) &&
-                    // {
                     <Box sx={{mr: -1.6}}>
                         <IconButton disableRipple
                                     onClick={handleConfirmDelete}

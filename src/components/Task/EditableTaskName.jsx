@@ -7,7 +7,7 @@ import {EditIcon} from "../../assets/icons/EditIcon.jsx";
 import ConflictException from "../../exception/ConflictException.jsx";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 
-export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
+export function EditableTaskName({task = {name: ''}, taskCompleted, hovered, disableDragging}) {
 
     const {userHasPermission, updateTaskField} = useTaskOperations();
     const theme = useTheme();
@@ -34,6 +34,7 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
 
     const handleEditClick = () => {
         setIsEditing(true);
+        disableDragging(true);
     };
 
     const handleBlur = async (event, duplicatedCount = 0) => {
@@ -64,6 +65,7 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
             typographyRef.current.textContent = initialText;
         }
         setIsEditing(false);
+        disableDragging(false);
     };
 
     const handleKeyDown = async (e) => {
@@ -125,9 +127,10 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered}) {
                     borderBottom: isEditing ? '1px solid #90caf9' : 'none',
                     outline: 'none',
                     width: '227px',
+                    cursor: isEditing? 'text' : 'pointer'
                 }}
             >
-                {task.name} {userHasPermission('UPDATE_TASK') && hovered && !isEditing && (
+                {task.name} {userHasPermission('UPDATE_TASK_NAME') && hovered && !isEditing && (
                 <IconButton disableRipple
                             sx={{width: '16px', height: '16px', p: 0, mb: '2px', ml: '2px'}}
                             onClick={handleEditClick}

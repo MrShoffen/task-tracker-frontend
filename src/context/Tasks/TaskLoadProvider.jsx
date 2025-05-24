@@ -44,7 +44,17 @@ export const TaskLoadProvider = ({children}) => {
         setFullWorkspaceInformation(fullWs)
         const uap = fullWs.usersAndPermissions.find(uap => uap.info.email === auth.user.email);
 
-        setPermissions(uap.permissions);
+        setPermissions(uap?.permissions);
+
+        return fullWs;
+    }
+
+    async function loadFullWs(wsId) {
+        const fullWs = await sendGetFullWsInformation("/api/v1/workspaces/" + wsId + "/full");
+        setFullWorkspaceInformation(fullWs)
+        const uap = fullWs.usersAndPermissions.find(uap => uap.info.email === auth.user.email);
+
+        setPermissions(uap?.permissions);
 
         return fullWs;
     }
@@ -57,25 +67,10 @@ export const TaskLoadProvider = ({children}) => {
         return permissions.includes(permission);
     }
 
-    function updateWsName(newWs) {
+    function updateWsField(field, newVal) {
         setFullWorkspaceInformation(prev => ({
             ...prev,
-            name: newWs.name
-        }))
-        loadAllWorkspaces();
-    }
-
-    function updateWsAccess(newWs) {
-        setFullWorkspaceInformation(prev => ({
-            ...prev,
-            isPublic: newWs.isPublic
-        }))
-    }
-
-    function updateWsCover(newCoverUrl) {
-        setFullWorkspaceInformation(prev => ({
-            ...prev,
-            coverUrl: newCoverUrl
+            [field]: newVal
         }))
     }
 
@@ -89,6 +84,34 @@ export const TaskLoadProvider = ({children}) => {
             ...prev, // Копируем все существующие поля
             desks: [...prev.desks, fullDesk] // Создаем новый массив desks со старыми элементами + новый элемент
         }));
+    }
+
+    function addNewPermission(uap, email) {
+        const alreadyExists = fullWorkspaceInformation.usersAndPermissions
+            .findIndex(u => u.info.email === email);
+        if(alreadyExists !== -1){
+            setFullWorkspaceInformation(prev => ({
+                ...prev,
+                usersAndPermissions: prev.usersAndPermissions.filter(u => u.userId !== uap.userId)
+            }))
+        }
+        setFullWorkspaceInformation(prev => ({
+            ...prev,
+            usersAndPermissions: [...prev.usersAndPermissions,
+                {
+                    ...uap,
+                    info: {
+                        email: email
+                    }
+                }]
+        }))
+    }
+
+    function deletePermission(userId){
+        setFullWorkspaceInformation(prev => ({
+            ...prev,
+            usersAndPermissions: prev.usersAndPermissions.filter(u => u.userId !== userId)
+        }))
     }
 
     function deleteDesk(deskToDelete) {
@@ -137,7 +160,6 @@ export const TaskLoadProvider = ({children}) => {
     }
 
     function moveTaskToAnotherDesk(movingTask, targetDesk) {
-        console.log(movingTask, targetDesk)
         const deskIdInMovingTask = movingTask.deskId;
         setFullWorkspaceInformation(prevData => {
             const movingTaskDeskIndex = prevData.desks.findIndex(desk => desk.id === deskIdInMovingTask);
@@ -152,31 +174,23 @@ export const TaskLoadProvider = ({children}) => {
                 tasks: updatedDesks[movingTaskDeskIndex].tasks.filter(t => t.id !== movingTask.id)
             };
 
-
             const targetDeskIndex = prevData.desks.findIndex(d => d.id === targetDesk)
 
-            const alreadyExists = updatedDesks[targetDeskIndex].tasks.findIndex(t => t.name === movingTask.name);
-            if (alreadyExists !== -1) {
+            if (updatedDesks[targetDeskIndex]
+                .tasks.findIndex(t => t.name === movingTask.name) !== -1) {
                 return prevData;
-            }
-
-            const newTask = {
-                ...movingTask,
-                deskId: targetDesk
             }
 
             updatedDesks[targetDeskIndex] = {
                 ...updatedDesks[targetDeskIndex],
-                tasks: [...updatedDesks[targetDeskIndex].tasks, newTask]
+                tasks: [...updatedDesks[targetDeskIndex].tasks, {...movingTask, deskId: targetDesk}]
             }
-            console.log(updatedDesks)
+
             return {
                 ...prevData,
                 desks: updatedDesks
             }
-
         })
-        return true;
     }
 
     function addNewTask(newTask) {
@@ -292,14 +306,12 @@ export const TaskLoadProvider = ({children}) => {
         <TaskLoadContext.Provider value={{
             workspaces,
             loadAllWorkspaces,
-
+            loadFullWs,
             loadFullWorkspace,
             fullWorkspaceInformation,
             setFullWorkspaceInformation,
             deleteWorkspace,
-            updateWsName,
-            updateWsAccess,
-            updateWsCover,
+            updateWsField,
 
             permissions,
             userHasPermission,
@@ -314,6 +326,9 @@ export const TaskLoadProvider = ({children}) => {
             deleteDesk,
             updateDeskField,
             updateDeskOrder,
+
+            addNewPermission,
+            deletePermission
         }}>
             {children}
         </TaskLoadContext.Provider>

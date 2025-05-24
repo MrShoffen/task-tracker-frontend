@@ -1,6 +1,6 @@
-import {Box, CircularProgress, Drawer} from "@mui/material";
+import {Box, CircularProgress} from "@mui/material";
 import * as React from "react";
-import {useEffect, useMemo, useState} from "react";
+import {useEffect, useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
 import {useTaskOperations} from "../context/Tasks/TaskLoadProvider.jsx";
 import WorkspaceHeader from "../components/Workspace/WorkspaceHeader.jsx";
@@ -10,17 +10,8 @@ import {Task} from "../components/Task/Task.jsx";
 
 
 import {NewDeskBadge} from "../components/Desk/NewDeskBadge.jsx";
-import {
-    closestCenter, closestCorners,
-    DndContext,
-    DragOverlay,
-    KeyboardSensor,
-    PointerSensor, pointerWithin,
-    useSensor,
-    useSensors
-} from "@dnd-kit/core";
-import {arrayMove, horizontalListSortingStrategy, rectSwappingStrategy, SortableContext} from "@dnd-kit/sortable";
-import {restrictToHorizontalAxis, restrictToWindowEdges} from "@dnd-kit/modifiers";
+import {DndContext, DragOverlay, PointerSensor, pointerWithin, useSensor, useSensors} from "@dnd-kit/core";
+import {horizontalListSortingStrategy, SortableContext} from "@dnd-kit/sortable";
 import {createPortal} from "react-dom";
 import {calculateNewOrderIndex, calculateNewOrderIndexReversed} from "../services/util/Utils.jsx";
 import {sendEditDesk} from "../services/fetch/tasks/desk/SendEditDesk.js";
@@ -31,11 +22,13 @@ export default function WorkspacesPage() {
         fullWorkspaceInformation,
         updateDeskOrder,
         workspaces,
+        userHasPermission,
         loadFullWorkspace,
         moveTaskToAnotherDesk,
         loadAllWorkspaces,
         updateTaskOrder,
-        updateTaskField
+        updateTaskField,
+        loadFullWs
     } = useTaskOperations();
 
     const navigate = useNavigate();
@@ -70,14 +63,11 @@ export default function WorkspacesPage() {
             if (loadedWorkspaces.length === 0) {
                 loadedWorkspaces = await loadAllWorkspaces();
             }
-
             const currentWs = loadedWorkspaces.find(ws => ws.id === workspaceId);
-            console.log('current workspace', currentWs);
-            // if (currentWs !== null) {
-            const content = await loadFullWorkspace(currentWs);
-            console.log(content);
+            // const fullWs = await loadFullWorkspace(currentWs);
+            const fullWs = await loadFullWs(workspaceId);
+            console.log(fullWs);
             setWorkspaceLoading(false);
-            // }
         } catch (error) {
             console.log(error);
             navigate("/profile");
@@ -87,7 +77,6 @@ export default function WorkspacesPage() {
     }
 
     function handleDragStart(event) {
-        // console.log("DRAG START ", event)
         if (event.active.data.current?.type === "desk") {
             setDraggingDesk(event.active.data.current.desk);
         }
@@ -101,22 +90,15 @@ export default function WorkspacesPage() {
         setDraggingTask(null);
         setDraggingDesk(null);
         setSourceDesk(null);
-        // setLastMovedTaskId(null);
-        console.log('in handle drop')
+
         const {active, over} = event;
         if (!over) {
             return;
         }
-        console.log('after fist')
         const activeId = active.id;
         const overId = over.id;
 
         if (activeId === overId) {
-            console.log(activeId, overId)
-            console.log('this erra')
-            console.log(' desks')
-
-
             const isActiveTask = active.data.current?.type === "task";
             const isOverTask = over.data.current?.type === "task";
             if (isActiveTask && isOverTask) {
@@ -136,7 +118,6 @@ export default function WorkspacesPage() {
                 const newOrderTask = calculateNewOrderIndexReversed(5, 0, workingDesk.tasks);
                 // console.error(newOrderTask.orderIndex)
                 updateTaskOrder(workingDeskI, activeTIndex, newOrderTask);
-                console.log('fixxx work - new order ', newOrderTask.orderIndex)
                 sendEditTask(workingDesk.tasks[activeTIndex].api.links.updateTaskDesk.href,
                     {
                         newDeskId: workingDesk.tasks[activeTIndex].deskId
@@ -149,19 +130,16 @@ export default function WorkspacesPage() {
                     )
                     .then(updatedTask2 => {
                             updateTaskField(updatedTask2.deskId, updatedTask2.id, 'api', updatedTask2.api);
-                            console.log('UPDATED AFTER MOVING IN FIX')
                         }
                     )
                 return;
             }
-            // return;
+            return;
         }
-        console.log('after sec')
 
         const isActiveTask = active.data.current?.type === "task";
         const isOverTask = over.data.current?.type === "task";
         if (isActiveTask && isOverTask) {
-            console.log('source ', sourceDesk)
             const activeTask = active.data.current.task;
             const overTask = over.data.current.task;
             const workingDeskI = fullWorkspaceInformation
@@ -178,13 +156,12 @@ export default function WorkspacesPage() {
             updateTaskOrder(workingDeskI, activeTIndex, newOrderTask);
 
             try {
-                if (sourceDesk === over.data.current.task.deskId) {
+                if (sourceDesk === activeTask.deskId) {
                     await sendEditTask(activeTask.api.links.updateTaskOrder.href,
                         {
                             updatedIndex: newOrderTask.orderIndex
                         });
                 } else {
-                    console.log('heeere')
                     sendEditTask(activeTask.api.links.updateTaskDesk.href,
                         {
                             newDeskId: newOrderTask.deskId
@@ -196,9 +173,7 @@ export default function WorkspacesPage() {
                                 })
                         )
                         .then(updatedTask2 => {
-                            updateTaskField(updatedTask2.deskId, updatedTask2.id, 'api', updatedTask2.api);
-
-                            console.log('UPDATED AFTER MOVING')
+                                updateTaskField(updatedTask2.deskId, updatedTask2.id, 'api', updatedTask2.api);
                             }
                         )
                 }
@@ -220,11 +195,8 @@ export default function WorkspacesPage() {
                 {
                     newDeskId: overId
                 })
-
                 .then(updatedTask2 => {
-                    updateTaskField(updatedTask2.deskId, updatedTask2.id, 'api', updatedTask2.api);
-
-                    console.log('UPDATED AFTER MOVING IN Empty desk')
+                        updateTaskField(updatedTask2.deskId, updatedTask2.id, 'api', updatedTask2.api);
                     }
                 )
 
@@ -282,73 +254,59 @@ export default function WorkspacesPage() {
             const targetDesk = fullWorkspaceInformation.desks.find(d => d.id === overTask.deskId);
             if (targetDesk?.tasks.some(t => t.id === activeTask.id)) return;
             moveTaskToAnotherDesk(activeTask, overTask.deskId);
-            console.log('active task ', activeTask)
-            console.log('over task ', overTask)
             return;
         }
 
         if (isActiveTask && over.data.current?.type === 'desk') {
-            console.log('moving task to desk');
             if (sourceDesk === overId) {
-                console.log('same desk shiieeet')
                 return;
             }
-
 
             const workingDesk = fullWorkspaceInformation.desks.find(d => d.id === overId);
             if (workingDesk.tasks.length !== 0) {
-                console.log('not empty desk');
                 return;
             }
-            console.log('continue to add to empty desk')
 
             const activeTask = active.data.current.task;
-
             moveTaskToAnotherDesk(activeTask, workingDesk.id);
         }
     }
 
+    const [disableDnd, setDisableDnd] = useState(false);
+
     if (!onConcreteWs) {
-        return (
-            <Box></Box>
-        )
+        return (<Box></Box>)
     }
 
     return (
         <Box
 
             sx={theme => ({
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100vh',
-            overflow: 'hidden',
-            ...(fullWorkspaceInformation.coverUrl !== null && {
-                '&::before': {
-                    content: '""',
-                    position: 'fixed',
-                    zIndex: 0,
-                    bottom: 0,
-                    left: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100vh',
+                overflow: 'hidden',
+                ...(fullWorkspaceInformation.coverUrl !== null && {
+                    '&::before': {
+                        content: '""',
+                        position: 'fixed',
+                        zIndex: 0,
+                        bottom: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundImage: `url(${fullWorkspaceInformation.coverUrl})`, // Путь к изображению
+                        backgroundSize: 'cover', // или 'contain' в зависимости от потребностей
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundAttachment: 'fixed', // Фиксированный фон при скролле
+                        filter: theme.palette.mode === 'dark' ? 'brightness(0.7)' : 'none'
+                    }
+                })
 
-                    width: '100%',
-                    height: '100%',
-                    // backgroundImage: ' linear-gradient(70deg, #B9DE0D, #EFEFEF);',
-                    // backgroundRepeat: '',
-                    // backgroundAttachment: 'scroll',
-
-                    backgroundImage: `url(${fullWorkspaceInformation.coverUrl})`, // Путь к изображению
-                    backgroundSize: 'cover', // или 'contain' в зависимости от потребностей
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundAttachment: 'fixed', // Фиксированный фон при скролле
-                    filter: theme.palette.mode === 'dark' ? 'brightness(0.7)' : 'none'
-                }
             })
 
-        })
-
-        }>
-            {/* Хедер - фиксированная высота */}
+            }>
             {workspaceLoading ? (
                 <Box sx={{
                     height: '65px',
@@ -369,7 +327,6 @@ export default function WorkspacesPage() {
                 <WorkspaceHeader workspace={fullWorkspaceInformation}/>
             )}
 
-            {/* Основной контент с горизонтальным скроллом */}
             <Box sx={{
                 flex: 1,
                 minHeight: 0,
@@ -390,23 +347,20 @@ export default function WorkspacesPage() {
                     py: 2
                 }}>
                     <DndContext
-                        // modifiers={[restrictToWindowEdges]}
-
                         sensors={sensors}
                         collisionDetection={pointerWithin}
                         onDragStart={handleDragStart}
                         onDragEnd={handleDragEnd}
                         onDragOver={onDragOver}
-                        // modifiers={[restrictToHorizontalAxis]}
                     >
                         <Box sx={{
                             display: 'inline-flex',
                             gap: 1.5,
-                            // mr: 200,
                             alignItems: 'flex-start',
                             height: 'fit-content'
                         }}>
                             <SortableContext
+                                disabled={disableDnd || !userHasPermission("UPDATE_DESK_ORDER")}
                                 strategy={horizontalListSortingStrategy}
                                 items={fullWorkspaceInformation.desks.map(d => d.id)}>
                                 {fullWorkspaceInformation?.desks
@@ -415,13 +369,11 @@ export default function WorkspacesPage() {
                                         <TaskDesk
                                             key={desk.id}
                                             desk={desk}
-                                            sx={{
-                                                flexShrink: 0
-                                            }}
+                                            disableDragging={setDisableDnd}
                                         />
                                     ))}
                             </SortableContext>
-                            <NewDeskBadge/>
+                            {userHasPermission("CREATE_DESK") && <NewDeskBadge/>}
                         </Box>
                         {createPortal(
                             <DragOverlay>

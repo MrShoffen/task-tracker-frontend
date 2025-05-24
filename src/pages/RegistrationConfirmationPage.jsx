@@ -69,8 +69,8 @@ export const RegistrationConfirmationPage = () => {
                   boxShadow: 3,
                   position: 'fixed',
                   left: '50%',
-                  transform: 'translate(-50%, 0%)',
-                  top: '350px',
+                  transform: 'translate(-50%, -50%)',
+                  top: '50%',
                   alignSelf: 'center',
                   borderRadius: 1,
                   width: '400px',
@@ -81,7 +81,7 @@ export const RegistrationConfirmationPage = () => {
                   alignItems: 'center',    // Добавлено - центрирует по горизонтали
               }}>
 
-            <Typography variant="h4" sx={{textAlign: 'center', mb: 2, mt: 3}}>
+            <Typography variant="h5" sx={{textAlign: 'center', mb: 2, mt: 3}}>
                 {confirmationInProgress ? 'Проверка ссылки...' :
                     confirmationError ? 'Ошибка' : 'Успешно!'}
             </Typography>

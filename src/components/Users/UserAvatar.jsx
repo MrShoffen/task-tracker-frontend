@@ -11,15 +11,15 @@ export function UserAvatar({userInfo, sx = {}}) {
             color: 'white',
             border: '2px solid ',
             borderColor: 'action.selected',
-            backgroundColor: avatarColor(userInfo.email),
+            backgroundColor: userInfo ? avatarColor(userInfo?.email) : 'white',
             fontWeight: "500",
             m: 0,
             ...sx
         }}
-                alt={userInfo.email}
-                src={userInfo.avatarUrl}
+                alt={userInfo?.email}
+                src={userInfo?.avatarUrl}
         >
-            {userInfo.email.slice(0, 3)}
+            {userInfo?.email.slice(0, 3)}
         </Avatar>
     )
 }

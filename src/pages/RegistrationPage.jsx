@@ -308,7 +308,7 @@ export const RegistrationPage = () => {
                           flexDirection: 'column'
                       }}
                 >
-                    <Typography variant="h5" sx={{mb: 10, mt: -10}}>
+                    <Typography variant="h5" sx={{mb: 10, mt: -10, textAlign: 'center',}}>
                         Подтверждение регистрации!
                     </Typography>
                     <Typography variant="body1" sx={{textAlign: 'center', mb: 5}}>

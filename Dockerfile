@@ -4,7 +4,7 @@ FROM nginx:alpine
 RUN rm -rf /etc/nginx/conf.d/*
 
 # Копируем нашу конфигурацию
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/nginx.conf
 
 # Копируем собранное приложение
 COPY dist/ /usr/share/nginx/html

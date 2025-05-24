@@ -4,6 +4,8 @@ import * as React from "react";
 import SettingsIcon from '@mui/icons-material/Settings';
 import {UsersAvatarStack} from "../Users/UsersAvatarStack.jsx";
 import WorkspaceEditModal from "../Modals/WorkspaceEditModal.jsx";
+import {useState} from "react";
+import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 
 export default function WorkspaceHeader({workspace}) {
 
@@ -14,6 +16,10 @@ export default function WorkspaceHeader({workspace}) {
     const closeWsModal = () => {
         setWorkspaceEditOpen(false);
     }
+
+    const {userHasPermission} = useTaskOperations();
+
+
     return (
         <Box sx={{
             backdropFilter: 'blur(8px)',
@@ -40,13 +46,16 @@ export default function WorkspaceHeader({workspace}) {
             }}>
                 {workspace.name}
             </Typography>
-            <IconButton
-                onClick={handleWorkspaceOpen}
-                sx={{ml: 1, mr: 2}}>
-                <SettingsIcon/>
-            </IconButton>
+            {(userHasPermission("UPDATE_WORKSPACE_COVER") ||
+                    userHasPermission("UPDATE_WORKSPACE_NAME")
+                ) &&
+                <IconButton
+                    onClick={handleWorkspaceOpen}
+                    sx={{ml: 1, mr: 2}}>
+                    <SettingsIcon/>
+                </IconButton>}
 
-            <UsersAvatarStack users={workspace.usersAndPermissions}/>
+            <UsersAvatarStack workspace={workspace}/>
 
             <WorkspaceEditModal workspace={workspace} onClose={closeWsModal} open={workspaceEditOpen}/>
         </Box>

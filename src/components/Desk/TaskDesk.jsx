@@ -10,7 +10,7 @@ import {DeskMenu} from "./DeskMenu.jsx";
 import {SortableContext, useSortable, verticalListSortingStrategy} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities"
 
-export function TaskDesk({desk, sx}) {
+export function TaskDesk({desk, sx, disableDragging}) {
     const {
         setNodeRef,
         attributes,
@@ -25,6 +25,13 @@ export function TaskDesk({desk, sx}) {
         }
     })
 
+    const [disableTaskDragging, setDisableTaskDragging] = useState(false);
+
+    function setDraggingTask(bool){
+        setDisableTaskDragging(bool);
+        disableDragging(bool);
+    }
+
     const [contentIsLoading, setContentIsLoading] = useState(false);
 
     const {userHasPermission} = useTaskOperations();
@@ -33,7 +40,6 @@ export function TaskDesk({desk, sx}) {
         transform: CSS.Translate.toString(transform),
         height: 'calc(100vh - 120px)',
     }
-
 
     if (isDragging) {
         return (
@@ -113,9 +119,8 @@ export function TaskDesk({desk, sx}) {
                     display: 'flex',
                     flexDirection: 'column',
                     pb: 1.5
-
                 }}>
-                    <EditableDeskName desk={desk} hovered={true}/>
+                    <EditableDeskName desk={desk} hovered={true} disableDragging={disableDragging}/>
                     <DeskMenu desk={desk}/>
                     {userHasPermission("CREATE_TASK") &&
                         <NewTaskBadge taskCreationLink={desk.api.links.createTask.href}
@@ -149,7 +154,7 @@ export function TaskDesk({desk, sx}) {
                     }}>
                         <SortableContext items={desk.tasks.map(t => t.id)}
                                          strategy={verticalListSortingStrategy}
-
+                                         disabled={disableTaskDragging || !(userHasPermission("UPDATE_TASK_ORDER") || userHasPermission("UPDATE_TASK_DESK"))}
                         >
                             {desk.tasks && desk.tasks
                                 .sort((a, b) => b.orderIndex - a.orderIndex)
@@ -157,6 +162,7 @@ export function TaskDesk({desk, sx}) {
                                     <Task
                                         key={task.id}
                                         task={task}
+                                        disableDragging={setDraggingTask}
                                         setContentIsLoading={setContentIsLoading}
                                     />
                                 )

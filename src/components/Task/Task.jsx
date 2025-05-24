@@ -14,7 +14,7 @@ import {CSS} from "@dnd-kit/utilities";
 import {useCustomThemeContext} from "../../context/GlobalThemeContext/CustomThemeProvider.jsx";
 import {TaskPlugins} from "./TaskPlugins.jsx";
 
-export function Task({task, setContentIsLoading}) {
+export function Task({task, setContentIsLoading, disableDragging}) {
     const [hovered, setHovered] = React.useState(false);
     const theme = useTheme();
     const {isDarkMode} = useCustomThemeContext();
@@ -36,7 +36,7 @@ export function Task({task, setContentIsLoading}) {
         }
     })
 
-    const {updateTaskField} = useTaskOperations();
+    const {updateTaskField, userHasPermission} = useTaskOperations();
 
     const style = {
         transform: transform ? CSS.Translate.toString(transform) : undefined,
@@ -44,6 +44,9 @@ export function Task({task, setContentIsLoading}) {
     };
 
     const handleCompletionClick = async () => {
+        if (!userHasPermission("UPDATE_TASK_COMPLETION")) {
+            return;
+        }
         try {
             updateTaskField(task.deskId, task.id, 'completed', !task.completed);
             await sendEditTask(task.api.links.updateTaskCompletion.href,
@@ -111,15 +114,19 @@ export function Task({task, setContentIsLoading}) {
                                 task={task}
                                 hovered={hovered}
                                 taskCompleted={task.completed}
+                                disableDragging={disableDragging}
                             />
                             <TaskPlugins task={task} hovered={hovered}/>
                         </Box>
-
+                        {(userHasPermission("UPDATE_TASK_COLOR")
+                            || userHasPermission("UPDATE_TASK_COVER")
+                            || userHasPermission("DELETE_TASK")
+                            ) &&
                         <TaskMenu
                             task={task}
                             hovered={hovered}
                             setContentIsLoading={setContentIsLoading}
-                        />
+                        />}
                     </Box>
                 </Box>
             </Card>
