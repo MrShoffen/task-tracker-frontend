@@ -97,6 +97,62 @@ const darkDeskColor = {
     'PURPLE': 'rgb(191, 72, 205)',
 };
 
+export const lightStickerColor = {
+    // null: '#333c49',
+    'GREY': '#98A2B3',
+    'RED': '#D92400',
+    'PINK': '#FF8C8C',
+    'YELLOW': '#F5C24D',
+    'GREEN': '#79CE69',
+    'CYAN': '#2BDBCC',
+    'BLUE': '#8CC2FF',
+    'PURPLE': '#CA79DB',
+};
+
+export const darkStickerColor = {
+    // null: '#333c49',
+    'GREY': '#B8BFCF',
+    'RED': '#FF7979',
+    'PINK': '#FF8CC3',
+    'YELLOW': '#E9A24F',
+    'GREEN': '#7BBC55',
+    'CYAN': '#49C5BC',
+    'BLUE': '#8CACFF',
+    'PURPLE': '#CC8CFF',
+};
+
+export const darkStickBg = {
+    'GREY': '#424D5F',
+    'RED': '#703C3C',
+    'PINK': '#784155',
+    'YELLOW': '#644C35',
+    'GREEN': '#3C6435',
+    'CYAN': '#30685E',
+    'BLUE': '#375578',
+    'PURPLE': '#6E3F7E',
+};
+
+export const lightStickBg = {
+    'GREY': '#F1F2F5',
+    'RED': '#F7D3CC',
+    'PINK': '#FFE8E8',
+    'YELLOW': '#FDF3DB',
+    'GREEN': '#E4F5E1',
+    'CYAN': '#D5F8F5',
+    'BLUE': '#E8F3FF',
+    'PURPLE': '#F4E4F8',
+};
+
+export const stickerColor = (deskColor) => {
+    const {isDarkMode} = useCustomThemeContext();
+    return !isDarkMode ? lightStickerColor[deskColor] : darkStickerColor[deskColor];
+}
+
+export const stickerBgColor = (deskColor) => {
+    const {isDarkMode} = useCustomThemeContext();
+    return isDarkMode ? darkStickBg[deskColor] : lightStickBg[deskColor];
+}
+
 export const deskColor = (deskColor) => {
     const {isDarkMode} = useCustomThemeContext();
     return !isDarkMode ? lightDeskColor[deskColor] : darkDeskColor[deskColor];

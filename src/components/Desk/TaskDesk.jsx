@@ -82,7 +82,7 @@ export function TaskDesk({desk, sx, disableDragging}) {
                     backgroundColor: deskColor(desk.color),
                     display: 'flex',
                     flexDirection: 'column',
-                    maxHeight: 'calc(100vh - 100px)',
+                    maxHeight: 'calc(100vh - 120px)',
                     ...sx
                 }}>
 
@@ -112,13 +112,14 @@ export function TaskDesk({desk, sx, disableDragging}) {
                         left: '-30px',
                         borderRadius: 12.5,
                         position: 'absolute',
-                        height: '9000px',
+                        height: '100%',
                     }}
                 />
                 <Box sx={{
                     display: 'flex',
                     flexDirection: 'column',
-                    pb: 1.5
+                    pb: 1.5,
+                    // minHeight: '50px'
                 }}>
                     <EditableDeskName desk={desk} hovered={true} disableDragging={disableDragging}/>
                     <DeskMenu desk={desk}/>
@@ -136,7 +137,7 @@ export function TaskDesk({desk, sx, disableDragging}) {
                 }}>
                     <Box sx={{
                         overflowY: 'auto',
-                        flex: 1,
+                        // flex: 1,
                         '&::-webkit-scrollbar': {
                             width: '7px',
                         },
@@ -149,12 +150,10 @@ export function TaskDesk({desk, sx, disableDragging}) {
                         '&:hover::-webkit-scrollbar-thumb': {
                             visibility: 'visible',
                         }
-
-
                     }}>
                         <SortableContext items={desk.tasks.map(t => t.id)}
                                          strategy={verticalListSortingStrategy}
-                                         disabled={disableTaskDragging || !(userHasPermission("UPDATE_TASK_ORDER") || userHasPermission("UPDATE_TASK_DESK"))}
+                                         disabled={disableTaskDragging }
                         >
                             {desk.tasks && desk.tasks
                                 .sort((a, b) => b.orderIndex - a.orderIndex)

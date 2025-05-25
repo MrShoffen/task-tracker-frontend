@@ -19,7 +19,9 @@ export function UserAvatar({userInfo, sx = {}}) {
                 alt={userInfo?.email}
                 src={userInfo?.avatarUrl}
         >
-            {userInfo?.email.slice(0, 3)}
+            {(userInfo.firstName && userInfo.lastName) ?
+                (userInfo.firstName.slice(0, 1) + userInfo.lastName.slice(0, 1)) :
+                userInfo?.email.slice(0, 2)}
         </Avatar>
     )
 }

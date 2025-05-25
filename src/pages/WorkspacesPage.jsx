@@ -130,6 +130,7 @@ export default function WorkspacesPage() {
                     )
                     .then(updatedTask2 => {
                             updateTaskField(updatedTask2.deskId, updatedTask2.id, 'api', updatedTask2.api);
+                            updateTaskField(updatedTask2.deskId, updatedTask2.id, 'orderIndex', updatedTask2.orderIndex);
                         }
                     )
                 return;
@@ -140,6 +141,7 @@ export default function WorkspacesPage() {
         const isActiveTask = active.data.current?.type === "task";
         const isOverTask = over.data.current?.type === "task";
         if (isActiveTask && isOverTask) {
+
             const activeTask = active.data.current.task;
             const overTask = over.data.current.task;
             const workingDeskI = fullWorkspaceInformation
@@ -153,15 +155,23 @@ export default function WorkspacesPage() {
 
             const newOrderTask = calculateNewOrderIndexReversed(activeTIndex, overTIndex, workingDesk.tasks);
             // console.error(newOrderTask.orderIndex)
-            updateTaskOrder(workingDeskI, activeTIndex, newOrderTask);
 
             try {
                 if (sourceDesk === activeTask.deskId) {
-                    await sendEditTask(activeTask.api.links.updateTaskOrder.href,
+                    if (!userHasPermission("UPDATE_TASK_ORDER")) {
+                        return;
+                    }
+                    updateTaskOrder(workingDeskI, activeTIndex, newOrderTask);
+
+                    const nTsk = await sendEditTask(activeTask.api.links.updateTaskOrder.href,
                         {
                             updatedIndex: newOrderTask.orderIndex
                         });
+                    updateTaskField(nTsk.deskId, nTsk.id, 'orderIndex', nTsk.orderIndex);
+
                 } else {
+                    updateTaskOrder(workingDeskI, activeTIndex, newOrderTask);
+
                     sendEditTask(activeTask.api.links.updateTaskDesk.href,
                         {
                             newDeskId: newOrderTask.deskId
@@ -173,9 +183,9 @@ export default function WorkspacesPage() {
                                 })
                         )
                         .then(updatedTask2 => {
-                                updateTaskField(updatedTask2.deskId, updatedTask2.id, 'api', updatedTask2.api);
-                            }
-                        )
+                            updateTaskField(updatedTask2.deskId, updatedTask2.id, 'api', updatedTask2.api);
+                            updateTaskField(updatedTask2.deskId, updatedTask2.id, 'orderIndex', updatedTask2.orderIndex);
+                        })
                 }
             } catch (error) {
                 showWarn(error.message);
@@ -204,7 +214,9 @@ export default function WorkspacesPage() {
 
         if (active.data.current?.type === 'desk' &&
             over.data.current?.type === 'desk') {
-
+            if (!userHasPermission("UPDATE_DESK_ORDER")) {
+                return;
+            }
             const activeDeskIndex = fullWorkspaceInformation.desks.findIndex(d => d.id === activeId);
             const overDeskIndex = fullWorkspaceInformation.desks.findIndex(d => d.id === overId);
 
@@ -224,6 +236,7 @@ export default function WorkspacesPage() {
     function onDragOver(event) {
         const {active, over} = event;
         if (!over) {
+            console.log('tur')
             return;
         }
 
@@ -242,6 +255,7 @@ export default function WorkspacesPage() {
         }
 
         if (isActiveTask && isOverTask) {
+
             const activeTask = active.data.current.task;
             const overTask = over.data.current.task;
             if (activeTask.deskId === overTask.deskId) {
@@ -252,6 +266,9 @@ export default function WorkspacesPage() {
             }
 
             const targetDesk = fullWorkspaceInformation.desks.find(d => d.id === overTask.deskId);
+            if (targetDesk.id !== sourceDesk.id && !userHasPermission("UPDATE_TASK_DESK")) {
+                return;
+            }
             if (targetDesk?.tasks.some(t => t.id === activeTask.id)) return;
             moveTaskToAnotherDesk(activeTask, overTask.deskId);
             return;
@@ -259,6 +276,9 @@ export default function WorkspacesPage() {
 
         if (isActiveTask && over.data.current?.type === 'desk') {
             if (sourceDesk === overId) {
+                return;
+            }
+            if (!userHasPermission("UPDATE_TASK_DESK")) {
                 return;
             }
 
@@ -360,7 +380,7 @@ export default function WorkspacesPage() {
                             height: 'fit-content'
                         }}>
                             <SortableContext
-                                disabled={disableDnd || !userHasPermission("UPDATE_DESK_ORDER")}
+                                disabled={disableDnd}
                                 strategy={horizontalListSortingStrategy}
                                 items={fullWorkspaceInformation.desks.map(d => d.id)}>
                                 {fullWorkspaceInformation?.desks

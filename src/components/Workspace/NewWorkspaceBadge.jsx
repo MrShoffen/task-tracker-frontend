@@ -93,7 +93,6 @@ export function NewWorkspaceBadge() {
 
     const handleInput = () => {
         saveSelection();
-
     };
 
     useEffect(() => {

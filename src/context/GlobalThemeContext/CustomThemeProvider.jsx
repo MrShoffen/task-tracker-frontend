@@ -68,6 +68,7 @@ export const CustomThemeProvider = ({children}) => {
                     desk: !isDarkMode ? "rgba(241,241,241,0.93)" : "rgba(58,58,58,0.93)",
                     task: !isDarkMode ? "white" : "#333c49",
                     taskName: !isDarkMode ? "#121b2e" : "#d2d4d6",
+                    stickerName: isDarkMode ? "#121b2e" : "#f3f3f3",
                     menuPopup: isDarkMode ? "#252b35" : 'white',
                     card: isDarkMode ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.51)",
                     header: isDarkMode ? "rgba(46,46,46,0.7)" : "rgba(230,228,228,0.76)",

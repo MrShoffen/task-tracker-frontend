@@ -34,6 +34,20 @@ export const TaskLoadProvider = ({children}) => {
         }
     }
 
+    async function loadUserInfo(userId) {
+        const allUsers = fullWorkspaceInformation?.usersAndPermissions;
+        if (!allUsers) {
+            //todo fetch user
+        }
+
+        const userI = allUsers.findIndex(uap => uap.id === userId);
+        if (userI === -1) {
+            //todo fetch user
+        } else {
+            return allUsers[userI].info;
+        }
+    }
+
     function deleteWorkspace(workspace) {
         setWorkspaces(prev =>
             prev.filter(w => w.id !== workspace.id))
@@ -89,7 +103,7 @@ export const TaskLoadProvider = ({children}) => {
     function addNewPermission(uap, email) {
         const alreadyExists = fullWorkspaceInformation.usersAndPermissions
             .findIndex(u => u.info.email === email);
-        if(alreadyExists !== -1){
+        if (alreadyExists !== -1) {
             setFullWorkspaceInformation(prev => ({
                 ...prev,
                 usersAndPermissions: prev.usersAndPermissions.filter(u => u.userId !== uap.userId)
@@ -107,7 +121,7 @@ export const TaskLoadProvider = ({children}) => {
         }))
     }
 
-    function deletePermission(userId){
+    function deletePermission(userId) {
         setFullWorkspaceInformation(prev => ({
             ...prev,
             usersAndPermissions: prev.usersAndPermissions.filter(u => u.userId !== userId)
@@ -328,7 +342,9 @@ export const TaskLoadProvider = ({children}) => {
             updateDeskOrder,
 
             addNewPermission,
-            deletePermission
+            deletePermission,
+
+            loadUserInfo
         }}>
             {children}
         </TaskLoadContext.Provider>

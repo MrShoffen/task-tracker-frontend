@@ -15,6 +15,9 @@ import {UncheckedIcon} from "../assets/icons/UncheckedIcon.jsx";
 import {CheckedIcon} from "../assets/icons/CheckedIcon.jsx";
 import ModeNightIcon from "@mui/icons-material/ModeNight";
 import LightModeIcon from "@mui/icons-material/LightMode";
+import {CommentsIcon} from "../assets/icons/Comments.jsx";
+import {Sticker} from "../components/Sticker/Sticker.jsx";
+import {StickerMenu} from "../components/Sticker/StickerMenu.jsx";
 
 
 function PublicTask({task}) {
@@ -86,6 +89,63 @@ function PublicTask({task}) {
                             >
                                 {task.name}
                             </Typography>
+
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    opacity: !task.completed ? 1 : (!hovered ? 0.5 : 1),
+                                    mb: 1, mt: -0.5
+                                }}
+                            >
+                                <Box sx={{display: 'flex', flexWrap: 'wrap', gap: '5px'}}>
+                                    <Sticker sticker={{
+                                        color: "BLUE",
+                                        name: 'fjfjj jajsf',
+                                        image: "Bookmark"
+                                    }}/>
+                                    <Sticker sticker={{
+                                        color: "GREEN",
+                                        name: 'ferw sdfghf',
+                                        image: "Video"
+                                    }}/>
+                                    <Sticker sticker={{
+                                        color: "CYAN",
+                                        name: 'rere wer wer',
+                                        image: 'Fire'
+                                    }}/>
+                                    <Sticker sticker={{
+                                        color: "YELLOW",
+                                        name: 'fdgfs sdf f',
+                                        image: 'Geo'
+                                    }}/>
+
+                                    <Sticker sticker={{
+                                        color: "GREY",
+                                        name: 'ade g df ff f',
+                                        image: 'Idea'
+                                    }}/>
+
+                                    <Sticker sticker={{
+                                        color: "PURPLE",
+                                        name: 'red label here',
+                                        image: 'Cloud'
+                                    }}/>
+
+                                    <Sticker sticker={{
+                                        color: "RED",
+                                        name: 'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww',
+                                        image: 'Key'
+                                    }}/>
+
+                                    <Sticker sticker={{
+                                        color: "YELLOW",
+                                        name: 'boooza',
+                                        image: 'User'
+                                    }}/>
+                                    <StickerMenu task={task} hovered={hovered}/>
+                                </Box>
+                            </Box>
                         </Box>
 
                     </Box>
@@ -109,7 +169,7 @@ function PublicDesk({desk, sx}) {
                     backgroundColor: deskColor(desk.color),
                     display: 'flex',
                     flexDirection: 'column',
-                    maxHeight: 'calc(100vh - 100px)', // Ограничение максимальной высоты
+                    maxHeight: 'calc(100vh - 120px)', // Ограничение максимальной высоты
                     ...sx
                 }}>
 
@@ -127,7 +187,7 @@ function PublicDesk({desk, sx}) {
                         left: '-30px',
                         borderRadius: 12.5,
                         position: 'absolute',
-                        height: '9000px',
+                        height: '900px',
                         // zIndex: 200,
                     }}
                 />

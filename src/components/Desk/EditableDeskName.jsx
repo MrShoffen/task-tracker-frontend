@@ -105,7 +105,7 @@ export function EditableDeskName({desk = {name: ''}, disableDragging}) {
     }, [isEditing]);
 
     return (
-        <Box sx={{display: 'flex', alignItems: 'center'}}
+        <Box sx={{display: 'flex', }}
         >
             <Typography
                 component="div"

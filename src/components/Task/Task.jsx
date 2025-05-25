@@ -13,6 +13,7 @@ import {useSortable} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
 import {useCustomThemeContext} from "../../context/GlobalThemeContext/CustomThemeProvider.jsx";
 import {TaskPlugins} from "./TaskPlugins.jsx";
+import {UserAvatar} from "../Users/UserAvatar.jsx";
 
 export function Task({task, setContentIsLoading, disableDragging}) {
     const [hovered, setHovered] = React.useState(false);
@@ -36,7 +37,7 @@ export function Task({task, setContentIsLoading, disableDragging}) {
         }
     })
 
-    const {updateTaskField, userHasPermission} = useTaskOperations();
+    const {updateTaskField, loadUserInfo, userHasPermission} = useTaskOperations();
 
     const style = {
         transform: transform ? CSS.Translate.toString(transform) : undefined,
@@ -119,16 +120,30 @@ export function Task({task, setContentIsLoading, disableDragging}) {
                             <TaskPlugins task={task} hovered={hovered}/>
                         </Box>
                         {(userHasPermission("UPDATE_TASK_COLOR")
-                            || userHasPermission("UPDATE_TASK_COVER")
-                            || userHasPermission("DELETE_TASK")
+                                || userHasPermission("UPDATE_TASK_COVER")
+                                || userHasPermission("DELETE_TASK")
                             ) &&
-                        <TaskMenu
-                            task={task}
-                            hovered={hovered}
-                            setContentIsLoading={setContentIsLoading}
-                        />}
+                            <TaskMenu
+                                task={task}
+                                hovered={hovered}
+                                setContentIsLoading={setContentIsLoading}
+                            />}
                     </Box>
+
                 </Box>
+                <UserAvatar
+                    sx={{
+                        position: 'absolute',
+                        width: '25px',
+                        height: '25px',
+                        right: '5px',
+                        bottom: '7px',
+                        fontWeight: '400',
+                        fontSize: '0.7rem',
+                        // opacity: hovered ? 0.5 : 1
+                    }}
+                    userInfo={{email: 'WW'}}/>
+
             </Card>
         </div>
     )
