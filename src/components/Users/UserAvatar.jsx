@@ -3,21 +3,27 @@ import {avatarColor} from "../../services/util/Utils.jsx";
 import * as React from "react";
 
 
-export function UserAvatar({userInfo, sx = {}}) {
+export function UserAvatar({userInfo, sx = {}, handleMenuClick}) {
+
+    if (!userInfo) {
+        return null;
+    }
 
     return (
-        <Avatar sx={{
-            fontSize: "13px",
-            color: 'white',
-            border: '2px solid ',
-            borderColor: 'action.selected',
-            backgroundColor: userInfo ? avatarColor(userInfo?.email) : 'white',
-            fontWeight: "500",
-            m: 0,
-            ...sx
-        }}
-                alt={userInfo?.email}
-                src={userInfo?.avatarUrl}
+        <Avatar
+            onClick={handleMenuClick}
+            sx={{
+                fontSize: "13px",
+                color: 'white',
+                border: '1px solid ',
+                borderColor: 'action.selected',
+                backgroundColor: userInfo ? avatarColor(userInfo?.email) : 'white',
+                fontWeight: "500",
+                m: 0,
+                ...sx
+            }}
+            alt={userInfo?.email}
+            src={userInfo?.avatarUrl}
         >
             {(userInfo.firstName && userInfo.lastName) ?
                 (userInfo.firstName.slice(0, 1) + userInfo.lastName.slice(0, 1)) :

@@ -50,45 +50,9 @@ export function TaskPlugins({task, hovered}) {
                     </Box>
                 }
 
-                <Sticker sticker={{
-                    color: "BLUE",
-                    name: 'fjfjj jajsf',
-                    image: "Bookmark"
-                }}/>
-                <Sticker sticker={{
-                    color: "GREEN",
-                    name: 'ferw sdfghf',
-                    image: "Video"
-                }}/>
-                <Sticker sticker={{
-                    color: "CYAN",
-                    name: 'rere wer wer',
-                    image: 'Fire'
-                }}/>
-                <Sticker sticker={{
-                    color: "YELLOW",
-                    name: 'fdgfs sdf f',
-                    image: 'Geo'
-                }}/>
-
-                <Sticker sticker={{
-                    color: "GREY",
-                    name: 'ade g df ff f',
-                    image: 'Idea'
-                }}/>
-
-                <Sticker sticker={{
-                    color: "PURPLE",
-                    name: 'red label here',
-                    image: 'Cloud'
-                }}/>
-
-                <Sticker sticker={{
-                    color: "RED",
-                    name: 'Высокий приоритет',
-                    image: 'Priority'
-                }}/>
-
+                {task.stickers.map(sticker =>
+                    <Sticker sticker={sticker}/>
+                )}
 
                 <StickerMenu task={task} hovered={hovered}/>
             </Box>

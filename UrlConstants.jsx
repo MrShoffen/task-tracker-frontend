@@ -2,7 +2,7 @@ const isProduction = import.meta.env.MODE === "production"; // Определя�
 
 
 export const API_BASE_URL =
-        "http://localhost:8080"
+        "http://192.168.0.190:8080"
     // "http://localhost:8080"
 ;
 
@@ -20,7 +20,7 @@ export const API_UPDATE_EMAIL = API_BASE_URL + API_CONTEXT + '/auth/credentials/
 export const API_USER_INFO = API_BASE_URL + API_CONTEXT + '/users/me';
 export const API_USER_INFORMATION_UPDATE = API_USER_INFO + "/information";
 export const API_USER_AVATAR_UPDATE = API_USER_INFO + "/avatar";
-
+export const API_USER_INFO_UNAUTH = API_BASE_URL + API_CONTEXT + '/users/info';
 
 export const API_ALL_WORKSPACES = API_BASE_URL + API_CONTEXT + '/workspaces';
 

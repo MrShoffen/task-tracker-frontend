@@ -56,7 +56,7 @@ export function TaskDesk({desk, sx, disableDragging}) {
                         borderColor: 'taskName',
                         width: '300px',
                         backgroundColor: 'rgba(174,174,174,0.21)',
-                        height: 'calc(100vh - 100px)',
+                        height: 'calc(100vh - 105px)',
                     }}>
 
                 </Card>
@@ -82,7 +82,7 @@ export function TaskDesk({desk, sx, disableDragging}) {
                     backgroundColor: deskColor(desk.color),
                     display: 'flex',
                     flexDirection: 'column',
-                    maxHeight: 'calc(100vh - 120px)',
+                    maxHeight: 'calc(100vh - 105px)',
                     ...sx
                 }}>
 

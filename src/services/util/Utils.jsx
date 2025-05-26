@@ -32,12 +32,15 @@ export const avatarColor = (email) => {
         "rgba(6,101,193,0.8)",
         "rgba(202,56,47,0.8)",
         "rgba(55,133,6,0.8)",
-        "rgba(193,105,4,0.8)",
-        "rgba(152,4,193,0.8)",
+        "rgba(236,128,5,0.8)",
+        "rgb(206,96,239)",
         "rgba(6,177,162,0.8)",
         "rgba(146,177,6,0.8)",
+        "rgba(236,188,4,0.8)",
     ];
-
+    if(!email){
+        return 'white'
+    }
 
     let hash = 0;
     for (let i = 0; i < email.length; i++) {
@@ -45,10 +48,9 @@ export const avatarColor = (email) => {
         hash = (hash << 5) - hash + char;
         hash |= 0; // Преобразуем в 32-битное целое
     }
-    const index = email.charCodeAt(0) % 7;
+    const index = email.charCodeAt(0) % 8;
 
-    const string = colors[index];
-    return string;
+    return colors[index];
 }
 
 export const lightTaskColor = {

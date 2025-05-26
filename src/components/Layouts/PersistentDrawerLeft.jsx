@@ -171,6 +171,7 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                                             p: 0,
                                             width: 12,
                                             justifyContent: "center",
+                                            mb: '3px'
                                         }}
                                     >
                                         <Avatar sx={{
@@ -191,6 +192,7 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                                         opacity: open ? 1 : 0,
                                         '& .MuiTypography-root': {
                                             fontSize: '0.9rem',
+
                                         }
                                     }}/>
                                 </ListItemButton>

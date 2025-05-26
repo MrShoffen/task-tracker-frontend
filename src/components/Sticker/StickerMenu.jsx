@@ -10,6 +10,7 @@ import {IconsMenu} from "./IconsMenu.jsx";
 import {ColorMenu} from "./ColorMenu.jsx";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import TextField from "@mui/material/TextField";
+import {sendCreateSticker} from "../../services/fetch/tasks/sticker/SendCreateSticker.js";
 
 
 export function StickerMenu({task, hovered}) {
@@ -23,13 +24,14 @@ export function StickerMenu({task, hovered}) {
     const [selectedColor, setSelectedColor] = useState("RED");
     const [stickerText, setStickerText] = useState('');
     const [textErr, setTextErr] = useState(false);
-    const {deleteTask, updateTaskField, userHasPermission} = useTaskOperations();
+    const {addNewSticker, userHasPermission} = useTaskOperations();
 
     const handleMenuClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
 
     const handleMenuClose = () => {
+        setStickerText('');
         setAnchorEl(null);
     };
 
@@ -37,7 +39,6 @@ export function StickerMenu({task, hovered}) {
         if (e.key === 'Enter') {
             e.preventDefault();
             await handleConfirm();
-            // await handleBlur();
         } else if (e.key === 'Escape') {
             handleMenuClose();
         }
@@ -47,16 +48,24 @@ export function StickerMenu({task, hovered}) {
 
     function handleChange(e) {
         const t = e.target.value;
-
-        if (t.trim().length > 50) {
+        if (t.trim().length > 64) {
             return
         }
-
         setStickerText(t);
     }
 
     async function handleConfirm() {
-        console.log('booba')
+        try {
+            const newSticker = await sendCreateSticker(task.api.links.addSticker.href, {
+                name: stickerText,
+                color: selectedColor,
+                icon: selectedIcon
+            });
+            addNewSticker(newSticker);
+        } catch (error) {
+            console.log(error.message);
+        }
+        handleMenuClose();
     }
 
     return (
@@ -71,7 +80,7 @@ export function StickerMenu({task, hovered}) {
                 </IconButton>
             }
             <Popper
-                disablePortal
+                // disablePortal
                 id="edit-menu"
                 anchorEl={anchorEl}
                 open={open}

@@ -14,6 +14,8 @@ import {CSS} from "@dnd-kit/utilities";
 import {useCustomThemeContext} from "../../context/GlobalThemeContext/CustomThemeProvider.jsx";
 import {TaskPlugins} from "./TaskPlugins.jsx";
 import {UserAvatar} from "../Users/UserAvatar.jsx";
+import {UserInfo} from "../Users/UserInfo.jsx";
+import {useEffect} from "react";
 
 export function Task({task, setContentIsLoading, disableDragging}) {
     const [hovered, setHovered] = React.useState(false);
@@ -22,6 +24,7 @@ export function Task({task, setContentIsLoading, disableDragging}) {
     const taskColor = (taskColor) => {
         return !isDarkMode ? lightTaskColor[taskColor] : darkTaskColor[taskColor];
     }
+
 
     const {
         setNodeRef,
@@ -37,12 +40,26 @@ export function Task({task, setContentIsLoading, disableDragging}) {
         }
     })
 
-    const {updateTaskField, loadUserInfo, userHasPermission} = useTaskOperations();
+    const {updateTaskField, usersInWs, userHasPermission} = useTaskOperations();
 
     const style = {
         transform: transform ? CSS.Translate.toString(transform) : undefined,
         paddingBottom: '10px'
     };
+
+
+    const [user, setUser] = React.useState(null);
+
+    async function loadUser() {
+        const alreadySavedUser = usersInWs.findIndex(user => user.id === task.userId);
+        if (alreadySavedUser !== -1) {
+            setUser(usersInWs[alreadySavedUser]);
+        }
+    }
+
+    useEffect(() => {
+        loadUser();
+    }, [usersInWs]);
 
     const handleCompletionClick = async () => {
         if (!userHasPermission("UPDATE_TASK_COMPLETION")) {
@@ -131,7 +148,7 @@ export function Task({task, setContentIsLoading, disableDragging}) {
                     </Box>
 
                 </Box>
-                <UserAvatar
+                <UserInfo
                     sx={{
                         position: 'absolute',
                         width: '25px',
@@ -140,9 +157,11 @@ export function Task({task, setContentIsLoading, disableDragging}) {
                         bottom: '7px',
                         fontWeight: '400',
                         fontSize: '0.7rem',
-                        // opacity: hovered ? 0.5 : 1
+                        opacity: !task.completed ? 1 : (!hovered ? 0.5 : 1),
                     }}
-                    userInfo={{email: 'WW'}}/>
+                    user={user}
+                    createdAt={task.createdAt}
+                />
 
             </Card>
         </div>

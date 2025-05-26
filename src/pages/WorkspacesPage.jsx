@@ -23,7 +23,6 @@ export default function WorkspacesPage() {
         updateDeskOrder,
         workspaces,
         userHasPermission,
-        loadFullWorkspace,
         moveTaskToAnotherDesk,
         loadAllWorkspaces,
         updateTaskOrder,

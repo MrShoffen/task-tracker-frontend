@@ -2,6 +2,7 @@ import {createContext, useContext, useState} from "react";
 import {sendGetAllWorkspaces} from "../../services/fetch/tasks/ws/SendGetAllWorkspaces.js";
 import {sendGetFullWsInformation} from "../../services/fetch/tasks/ws/SendGetFullWsInformation.js";
 import {useAuthContext} from "../Auth/AuthContext.jsx";
+import {sendUserInfo} from "../../services/fetch/unauth/SendUserInfo.js";
 
 
 const TaskLoadContext = createContext(null);
@@ -17,6 +18,8 @@ export const TaskLoadProvider = ({children}) => {
 
     const [permissions, setPermissions] = useState([]);
 
+    const [usersInWs, setUsersInWs] = useState([]);
+
     const [fullWorkspaceInformation, setFullWorkspaceInformation] = useState({
         createdAt: "2025-05-14T09:49:41.258378Z",
         desks: [],
@@ -31,20 +34,6 @@ export const TaskLoadProvider = ({children}) => {
             return allWs;
         } catch (error) {
             console.log("failed to load all workspaces " + error);
-        }
-    }
-
-    async function loadUserInfo(userId) {
-        const allUsers = fullWorkspaceInformation?.usersAndPermissions;
-        if (!allUsers) {
-            //todo fetch user
-        }
-
-        const userI = allUsers.findIndex(uap => uap.id === userId);
-        if (userI === -1) {
-            //todo fetch user
-        } else {
-            return allUsers[userI].info;
         }
     }
 
@@ -70,8 +59,48 @@ export const TaskLoadProvider = ({children}) => {
 
         setPermissions(uap?.permissions);
 
+        preloadWsUsers(fullWs.desks, fullWs.usersAndPermissions);
+
         return fullWs;
     }
+
+
+    async function preloadWsUsers(desks, usersAndPermissions) {
+        async function preloadDesk(desk, allUsers, usersAndPermissions) {
+            for (const task of desk.tasks) {
+                await loadUserFromTask(task, allUsers, usersAndPermissions);
+            }
+        }
+
+        async function loadUserFromTask(task, allUsers, usersAndPermissions) {
+            const findIndex = allUsers.findIndex(user => user.id === task.userId);
+            if (findIndex !== -1) {
+                return;
+            }
+
+            const userI = usersAndPermissions.findIndex(uap => uap.userId === task.userId);
+            if (userI === -1) {
+                console.log('fetching unknown user');
+                const fetchedUser = await sendUserInfo(task.userId);
+                const nUser = {...fetchedUser, id: task.userId};
+                allUsers.push(nUser);
+            } else {
+                allUsers.push({
+                    ...usersAndPermissions[userI].info,
+                    id: usersAndPermissions[userI].userId
+                })
+            }
+
+        }
+
+        const allUsers = [];
+        for (const desk of desks) {
+            await preloadDesk(desk, allUsers, usersAndPermissions);
+        }
+
+        setUsersInWs(allUsers);
+    }
+
 
     function userHasPermission(permission) {
         if (permissions === null) {
@@ -219,9 +248,14 @@ export const TaskLoadProvider = ({children}) => {
             }
 
             const updatedDesks = [...prevData.desks];
+
             updatedDesks[deskIndex] = {
                 ...updatedDesks[deskIndex],
-                tasks: [...updatedDesks[deskIndex].tasks, newTask]
+                tasks: [...updatedDesks[deskIndex].tasks,
+                    {
+                        ...newTask,
+                        stickers: []
+                    }]
             };
             console.log(updatedDesks)
             return {
@@ -315,6 +349,43 @@ export const TaskLoadProvider = ({children}) => {
         });
     }
 
+
+    function addNewSticker(newSticker) {
+        console.log(newSticker);
+        const deskIdForUpdate = newSticker.deskId;
+        const taskIdForUpdate = newSticker.taskId;
+        setFullWorkspaceInformation(prevData => {
+            const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
+            if (deskIndex === -1) {
+                console.error("Desk not found");
+                return prevData;
+            }
+
+            const updatedDesks = [...prevData.desks];
+
+
+            const taskIndex = prevData.desks[deskIndex].tasks.findIndex(task => task.id === taskIdForUpdate);
+
+            const updatedTasks = [...prevData.desks[deskIndex].tasks];
+
+            updatedTasks[taskIndex] = {
+                ...updatedTasks[taskIndex],
+                stickers: [...updatedTasks[taskIndex].stickers, newSticker],
+            }
+
+            updatedDesks[deskIndex] = {
+                ...updatedDesks[deskIndex],
+                tasks: updatedTasks
+            };
+            console.log(updatedDesks)
+            return {
+                ...prevData,
+                desks: updatedDesks
+            }
+
+        })
+    }
+
 //todo add name updating also heher
     return (
         <TaskLoadContext.Provider value={{
@@ -344,7 +415,9 @@ export const TaskLoadProvider = ({children}) => {
             addNewPermission,
             deletePermission,
 
-            loadUserInfo
+            usersInWs,
+
+            addNewSticker
         }}>
             {children}
         </TaskLoadContext.Provider>

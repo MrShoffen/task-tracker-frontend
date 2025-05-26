@@ -30,7 +30,7 @@ export function Sticker({sticker}) {
                                 opacity: 1, height: '16px',
                                 p: 0,
                             }}>
-                    <StickerImage image={sticker.image} color={theme.palette.stickerName}/>
+                    <StickerImage image={sticker.icon} color={theme.palette.stickerName}/>
                 </IconButton>
             </Box>
             <Typography sx={theme => ({
@@ -40,6 +40,7 @@ export function Sticker({sticker}) {
                 color: stickerColor(sticker.color),
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
+                userSelect: 'none',
                 textOverflow: 'ellipsis',
                 mr: '3px'
             })} variant='body2' fontSize={'0.7rem'}>
