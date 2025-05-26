@@ -47,19 +47,12 @@ export function Task({task, setContentIsLoading, disableDragging}) {
         paddingBottom: '10px'
     };
 
-
-    const [user, setUser] = React.useState(null);
-
-    async function loadUser() {
+    function loadUser() {
         const alreadySavedUser = usersInWs.findIndex(user => user.id === task.userId);
         if (alreadySavedUser !== -1) {
-            setUser(usersInWs[alreadySavedUser]);
+            return usersInWs[alreadySavedUser];
         }
     }
-
-    useEffect(() => {
-        loadUser();
-    }, [usersInWs]);
 
     const handleCompletionClick = async () => {
         if (!userHasPermission("UPDATE_TASK_COMPLETION")) {
@@ -159,7 +152,7 @@ export function Task({task, setContentIsLoading, disableDragging}) {
                         fontSize: '0.7rem',
                         opacity: !task.completed ? 1 : (!hovered ? 0.5 : 1),
                     }}
-                    user={user}
+                    user={loadUser()}
                     createdAt={task.createdAt}
                 />
 

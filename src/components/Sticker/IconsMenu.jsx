@@ -1,6 +1,6 @@
 import * as React from "react";
 import {useState} from "react";
-import {ClickAwayListener, IconButton, Paper, Popper, useTheme} from "@mui/material";
+import {Box, ClickAwayListener, IconButton, Paper, Popper, useTheme} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {allStickerIcons, StickerImage} from "../../assets/icons/stickers/StickerUtils.jsx";
 
@@ -21,7 +21,10 @@ export function IconsMenu({selectedIcon, setSelectedIcon}) {
     };
 
     return (
-        <>
+        <Box
+            onMouseEnter={handleHover}
+            onMouseLeave={handleMenuClose}
+        >
             <IconButton
                 onClick={handleHover}
                 // onMouseLeave={handleMenuClose}
@@ -37,7 +40,7 @@ export function IconsMenu({selectedIcon, setSelectedIcon}) {
                 onMouseLeave={handleMenuClose}
 
                 onClose={handleMenuClose}
-                placement="auto"
+                placement="bottom"
                 sx={{
                     zIndex: 1310,
                 }}
@@ -77,6 +80,6 @@ export function IconsMenu({selectedIcon, setSelectedIcon}) {
                     </Paper>
                 </ClickAwayListener>
             </Popper>
-        </>
+        </Box>
     )
 }

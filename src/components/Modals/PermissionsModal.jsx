@@ -51,6 +51,10 @@ const permissionGroups = {
         "Перетаскивание в другую доску": "UPDATE_TASK_DESK",
         "Удаление задачи": "DELETE_TASK"
     },
+    "Стикеры": {
+        "Создание стикеров": "CREATE_STICKERS",
+        "Удаление стикеров": "DELETE_STICKERS"
+    },
     "Комментарии": {
         "Создание/просмотр комментариев": "CREATE_READ_COMMENTS",
         "Удаление комментариев": "DELETE_COMMENTS"
@@ -70,7 +74,9 @@ export default function PermissionsModal({workspace, open, onClose}) {
         && grantedPermissions.includes("UPDATE_TASK_COMPLETION")
         && grantedPermissions.includes("UPDATE_TASK_DESK")
         && grantedPermissions.includes("UPDATE_TASK_ORDER")
-        && grantedPermissions.length === 7;
+        && grantedPermissions.includes("CREATE_STICKERS")
+        && grantedPermissions.includes("DELETE_STICKERS")
+        && grantedPermissions.length === 9;
     const adminPerms = grantedPermissions.includes("READ_WORKSPACE_CONTENT")
         && grantedPermissions.includes("UPDATE_TASK_DESK")
         && grantedPermissions.includes("UPDATE_TASK_ORDER")
@@ -84,6 +90,8 @@ export default function PermissionsModal({workspace, open, onClose}) {
         && grantedPermissions.includes("DELETE_COMMENTS")
         && grantedPermissions.includes("CREATE_TASK")
         && grantedPermissions.includes("UPDATE_DESK_COLOR")
+        && grantedPermissions.includes("CREATE_STICKERS")
+        && grantedPermissions.includes("DELETE_STICKERS")
         && grantedPermissions.includes("UPDATE_DESK_ORDER")
         && grantedPermissions.includes("UPDATE_DESK_NAME");
 
@@ -105,14 +113,14 @@ export default function PermissionsModal({workspace, open, onClose}) {
         if (type === "USER") {
             setGrantedPermissions(["READ_WORKSPACE_CONTENT",
                 "UPDATE_TASK_DESK", "UPDATE_TASK_ORDER",
-                "UPDATE_TASK_COLOR","UPDATE_TASK_COVER",
+                "UPDATE_TASK_COLOR", "UPDATE_TASK_COVER", "CREATE_STICKERS", "DELETE_STICKERS",
                 "CREATE_READ_COMMENTS", "UPDATE_TASK_COMPLETION"]);
         }
         if (type === "ADMIN") {
             setGrantedPermissions(["READ_WORKSPACE_CONTENT",
                 "UPDATE_TASK_DESK", "UPDATE_TASK_ORDER",
                 "CREATE_READ_COMMENTS", "UPDATE_TASK_COMPLETION", "UPDATE_DESK_ORDER",
-                "UPDATE_TASK_COLOR", "UPDATE_TASK_NAME", "UPDATE_TASK_COVER",
+                "UPDATE_TASK_COLOR", "UPDATE_TASK_NAME", "UPDATE_TASK_COVER","CREATE_STICKERS", "DELETE_STICKERS",
                 "CREATE_TASK", "CREATE_DESK", "UPDATE_DESK_COLOR", "UPDATE_DESK_NAME",
                 "DELETE_TASK", "DELETE_DESK", "DELETE_COMMENTS"
             ]);
@@ -476,90 +484,90 @@ export default function PermissionsModal({workspace, open, onClose}) {
                             {workspace.usersAndPermissions
                                 .filter(uap => auth.user.email !== uap.info.email)
                                 .map(uap => (
-                                <Box
-                                    onClick={() => {
-                                        setEmail(uap.info.email);
-                                        setGrantedPermissions(uap.permissions)
-                                    }}
-                                    sx={{
-                                        cursor: 'pointer',
-                                        height: '50px',
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        borderBottom: '1px solid',
-                                        p: '4px',
-                                        position: 'relative',
-                                        alignItems: 'center',
-                                        borderColor: 'action.disabled'
-                                    }}>
-                                    <UserAvatar userInfo={uap.info}/>
+                                    <Box
+                                        onClick={() => {
+                                            setEmail(uap.info.email);
+                                            setGrantedPermissions(uap.permissions)
+                                        }}
+                                        sx={{
+                                            cursor: 'pointer',
+                                            height: '50px',
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            borderBottom: '1px solid',
+                                            p: '4px',
+                                            position: 'relative',
+                                            alignItems: 'center',
+                                            borderColor: 'action.disabled'
+                                        }}>
+                                        <UserAvatar userInfo={uap.info}/>
 
-                                    <Typography sx={{
-                                        fontSize: '0.9rem', ml: 2,
-                                        width: '150px',
-                                        fontWeight: uap.info.email === auth.user.email ? 'bold' : 'regular',
-                                        whiteSpace: 'nowrap',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                    }} variant="body2">
-                                        {uap.info.email}</Typography>
-
-                                    {workspace.userId === uap.userId ?
                                         <Typography sx={{
                                             fontSize: '0.9rem', ml: 2,
                                             width: '150px',
-                                            color: 'action.disabled',
+                                            fontWeight: uap.info.email === auth.user.email ? 'bold' : 'regular',
                                             whiteSpace: 'nowrap',
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis',
                                         }} variant="body2">
-                                            Владелец</Typography>
+                                            {uap.info.email}</Typography>
+
+                                        {workspace.userId === uap.userId ?
+                                            <Typography sx={{
+                                                fontSize: '0.9rem', ml: 2,
+                                                width: '150px',
+                                                color: 'action.disabled',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                            }} variant="body2">
+                                                Владелец</Typography>
 
                                             : <Box sx={{width: '150px'}}></Box>}
 
-                                    <Tooltip
-                                        title={uap.permissions.join('\n')}
-                                        placement="bottom"
-                                        arrow
-                                        slotProps={{
-                                            tooltip: {
-                                                sx: {
-                                                    whiteSpace: 'pre-wrap',
-                                                    fontSize: 13,
-                                                    borderRadius: 2,
+                                        <Tooltip
+                                            title={uap.permissions.join('\n')}
+                                            placement="bottom"
+                                            arrow
+                                            slotProps={{
+                                                tooltip: {
+                                                    sx: {
+                                                        whiteSpace: 'pre-wrap',
+                                                        fontSize: 13,
+                                                        borderRadius: 2,
+                                                    }
                                                 }
-                                            }
-                                        }}
-                                    >
-                                        <IconButton disableRipple
-                                                    sx={{
-                                                        position: 'absolute',
-                                                        right: 30,
-                                                        top: 7
-                                                    }}
-                                        >
-                                            <QuestionMarkIcon sx={{fontSize: '18px'}}/>
-                                        </IconButton>
-                                    </Tooltip>
-
-                                    {userHasPermission("UPDATE_WORKSPACE_PERMISSIONS") && workspace.userId !== uap.userId &&
-                                        <IconButton
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                revokeGrants(uap)
-                                            }}
-                                            sx={{
-                                                position: 'absolute',
-                                                right: 2,
-                                                top: 8
                                             }}
                                         >
-                                            <DeleteTask color={'rgba(193,9,9,0.9)'}/>
-                                        </IconButton>
+                                            <IconButton disableRipple
+                                                        sx={{
+                                                            position: 'absolute',
+                                                            right: 30,
+                                                            top: 7
+                                                        }}
+                                            >
+                                                <QuestionMarkIcon sx={{fontSize: '18px'}}/>
+                                            </IconButton>
+                                        </Tooltip>
 
-                                    }
-                                </Box>
-                            ))}
+                                        {userHasPermission("UPDATE_WORKSPACE_PERMISSIONS") && workspace.userId !== uap.userId &&
+                                            <IconButton
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    revokeGrants(uap)
+                                                }}
+                                                sx={{
+                                                    position: 'absolute',
+                                                    right: 2,
+                                                    top: 8
+                                                }}
+                                            >
+                                                <DeleteTask color={'rgba(193,9,9,0.9)'}/>
+                                            </IconButton>
+
+                                        }
+                                    </Box>
+                                ))}
 
 
                         </Box>

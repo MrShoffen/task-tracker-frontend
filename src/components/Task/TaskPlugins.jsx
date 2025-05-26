@@ -51,10 +51,11 @@ export function TaskPlugins({task, hovered}) {
                 }
 
                 {task.stickers.map(sticker =>
-                    <Sticker sticker={sticker}/>
+                    <Sticker key={sticker.id} sticker={sticker} deskId={task.deskId}/>
                 )}
-
-                <StickerMenu task={task} hovered={hovered}/>
+                {userHasPermission("CREATE_STICKERS") &&
+                    <StickerMenu task={task} hovered={hovered}/>
+                }
             </Box>
         </Box>
     )

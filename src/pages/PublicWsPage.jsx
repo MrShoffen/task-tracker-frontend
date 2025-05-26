@@ -99,51 +99,7 @@ function PublicTask({task}) {
                                 }}
                             >
                                 <Box sx={{display: 'flex', flexWrap: 'wrap', gap: '5px'}}>
-                                    <Sticker sticker={{
-                                        color: "BLUE",
-                                        name: 'fjfjj jajsf',
-                                        image: "Bookmark"
-                                    }}/>
-                                    <Sticker sticker={{
-                                        color: "GREEN",
-                                        name: 'ferw sdfghf',
-                                        image: "Video"
-                                    }}/>
-                                    <Sticker sticker={{
-                                        color: "CYAN",
-                                        name: 'rere wer wer',
-                                        image: 'Fire'
-                                    }}/>
-                                    <Sticker sticker={{
-                                        color: "YELLOW",
-                                        name: 'fdgfs sdf f',
-                                        image: 'Geo'
-                                    }}/>
-
-                                    <Sticker sticker={{
-                                        color: "GREY",
-                                        name: 'ade g df ff f',
-                                        image: 'Idea'
-                                    }}/>
-
-                                    <Sticker sticker={{
-                                        color: "PURPLE",
-                                        name: 'red label here',
-                                        image: 'Cloud'
-                                    }}/>
-
-                                    <Sticker sticker={{
-                                        color: "RED",
-                                        name: 'wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww',
-                                        image: 'Key'
-                                    }}/>
-
-                                    <Sticker sticker={{
-                                        color: "YELLOW",
-                                        name: 'boooza',
-                                        image: 'User'
-                                    }}/>
-                                    <StickerMenu task={task} hovered={hovered}/>
+                                    //stickers todo
                                 </Box>
                             </Box>
                         </Box>

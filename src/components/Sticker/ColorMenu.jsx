@@ -24,9 +24,11 @@ export function ColorMenu({selectedColor, setSelectedColor}) {
     };
 
     return (
-        <>
+        <Box
+            onMouseEnter={handleHover}
+            onMouseLeave={handleMenuClose}
+        >
             <IconButton
-                onClick={handleHover}
                 disableRipple
                 sx={{p: 0, ml: '5px'}}>
                 <Box sx={{
@@ -40,7 +42,7 @@ export function ColorMenu({selectedColor, setSelectedColor}) {
                 open={open}
                 onMouseLeave={handleMenuClose}
                 onClose={handleMenuClose}
-                placement="auto"
+                placement="bottom"
                 sx={{zIndex: 1310,}}
             >
                 <ClickAwayListener onClickAway={handleMenuClose}>
@@ -79,6 +81,6 @@ export function ColorMenu({selectedColor, setSelectedColor}) {
                     </Paper>
                 </ClickAwayListener>
             </Popper>
-        </>
+        </Box>
     )
 }

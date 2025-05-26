@@ -73,27 +73,20 @@ export const TaskLoadProvider = ({children}) => {
         }
 
         async function loadUserFromTask(task, allUsers, usersAndPermissions) {
-            const findIndex = allUsers.findIndex(user => user.id === task.userId);
-            if (findIndex !== -1) {
+            if (allUsers.findIndex(user => user.id === task.userId) !== -1) {
                 return;
             }
 
-            const userI = usersAndPermissions.findIndex(uap => uap.userId === task.userId);
-            if (userI === -1) {
-                console.log('fetching unknown user');
-                const fetchedUser = await sendUserInfo(task.userId);
-                const nUser = {...fetchedUser, id: task.userId};
-                allUsers.push(nUser);
-            } else {
-                allUsers.push({
-                    ...usersAndPermissions[userI].info,
-                    id: usersAndPermissions[userI].userId
-                })
-            }
-
+            console.log('fetching unknown user');
+            const fetchedUser = await sendUserInfo(task.userId);
+            const nUser = {...fetchedUser, id: task.userId};
+            allUsers.push(nUser);
         }
 
-        const allUsers = [];
+        const allUsers = usersAndPermissions.map(uap => ({
+            ...uap.info,
+            id: uap.userId,
+        }));
         for (const desk of desks) {
             await preloadDesk(desk, allUsers, usersAndPermissions);
         }
@@ -350,9 +343,8 @@ export const TaskLoadProvider = ({children}) => {
     }
 
 
-    function addNewSticker(newSticker) {
+    function addNewSticker(deskIdForUpdate, newSticker) {
         console.log(newSticker);
-        const deskIdForUpdate = newSticker.deskId;
         const taskIdForUpdate = newSticker.taskId;
         setFullWorkspaceInformation(prevData => {
             const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
@@ -382,6 +374,54 @@ export const TaskLoadProvider = ({children}) => {
                 ...prevData,
                 desks: updatedDesks
             }
+
+        })
+    }
+
+
+    function deleteSticker(deskIdForUpdate, sticker) {
+        const taskIdForUpdate = sticker.taskId;
+
+        setFullWorkspaceInformation(prevData => {
+            const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
+            if (deskIndex === -1) {
+                console.error("Desk not found");
+                return prevData;
+            }
+
+            const updatedDesks = [...prevData.desks];
+
+            const taskIndex = prevData.desks[deskIndex].tasks.findIndex(task => task.id === taskIdForUpdate);
+
+
+            if (taskIndex === -1) {
+                console.error("Task not found");
+                return prevData;
+            }
+
+            const updatedTasks = [...prevData.desks[deskIndex].tasks];
+
+            const currentTask = updatedTasks[taskIndex];
+            if (!currentTask || !currentTask.stickers) {
+                console.error("Task or stickers not found");
+                return prevData;
+            }
+
+            updatedTasks[taskIndex] = {
+                ...currentTask,
+                stickers: currentTask.stickers.filter(stick => stick.id !== sticker.id)
+            };
+
+            // Обновляем доску
+            updatedDesks[deskIndex] = {
+                ...updatedDesks[deskIndex],
+                tasks: updatedTasks
+            };
+
+            return {
+                ...prevData,
+                desks: updatedDesks
+            };
 
         })
     }
@@ -417,7 +457,8 @@ export const TaskLoadProvider = ({children}) => {
 
             usersInWs,
 
-            addNewSticker
+            addNewSticker,
+            deleteSticker
         }}>
             {children}
         </TaskLoadContext.Provider>

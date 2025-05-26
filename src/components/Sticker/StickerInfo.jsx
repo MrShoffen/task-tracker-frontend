@@ -1,49 +1,45 @@
-import {UserAvatar} from "./UserAvatar.jsx";
 import * as React from "react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Box, ClickAwayListener, Divider, Paper, Popper} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import {formatDate} from "../../services/util/Utils.jsx";
+import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
+import {UserAvatar} from "../Users/UserAvatar.jsx";
 
 
-export function UserInfo({sx = {}, createdAt, user}) {
-    const [anchorEl, setAnchorEl] = useState(null);
+export function StickerInfo({sx = {}, sticker, handleClose, open, anchorEl}) {
+    const {usersInWs} = useTaskOperations();
 
-    const handleMenuClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
 
-    const handleMenuClose = () => {
-        setAnchorEl(null);
-    };
-    const open = Boolean(anchorEl);
+
+    const [user, setUser] = React.useState(null);
+
+    async function loadUser() {
+        const alreadySavedUser = usersInWs.findIndex(user => user.id === sticker.userId);
+        console.log('loading user in sticker')
+        if (alreadySavedUser !== -1) {
+            setUser(usersInWs[alreadySavedUser]);
+        }
+    }
+
+    useEffect(() => {
+        if (open) {
+            loadUser();
+        }
+    }, [open]);
 
 
     return (
         <>
             {user &&
                 <>
-                    <UserAvatar
-                        handleMenuClick={handleMenuClick}
-                        sx={{
-                            position: 'bottom',
-                            width: '25px',
-                            height: '25px',
-                            right: '5px',
-                            bottom: '7px',
-                            fontWeight: '400',
-                            fontSize: '0.7rem',
-                            ...sx
-                            // opacity: hovered ? 0.5 : 1
-                        }}
-                        userInfo={user}/>
                     {
                         // hovered &&
                         <Popper
                             id="edit-menu"
                             anchorEl={anchorEl}
                             open={open}
-                            onClose={handleMenuClose}
+                            onClose={handleClose}
                             placement="auto"
                             sx={{
                                 zIndex: 1800,
@@ -51,7 +47,7 @@ export function UserInfo({sx = {}, createdAt, user}) {
                             }}
 
                         >
-                            <ClickAwayListener onClickAway={handleMenuClose}>
+                            <ClickAwayListener onClickAway={handleClose}>
                                 <Paper
                                     elevation={3}
                                     sx={{
@@ -67,7 +63,7 @@ export function UserInfo({sx = {}, createdAt, user}) {
                                                 textAlign="center"
                                                 fontSize="0.8rem"
                                                 fontWeight="500">
-                                        Автор задачи
+                                        Автор стикера
                                     </Typography>
 
                                     <Box display='flex' flexDirection='column'
@@ -177,7 +173,7 @@ export function UserInfo({sx = {}, createdAt, user}) {
                                             }} textAlign="center"
                                                         fontSize="0.8rem"
                                                         fontWeight="400">
-                                                {'Дата: ' + formatDate(createdAt)}
+                                                {'Дата: ' + formatDate(sticker.createdAt)}
                                             </Typography>
                                         </Box>
                                     </Box>

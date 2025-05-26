@@ -1,9 +1,7 @@
 import * as React from "react";
-import {useRef, useState} from "react";
+import {useState} from "react";
 import {Box, ClickAwayListener, IconButton, Paper, Popper, useTheme} from "@mui/material";
-import {useCustomThemeContext} from "../../context/GlobalThemeContext/CustomThemeProvider.jsx";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
-import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 import {AddStickerIcon} from "../../assets/icons/AddStickerIcon.jsx";
 import Typography from "@mui/material/Typography";
 import {IconsMenu} from "./IconsMenu.jsx";
@@ -18,12 +16,9 @@ export function StickerMenu({task, hovered}) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const theme = useTheme();
-    const {isDarkMode} = useCustomThemeContext();
-
     const [selectedIcon, setSelectedIcon] = useState("Stick");
     const [selectedColor, setSelectedColor] = useState("RED");
     const [stickerText, setStickerText] = useState('');
-    const [textErr, setTextErr] = useState(false);
     const {addNewSticker, userHasPermission} = useTaskOperations();
 
     const handleMenuClick = (event) => {
@@ -34,6 +29,7 @@ export function StickerMenu({task, hovered}) {
         setStickerText('');
         setAnchorEl(null);
     };
+
 
     const handleKeyDown = async (e) => {
         if (e.key === 'Enter') {
@@ -61,7 +57,7 @@ export function StickerMenu({task, hovered}) {
                 color: selectedColor,
                 icon: selectedIcon
             });
-            addNewSticker(newSticker);
+            addNewSticker(task.deskId, newSticker);
         } catch (error) {
             console.log(error.message);
         }
@@ -116,7 +112,7 @@ export function StickerMenu({task, hovered}) {
                             <ColorMenu selectedColor={selectedColor} setSelectedColor={setSelectedColor}/>
 
                             <TextField
-                                // error={textErr}
+                                autoFocus
                                 value={stickerText}
                                 placeholder='Имя'
                                 onKeyDown={handleKeyDown}
@@ -125,6 +121,7 @@ export function StickerMenu({task, hovered}) {
                                 sx={{
                                     width: '100px',
                                     ml: '5px',
+                                    mt: '2px',
                                     '& .MuiInputBase-input': {
                                         fontSize: '0.7rem',
                                         p: '2px 4px',
@@ -140,6 +137,7 @@ export function StickerMenu({task, hovered}) {
                                     width: '18px',
                                     height: '18px',
                                     ml: '4px',
+                                    mt: '3px',
                                     color: 'info.main'
                                 }}>
                                 <CheckCircleOutlineIcon sx={{fontSize: '20px'}}/>
