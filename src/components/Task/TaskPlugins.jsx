@@ -6,6 +6,8 @@ import {Sticker} from "../Sticker/Sticker.jsx";
 import {EditIcon} from "../../assets/icons/EditIcon.jsx";
 import {AddStickerIcon} from "../../assets/icons/AddStickerIcon.jsx";
 import {StickerMenu} from "../Sticker/StickerMenu.jsx";
+import {SortableContext, verticalListSortingStrategy} from "@dnd-kit/sortable";
+import {StickerSkeleton} from "../Sticker/StickerSkeleton.jsx";
 
 export function TaskPlugins({task, hovered}) {
     const theme = useTheme();
@@ -50,9 +52,14 @@ export function TaskPlugins({task, hovered}) {
                     </Box>
                 }
 
-                {task.stickers.map(sticker =>
-                    <Sticker key={sticker.id} sticker={sticker} deskId={task.deskId}/>
-                )}
+                <SortableContext items={task.stickers.map(t => t.id)}
+                                 // strategy={verticalListSortingStrategy}
+                                 // disabled={disableTaskDragging}
+                >
+                    {task.stickers.map(sticker =>
+                        <Sticker key={sticker.id} sticker={sticker} deskId={task.deskId}/>
+                    )}
+                </SortableContext>
                 {userHasPermission("CREATE_STICKERS") &&
                     <StickerMenu task={task} hovered={hovered}/>
                 }

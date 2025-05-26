@@ -16,6 +16,8 @@ import {createPortal} from "react-dom";
 import {calculateNewOrderIndex, calculateNewOrderIndexReversed} from "../services/util/Utils.jsx";
 import {sendEditDesk} from "../services/fetch/tasks/desk/SendEditDesk.js";
 import {sendEditTask} from "../services/fetch/tasks/task/SendEditTask.js";
+import {Sticker} from "../components/Sticker/Sticker.jsx";
+import {StickerSkeleton} from "../components/Sticker/StickerSkeleton.jsx";
 
 export default function WorkspacesPage() {
     const {
@@ -39,6 +41,7 @@ export default function WorkspacesPage() {
 
     const [draggingDesk, setDraggingDesk] = useState(null);
     const [draggingTask, setDraggingTask] = useState(null);
+    const [draggingSticker, setDraggingSticker] = useState(null);
     const [sourceDesk, setSourceDesk] = useState(null);
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -76,6 +79,12 @@ export default function WorkspacesPage() {
     }
 
     function handleDragStart(event) {
+        console.log(event.active.data.current?.type)
+
+        if (event.active.data.current?.type === "sticker") {
+            setDraggingSticker(event.active.data.current.sticker);
+        }
+
         if (event.active.data.current?.type === "desk") {
             setDraggingDesk(event.active.data.current.desk);
         }
@@ -88,6 +97,7 @@ export default function WorkspacesPage() {
     async function handleDragEnd(event) {
         setDraggingTask(null);
         setDraggingDesk(null);
+        setDraggingSticker(null);
         setSourceDesk(null);
 
         const {active, over} = event;
@@ -401,6 +411,9 @@ export default function WorkspacesPage() {
 
                                 {draggingTask &&
                                     <Task task={draggingTask}/>}
+
+                                {draggingSticker &&
+                                    <StickerSkeleton sticker={draggingSticker}/>}
                             </DragOverlay>, document.body)
                         }
                     </DndContext>

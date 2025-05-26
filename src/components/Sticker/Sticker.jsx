@@ -10,9 +10,29 @@ import CloseIcon from '@mui/icons-material/Close';
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import {xor} from "lodash/array.js";
 import {sendDeleteSticker} from "../../services/fetch/tasks/sticker/SendDeleteSticker.js";
+import {useSortable} from "@dnd-kit/sortable";
+import {CSS} from "@dnd-kit/utilities";
 
 export function Sticker({sticker, deskId}) {
     const theme = useTheme();
+
+    const {
+        setNodeRef,
+        attributes,
+        listeners,
+        transform,
+    } = useSortable({
+        id: sticker.id,
+        data: {
+            type: "sticker",
+            sticker
+        }
+    })
+
+    const style = {
+        transform: transform ? CSS.Translate.toString(transform) : undefined,
+        // paddingBottom: '10px'
+    };
 
     const [hovered, setHovered] = React.useState(false);
 
@@ -39,8 +59,13 @@ export function Sticker({sticker, deskId}) {
         }
     }
 
+
     return (
         <Box
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
             onClick={handleOpen}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
@@ -49,6 +74,7 @@ export function Sticker({sticker, deskId}) {
                 border: '1px solid',
                 position: 'relative',
                 display: 'flex',
+                height: '27px',
                 borderColor: open ? 'action.active' : 'action.selected',
                 backgroundColor: stickerBgColor(sticker.color),
                 p: '2px',
@@ -61,14 +87,9 @@ export function Sticker({sticker, deskId}) {
                 backgroundColor: stickerColor(sticker.color),
                 borderRadius: '5px',
             }}>
-                <IconButton disableRipple
-                            sx={{
-                                width: '16px',
-                                opacity: 1, height: '16px',
-                                p: 0,
-                            }}>
-                    <StickerImage image={sticker.icon} color={theme.palette.stickerName}/>
-                </IconButton>
+
+                <StickerImage image={sticker.icon} color={theme.palette.stickerName}/>
+
             </Box>
             <Typography sx={theme => ({
                 pt: '2px',
