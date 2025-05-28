@@ -1,38 +1,30 @@
 import {Box, IconButton, useTheme} from "@mui/material";
 import * as React from "react";
+import {useState} from "react";
 import Typography from "@mui/material/Typography";
 import {stickerBgColor, stickerColor} from "../../services/util/Utils.jsx";
 import {StickerImage} from "../../assets/icons/stickers/StickerUtils.jsx";
-import {useState} from "react";
 import {StickerInfo} from "./StickerInfo.jsx";
-import {DeleteTask} from "../../assets/icons/DeleteTask.jsx";
 import CloseIcon from '@mui/icons-material/Close';
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
-import {xor} from "lodash/array.js";
 import {sendDeleteSticker} from "../../services/fetch/tasks/sticker/SendDeleteSticker.js";
-import {useSortable} from "@dnd-kit/sortable";
-import {CSS} from "@dnd-kit/utilities";
+import {useDraggable} from "@dnd-kit/core";
 
 export function Sticker({sticker, deskId}) {
     const theme = useTheme();
 
     const {
         setNodeRef,
-        attributes,
         listeners,
-        transform,
-    } = useSortable({
+    } = useDraggable({
         id: sticker.id,
         data: {
             type: "sticker",
             sticker
-        }
+        },
+        disabled: false
     })
 
-    const style = {
-        transform: transform ? CSS.Translate.toString(transform) : undefined,
-        // paddingBottom: '10px'
-    };
 
     const [hovered, setHovered] = React.useState(false);
 
@@ -41,6 +33,7 @@ export function Sticker({sticker, deskId}) {
     const {deleteSticker, userHasPermission} = useTaskOperations();
 
     const handleOpen = (event) => {
+        event.stopPropagation();
         setAnchorEl(event.currentTarget);
     };
 
@@ -53,7 +46,7 @@ export function Sticker({sticker, deskId}) {
         event.stopPropagation();
         try {
             deleteSticker(deskId, sticker);
-            await sendDeleteSticker(sticker.api.links.deleteSticker.href)
+            await sendDeleteSticker(sticker)
         } catch (error) {
             console.log(error.message);
         }
@@ -63,8 +56,6 @@ export function Sticker({sticker, deskId}) {
     return (
         <Box
             ref={setNodeRef}
-            style={style}
-            {...attributes}
             {...listeners}
             onClick={handleOpen}
             onMouseEnter={() => setHovered(true)}
@@ -87,9 +78,7 @@ export function Sticker({sticker, deskId}) {
                 backgroundColor: stickerColor(sticker.color),
                 borderRadius: '5px',
             }}>
-
                 <StickerImage image={sticker.icon} color={theme.palette.stickerName}/>
-
             </Box>
             <Typography sx={theme => ({
                 pt: '2px',

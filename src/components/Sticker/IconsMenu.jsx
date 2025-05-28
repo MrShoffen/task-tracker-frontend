@@ -69,7 +69,8 @@ export function IconsMenu({selectedIcon, setSelectedIcon}) {
                         {allStickerIcons.map(stickerName =>
                             <IconButton
                                 disableRipple
-                                onClick={() => {
+                                onClick={(e) => {
+                                    e.stopPropagation();
                                     setSelectedIcon(stickerName);
                                     handleMenuClose();
                                 }}

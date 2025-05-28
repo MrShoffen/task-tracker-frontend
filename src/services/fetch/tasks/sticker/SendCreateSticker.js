@@ -1,13 +1,15 @@
 import {tryToRefreshJwt} from "../../jwt/RefreshJwt.js";
 import UnauthorizedException from "../../../../exception/UnauthorizedException.jsx";
 import {throwSpecifyException} from "../../../../exception/ThrowSpecifyException.jsx";
-import {API_BASE_URL} from "../../../../../UrlConstants.jsx";
+import {API_BASE_URL, API_CONTEXT} from "../../../../../UrlConstants.jsx";
 
 
-export const sendCreateSticker = async (url, createStickerDto) => {
+export const sendCreateSticker = async (task, createStickerDto) => {
     console.log("--------------------")
+    const url = API_BASE_URL + API_CONTEXT + "/workspaces/" + task.workspaceId + "/desks/" + task.deskId + "/tasks/" + task.id + "/stickers";
+
     console.log(url, createStickerDto);
-    let response = await fetch(API_BASE_URL + url, {
+    let response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -25,7 +27,7 @@ export const sendCreateSticker = async (url, createStickerDto) => {
             try {
                 await tryToRefreshJwt();
                 console.log('successfully refreshed - back to logic')
-                return await sendCreateSticker(url, createStickerDto);
+                return await sendCreateSticker(task, createStickerDto);
             } catch (in_error) {
                 throw new UnauthorizedException(in_error.detail);
             }

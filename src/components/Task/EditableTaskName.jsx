@@ -7,7 +7,11 @@ import {EditIcon} from "../../assets/icons/EditIcon.jsx";
 import ConflictException from "../../exception/ConflictException.jsx";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 
-export function EditableTaskName({task = {name: ''}, taskCompleted, hovered, disableDragging}) {
+export function EditableTaskName({
+                                     sx = {}, task = {name: ''},
+                                     taskCompleted, hovered, disableDragging,
+                                     chatVariant = false
+                                 }) {
 
     const {userHasPermission, updateTaskField} = useTaskOperations();
     const theme = useTheme();
@@ -32,9 +36,12 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered, dis
         }
     };
 
-    const handleEditClick = () => {
+    const handleEditClick = (event) => {
+        event.stopPropagation();
         setIsEditing(true);
-        disableDragging(true);
+        if (disableDragging) {
+            disableDragging(true);
+        }
     };
 
     const handleBlur = async (event, duplicatedCount = 0) => {
@@ -43,7 +50,7 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered, dis
         if (newText !== initialText && newText !== '') {
             try {
                 const newNameWithDubls = newText + (duplicatedCount === 0 ? '' : (' (' + duplicatedCount + ')'));
-               await sendEditTask(task.api.links.updateTaskName.href,
+                await sendEditTask("name", task,
                     {
                         newName: newNameWithDubls
                     });
@@ -65,7 +72,9 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered, dis
             typographyRef.current.textContent = initialText;
         }
         setIsEditing(false);
-        disableDragging(false);
+        if (disableDragging) {
+            disableDragging(false);
+        }
     };
 
     const handleKeyDown = async (e) => {
@@ -83,6 +92,10 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered, dis
     };
 
     useEffect(() => {
+        if (chatVariant) {
+            setInitialText(task.name);
+            return;
+        }
         if (isEditing && typographyRef.current) {
             typographyRef.current.focus();
 
@@ -99,7 +112,7 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered, dis
         } else {
             lastSelectionRef.current = null;
         }
-    }, [isEditing]);
+    }, [isEditing, task]);
 
 
     return (
@@ -127,7 +140,8 @@ export function EditableTaskName({task = {name: ''}, taskCompleted, hovered, dis
                     borderBottom: isEditing ? '1px solid #90caf9' : 'none',
                     outline: 'none',
                     width: '227px',
-                    cursor: isEditing? 'text' : 'pointer'
+                    cursor: isEditing ? 'text' : 'pointer',
+                    ...sx
                 }}
             >
                 {task.name} {userHasPermission('UPDATE_TASK_NAME') && hovered && !isEditing && (

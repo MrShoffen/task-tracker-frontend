@@ -1,12 +1,14 @@
-import {API_BASE_URL} from "../../../../UrlConstants.jsx";
+import {API_BASE_URL, API_CONTEXT} from "../../../../UrlConstants.jsx";
 import {tryToRefreshJwt} from "../jwt/RefreshJwt.js";
 import UnauthorizedException from "../../../exception/UnauthorizedException.jsx";
 import {throwSpecifyException} from "../../../exception/ThrowSpecifyException.jsx";
 
 
-export const sendDeletePerm = async (url) => {
+export const sendDeletePerm = async (workspace, uap) => {
 
-    let response = await fetch(API_BASE_URL + url, {
+    const url = API_BASE_URL + API_CONTEXT + "/workspaces/" + workspace.id + "/permissions/" + uap.userId ;
+
+    let response = await fetch( url, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -22,7 +24,7 @@ export const sendDeletePerm = async (url) => {
             try {
                 await tryToRefreshJwt();
                 console.log('successfully refreshed - back to logic')
-                await sendDeletePerm(url);
+                await sendDeletePerm(workspace, uap);
             } catch (in_error) {
                 throw new UnauthorizedException(in_error.detail);
             }

@@ -20,6 +20,39 @@ export const TaskLoadProvider = ({children}) => {
 
     const [usersInWs, setUsersInWs] = useState([]);
 
+    const [chatOpen, setChatOpen] = useState(false);
+
+    const [currentOpenTask, setCurrentOpenTask] = useState(null);
+
+
+    function activeTask  () {
+        if(!currentOpenTask){
+            return null;
+        }
+        const deskIndex = fullWorkspaceInformation.desks.findIndex(desk => desk.id === currentOpenTask.deskId);
+        if (deskIndex === -1) {
+            return null;
+        }
+
+        const taskIndex = fullWorkspaceInformation.desks[deskIndex].tasks.findIndex(task => task.id === currentOpenTask.id);
+
+        if (taskIndex === -1) {
+            return null;
+        }
+
+        return fullWorkspaceInformation.desks[deskIndex].tasks[taskIndex]
+    }
+
+    function openChat(task) {
+        setChatOpen(true);
+        setCurrentOpenTask(task);
+    }
+
+    function closeChat() {
+        setChatOpen(false);
+        setCurrentOpenTask(null);
+    }
+
     const [fullWorkspaceInformation, setFullWorkspaceInformation] = useState({
         createdAt: "2025-05-14T09:49:41.258378Z",
         desks: [],
@@ -40,16 +73,6 @@ export const TaskLoadProvider = ({children}) => {
     function deleteWorkspace(workspace) {
         setWorkspaces(prev =>
             prev.filter(w => w.id !== workspace.id))
-    }
-
-    async function loadFullWorkspace(workspace) {
-        const fullWs = await sendGetFullWsInformation(workspace.api.links.fullAggregatedInfo.href);
-        setFullWorkspaceInformation(fullWs)
-        const uap = fullWs.usersAndPermissions.find(uap => uap.info.email === auth.user.email);
-
-        setPermissions(uap?.permissions);
-
-        return fullWs;
     }
 
     async function loadFullWs(wsId) {
@@ -432,7 +455,6 @@ export const TaskLoadProvider = ({children}) => {
             workspaces,
             loadAllWorkspaces,
             loadFullWs,
-            loadFullWorkspace,
             fullWorkspaceInformation,
             setFullWorkspaceInformation,
             deleteWorkspace,
@@ -458,7 +480,12 @@ export const TaskLoadProvider = ({children}) => {
             usersInWs,
 
             addNewSticker,
-            deleteSticker
+            deleteSticker,
+
+            openChat,
+            chatOpen,
+            activeTask,
+            closeChat
         }}>
             {children}
         </TaskLoadContext.Provider>

@@ -40,7 +40,7 @@ export function Task({task, setContentIsLoading, disableDragging}) {
         }
     })
 
-    const {updateTaskField, usersInWs, userHasPermission} = useTaskOperations();
+    const {updateTaskField, openChat, closeChat, chatOpen, activeTask, usersInWs, userHasPermission} = useTaskOperations();
 
     const style = {
         transform: transform ? CSS.Translate.toString(transform) : undefined,
@@ -54,16 +54,25 @@ export function Task({task, setContentIsLoading, disableDragging}) {
         }
     }
 
-    const handleCompletionClick = async () => {
+    const handleCompletionClick = async (event) => {
+        event.stopPropagation();
         if (!userHasPermission("UPDATE_TASK_COMPLETION")) {
             return;
         }
         try {
             updateTaskField(task.deskId, task.id, 'completed', !task.completed);
-            await sendEditTask(task.api.links.updateTaskCompletion.href,
+            await sendEditTask("completion", task,
                 {completed: !task.completed});
         } catch (error) {
             console.log(error);
+        }
+    }
+
+    function handleTaskClick() {
+        if (chatOpen && task.id === activeTask()?.id){
+            closeChat();
+        } else {
+            openChat(task);
         }
     }
 
@@ -76,6 +85,7 @@ export function Task({task, setContentIsLoading, disableDragging}) {
         >
             <Card
                 elevation={1}
+                onClick={handleTaskClick}
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
                 sx={{
@@ -84,6 +94,8 @@ export function Task({task, setContentIsLoading, disableDragging}) {
                     border: isDragging ? '1px dashed' : '1px solid',
                     borderColor: isDragging ? 'info.main' : !hovered ? taskColor(task.color) : 'action.disabled',
                     borderRadius: 2,
+                    borderLeft: activeTask()?.id === task.id && '6px solid',
+                    borderLeftColor: activeTask()?.id === task.id && 'info.main',
                     position: 'relative',
                     minWidth: '286px',
                     maxWidth: '286px',
@@ -141,20 +153,22 @@ export function Task({task, setContentIsLoading, disableDragging}) {
                     </Box>
 
                 </Box>
-                <UserInfo
-                    sx={{
-                        position: 'absolute',
-                        width: '25px',
-                        height: '25px',
-                        right: '5px',
-                        bottom: '7px',
-                        fontWeight: '400',
-                        fontSize: '0.7rem',
-                        opacity: !task.completed ? 1 : (!hovered ? 0.5 : 1),
-                    }}
-                    user={loadUser()}
-                    createdAt={task.createdAt}
-                />
+                {!isDragging &&
+                    <UserInfo
+                        sx={{
+                            position: 'absolute',
+                            width: '25px',
+                            height: '25px',
+                            right: '5px',
+                            bottom: '7px',
+                            fontWeight: '400',
+                            fontSize: '0.7rem',
+                            opacity: !task.completed ? 1 : (!hovered ? 0.5 : 1),
+                        }}
+                        user={loadUser()}
+                        createdAt={task.createdAt}
+                    />
+                }
 
             </Card>
         </div>

@@ -140,7 +140,7 @@ export default function PermissionsModal({workspace, open, onClose}) {
 
     async function handlePermissionsGrant() {
         try {
-            const newPerm = await sendGrantPermission(workspace.usersAndPermissions[0].api.links.createPermission.href,
+            const newPerm = await sendGrantPermission(workspace,
                 {
                     userEmail: email,
                     permissions: grantedPermissions
@@ -157,7 +157,7 @@ export default function PermissionsModal({workspace, open, onClose}) {
 
     async function revokeGrants(usPerm) {
         try {
-            sendDeletePerm(usPerm.api.links.revokePermissions.href);
+            sendDeletePerm(workspace, usPerm);
             deletePermission(usPerm.userId);
         } catch (error) {
             showWarn(error.message);

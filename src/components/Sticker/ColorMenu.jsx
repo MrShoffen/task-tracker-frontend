@@ -67,7 +67,8 @@ export function ColorMenu({selectedColor, setSelectedColor}) {
                         {Object.entries(colorPalette()).map(([name, color]) => (
                             <IconButton
                                 disableRipple
-                                onClick={() => {
+                                onClick={(e) => {
+                                    e.stopPropagation();
                                     setSelectedColor(name);
                                     handleMenuClose();
                                 }}

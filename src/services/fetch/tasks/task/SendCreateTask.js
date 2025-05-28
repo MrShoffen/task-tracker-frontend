@@ -1,13 +1,12 @@
 import {tryToRefreshJwt} from "../../jwt/RefreshJwt.js";
 import UnauthorizedException from "../../../../exception/UnauthorizedException.jsx";
 import {throwSpecifyException} from "../../../../exception/ThrowSpecifyException.jsx";
-import {API_BASE_URL} from "../../../../../UrlConstants.jsx";
 
 
 export const sendCreateTask = async (url, createTaskDto) => {
     console.log("--------------------")
     console.log(url, createTaskDto);
-    let response = await fetch(API_BASE_URL + url, {
+    let response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

@@ -15,9 +15,10 @@ import {horizontalListSortingStrategy, SortableContext} from "@dnd-kit/sortable"
 import {createPortal} from "react-dom";
 import {calculateNewOrderIndex, calculateNewOrderIndexReversed} from "../services/util/Utils.jsx";
 import {sendEditDesk} from "../services/fetch/tasks/desk/SendEditDesk.js";
-import {sendEditTask} from "../services/fetch/tasks/task/SendEditTask.js";
+import {sendEditTask, sendEditTaskDesk} from "../services/fetch/tasks/task/SendEditTask.js";
 import {Sticker} from "../components/Sticker/Sticker.jsx";
 import {StickerSkeleton} from "../components/Sticker/StickerSkeleton.jsx";
+import {sendCreateSticker} from "../services/fetch/tasks/sticker/SendCreateSticker.js";
 
 export default function WorkspacesPage() {
     const {
@@ -25,11 +26,13 @@ export default function WorkspacesPage() {
         updateDeskOrder,
         workspaces,
         userHasPermission,
+        addNewSticker,
         moveTaskToAnotherDesk,
         loadAllWorkspaces,
         updateTaskOrder,
         updateTaskField,
-        loadFullWs
+        loadFullWs,
+        closeChat
     } = useTaskOperations();
 
     const navigate = useNavigate();
@@ -51,6 +54,8 @@ export default function WorkspacesPage() {
         })
     );
 
+    const [validStickerDrop, setValidStickerDrop] = useState(false);
+
     useEffect(() => {
         checkAndLoadWorkspace();
     }, [location.pathname]);
@@ -61,12 +66,6 @@ export default function WorkspacesPage() {
         try {
             setWorkspaceLoading(true);
             setOnConcreteWs(true);
-            let loadedWorkspaces = workspaces;
-            if (loadedWorkspaces.length === 0) {
-                loadedWorkspaces = await loadAllWorkspaces();
-            }
-            const currentWs = loadedWorkspaces.find(ws => ws.id === workspaceId);
-            // const fullWs = await loadFullWorkspace(currentWs);
             const fullWs = await loadFullWs(workspaceId);
             console.log(fullWs);
             setWorkspaceLoading(false);
@@ -89,6 +88,7 @@ export default function WorkspacesPage() {
             setDraggingDesk(event.active.data.current.desk);
         }
         if (event.active.data.current?.type === "task") {
+            closeChat();
             setDraggingTask(event.active.data.current.task);
             setSourceDesk(event.active.data.current.task.deskId);
         }
@@ -99,6 +99,7 @@ export default function WorkspacesPage() {
         setDraggingDesk(null);
         setDraggingSticker(null);
         setSourceDesk(null);
+        setValidStickerDrop(false);
 
         const {active, over} = event;
         if (!over) {
@@ -106,6 +107,30 @@ export default function WorkspacesPage() {
         }
         const activeId = active.id;
         const overId = over.id;
+
+        if (over.data.current?.type === "task" && active.data.current?.type === "sticker") {
+
+            const sticker = active.data.current.sticker;
+            const task = over.data.current.task;
+
+            if (sticker.taskId === task.id) {
+                return;
+            }
+
+            try {
+                const newSticker = await sendCreateSticker(task, {
+                    name: sticker.name,
+                    color: sticker.color,
+                    icon: sticker.icon
+                });
+                addNewSticker(task.deskId, newSticker);
+            } catch (error) {
+                console.log(error.message);
+            }
+            return;
+
+        }
+
 
         if (activeId === overId) {
             const isActiveTask = active.data.current?.type === "task";
@@ -127,12 +152,12 @@ export default function WorkspacesPage() {
                 const newOrderTask = calculateNewOrderIndexReversed(5, 0, workingDesk.tasks);
                 // console.error(newOrderTask.orderIndex)
                 updateTaskOrder(workingDeskI, activeTIndex, newOrderTask);
-                sendEditTask(workingDesk.tasks[activeTIndex].api.links.updateTaskDesk.href,
+                sendEditTaskDesk(workingDesk.tasks[activeTIndex],sourceDesk,
                     {
                         newDeskId: workingDesk.tasks[activeTIndex].deskId
                     })
                     .then(updatedTask1 =>
-                        sendEditTask(updatedTask1.api.links.updateTaskOrder.href,
+                        sendEditTask("order", updatedTask1,
                             {
                                 updatedIndex: workingDesk.tasks[activeTIndex].orderIndex
                             })
@@ -172,7 +197,7 @@ export default function WorkspacesPage() {
                     }
                     updateTaskOrder(workingDeskI, activeTIndex, newOrderTask);
 
-                    const nTsk = await sendEditTask(activeTask.api.links.updateTaskOrder.href,
+                    const nTsk = await sendEditTask("order", activeTask,
                         {
                             updatedIndex: newOrderTask.orderIndex
                         });
@@ -181,12 +206,12 @@ export default function WorkspacesPage() {
                 } else {
                     updateTaskOrder(workingDeskI, activeTIndex, newOrderTask);
 
-                    sendEditTask(activeTask.api.links.updateTaskDesk.href,
+                    sendEditTaskDesk(activeTask, sourceDesk,
                         {
                             newDeskId: newOrderTask.deskId
                         })
                         .then(updatedTask1 =>
-                            sendEditTask(updatedTask1.api.links.updateTaskOrder.href,
+                            sendEditTask("order", updatedTask1,
                                 {
                                     updatedIndex: newOrderTask.orderIndex
                                 })
@@ -210,7 +235,7 @@ export default function WorkspacesPage() {
                 ...activeTask,
                 orderIndex: 2001234
             }
-            sendEditTask(newOrderTask.api.links.updateTaskDesk.href,
+            sendEditTaskDesk(newOrderTask, sourceDesk,
                 {
                     newDeskId: overId
                 })
@@ -232,7 +257,7 @@ export default function WorkspacesPage() {
             const deskWithUpdatedOrder = calculateNewOrderIndex(activeDeskIndex, overDeskIndex, fullWorkspaceInformation.desks);
             updateDeskOrder(activeDeskIndex, deskWithUpdatedOrder);
             try {
-                await sendEditDesk(deskWithUpdatedOrder.api.links.updateDeskOrder.href,
+                await sendEditDesk('order', deskWithUpdatedOrder,
                     {
                         updatedIndex: deskWithUpdatedOrder.orderIndex
                     })
@@ -255,6 +280,22 @@ export default function WorkspacesPage() {
         if (activeId === overId) {
             return;
         }
+
+        if (over.data.current?.type === "task" && active.data.current?.type === "sticker") {
+            const sticker = active.data.current.sticker;
+            const task = over.data.current.task;
+
+            if (sticker.taskId === task.id) {
+                setValidStickerDrop(false);
+                return;
+            }
+            console.log('valid target')
+
+            setValidStickerDrop(true);
+            return;
+        }
+        setValidStickerDrop(false);
+
 
         const isActiveTask = active.data.current?.type === "task";
         const isOverTask = over.data.current?.type === "task";
@@ -405,7 +446,7 @@ export default function WorkspacesPage() {
                             {userHasPermission("CREATE_DESK") && <NewDeskBadge/>}
                         </Box>
                         {createPortal(
-                            <DragOverlay>
+                            <DragOverlay dropAnimation={null}>
                                 {draggingDesk &&
                                     <TaskDesk desk={draggingDesk}/>}
 
@@ -413,7 +454,7 @@ export default function WorkspacesPage() {
                                     <Task task={draggingTask}/>}
 
                                 {draggingSticker &&
-                                    <StickerSkeleton sticker={draggingSticker}/>}
+                                    <StickerSkeleton isCopying={validStickerDrop} sticker={draggingSticker}/>}
                             </DragOverlay>, document.body)
                         }
                     </DndContext>

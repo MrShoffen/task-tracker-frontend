@@ -22,6 +22,7 @@ export function StickerMenu({task, hovered}) {
     const {addNewSticker, userHasPermission} = useTaskOperations();
 
     const handleMenuClick = (event) => {
+        event.stopPropagation();
         setAnchorEl(event.currentTarget);
     };
 
@@ -52,7 +53,7 @@ export function StickerMenu({task, hovered}) {
 
     async function handleConfirm() {
         try {
-            const newSticker = await sendCreateSticker(task.api.links.addSticker.href, {
+            const newSticker = await sendCreateSticker(task, {
                 name: stickerText,
                 color: selectedColor,
                 icon: selectedIcon
@@ -78,6 +79,7 @@ export function StickerMenu({task, hovered}) {
             <Popper
                 // disablePortal
                 id="edit-menu"
+                onClick={e => e.stopPropagation()}
                 anchorEl={anchorEl}
                 open={open}
                 onClose={handleMenuClose}

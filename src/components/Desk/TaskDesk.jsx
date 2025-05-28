@@ -9,6 +9,7 @@ import {deskColor} from "../../services/util/Utils.jsx";
 import {DeskMenu} from "./DeskMenu.jsx";
 import {SortableContext, useSortable, verticalListSortingStrategy} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities"
+import {API_BASE_URL, API_CONTEXT} from "../../../UrlConstants.jsx";
 
 export function TaskDesk({desk, sx, disableDragging}) {
     const {
@@ -82,7 +83,7 @@ export function TaskDesk({desk, sx, disableDragging}) {
                     backgroundColor: deskColor(desk.color),
                     display: 'flex',
                     flexDirection: 'column',
-                    maxHeight: 'calc(100vh - 105px)',
+                    maxHeight: 'calc(100vh - 115px)',
                     ...sx
                 }}>
 
@@ -124,7 +125,7 @@ export function TaskDesk({desk, sx, disableDragging}) {
                     <EditableDeskName desk={desk} hovered={true} disableDragging={disableDragging}/>
                     <DeskMenu desk={desk}/>
                     {userHasPermission("CREATE_TASK") &&
-                        <NewTaskBadge taskCreationLink={desk.api.links.createTask.href}
+                        <NewTaskBadge taskCreationLink={API_BASE_URL + API_CONTEXT + "/workspaces/" + desk.workspaceId + "/desks/" + desk.id + '/tasks'}
                         />
                     }
 

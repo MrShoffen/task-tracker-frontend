@@ -45,7 +45,7 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
         }
         try {
             updateWsField('coverUrl', imageUrl);
-            await sendEditWs(workspace.api.links.updateWorkspaceCover.href, {
+            await sendEditWs('cover', workspace, {
                 newCoverUrl: imageUrl
             });
             setSelectedImage(imageUrl);
@@ -66,7 +66,7 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
         const oldName = workspace.name;
         try {
             updateWsField('name', wsName);
-            await sendEditWs(workspace.api.links.updateWorkspaceName.href,
+            await sendEditWs("name", workspace,
                 {
                     newName: wsName
                 });
@@ -83,7 +83,7 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
     async function handleAccessSave() {
         try {
             updateWsField('isPublic', isPublic);
-            await sendEditWs(workspace.api.links.updateWorkspaceAccess.href,
+            await sendEditWs("access", workspace,
                 {
                     isPublic: isPublic
                 });

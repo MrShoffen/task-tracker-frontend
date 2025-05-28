@@ -46,7 +46,7 @@ export function EditableDeskName({desk = {name: ''}, disableDragging}) {
         if (newText !== initialText && newText !== '') {
             try {
                 const newNameWithDubls = newText + (duplicatedCount === 0 ? '' : (' (' + duplicatedCount + ')'));
-                await sendEditDesk(desk.api.links.updateDeskName.href,
+                await sendEditDesk('name', desk,
                     {
                         newName: newNameWithDubls.trim()
                     });

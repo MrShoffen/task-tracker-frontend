@@ -3,7 +3,7 @@ import {styled} from "@mui/material/styles";
 import MuiDrawer from "@mui/material/Drawer";
 import {
     Avatar,
-    Box,
+    Box, Button, Card,
     Collapse,
     Divider,
     IconButton,
@@ -27,6 +27,7 @@ import {useNavigate} from "react-router-dom";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import WorkspaceListElement from "../Workspace/WorkspaceListElement.jsx";
 import {NewWorkspaceBadge} from "../Workspace/NewWorkspaceBadge.jsx";
+import {ChatCard} from "../Chat/ChatCard.jsx";
 
 
 const drawerWidth = 180;
@@ -74,13 +75,27 @@ const Drawer = styled(MuiDrawer)(({theme, open}) => ({
     }),
 }));
 
+
+const AnimatedCard = styled(Card)(({theme, open}) => ({
+    backgroundColor: 'white',
+    width: open ? '450px' : '0px',
+    zIndex: 4000,
+    transition: 'width 200ms ease-in-out',
+    // transform: open ? 'translateX(0)' : 'translateX(100%)',
+    // position: 'fixed',
+    right: 0,
+    top: 0,
+    height: '100vh',
+}));
+
 export const PersistentDrawerLeft = ({children, open, setOpen}) => {
     const {auth} = useAuthContext();
 
-    const {workspaces, loadAllWorkspaces, } = useTaskOperations();
+    const {workspaces, loadAllWorkspaces, chatOpen} = useTaskOperations();
 
     const {isDarkMode, toggleTheme} = useCustomThemeContext();
     const [openSubmenu, setOpenSubmenu] = React.useState(false);
+    const [cardOpen, setCardOpen] = React.useState(false); // Состояние для карточки
 
     const navigate = useNavigate();
     const handleDrawerClick = () => {
@@ -95,7 +110,7 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
     const handleProjectsOpen = async () => {
         if (open) {
             if (!openSubmenu) {
-             await loadAllWorkspaces();
+                await loadAllWorkspaces();
             }
             setOpenSubmenu(prev => !prev);
         } else {
@@ -105,6 +120,11 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
             }
             setOpenSubmenu(true);
         }
+
+    };
+
+    const toggleCard = () => {
+        setCardOpen(prev => !prev);
     };
 
     if (!auth.isAuthenticated) {
@@ -113,7 +133,9 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                 {children}
             </>
         );
+
     }
+
 
     return (
         <Box sx={{
@@ -281,16 +303,37 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                             </ListItem>
 
                         </List>
+
+
                     </Drawer>
                 }
-                <Box sx={{
-                    width: '100%',
-                    margin: '0',
-                    flex: 1
-                }}>
-                    {children}
-                </Box>
 
+                <Box display="flex" width='100%' flexDirection="row">
+                    <Box sx={{
+                        width: '100%',
+                        margin: '0',
+                        flex: 1
+                    }}>
+                        {children}
+                        <Button
+                            onClick={toggleCard}
+                            variant="contained"
+                            sx={{
+                                position: 'fixed',
+                                left: 50,
+                                top: 50,
+                                zIndex: 5000
+                            }}
+                        >
+                            test
+                        </Button>
+                    </Box>
+
+                    {auth.isAuthenticated &&
+                        <ChatCard open={chatOpen}/>
+                    }
+
+                </Box>
             </Box>
 
         </Box>

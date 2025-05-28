@@ -50,7 +50,7 @@ export const NewDeskBadge = () => {
         if (newText !== initialText && newText !== '') {
             try {
                 const newNameWithDubls = newText + (duplicatedCount === 0 ? '' : (' (' + duplicatedCount + ')'));
-                let newDesk = await sendCreateDesk(fullWorkspaceInformation.api.links.createDesk.href,
+                let newDesk = await sendCreateDesk(fullWorkspaceInformation,
                     {
                         name: newNameWithDubls,
                         color: randomDeskColor()

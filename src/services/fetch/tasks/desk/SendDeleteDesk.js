@@ -1,13 +1,15 @@
 import {tryToRefreshJwt} from "../../jwt/RefreshJwt.js";
 import UnauthorizedException from "../../../../exception/UnauthorizedException.jsx";
 import {throwSpecifyException} from "../../../../exception/ThrowSpecifyException.jsx";
-import {API_BASE_URL} from "../../../../../UrlConstants.jsx";
+import {API_BASE_URL, API_CONTEXT} from "../../../../../UrlConstants.jsx";
 
 
-export const sendDeleteDesk = async (url) => {
+export const sendDeleteDesk = async (desk) => {
     console.log("--------------------")
+    const url = API_BASE_URL + API_CONTEXT + "/workspaces/" + desk.workspaceId + "/desks/" + desk.id;
+
     console.log(url);
-    let response = await fetch(API_BASE_URL + url, {
+    let response = await fetch(url, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -23,7 +25,7 @@ export const sendDeleteDesk = async (url) => {
             try {
                 await tryToRefreshJwt();
                 console.log('successfully refreshed - back to logic')
-                await sendDeleteDesk(url);
+                await sendDeleteDesk(desk);
             } catch (in_error) {
                 throw new UnauthorizedException(in_error.detail);
             }

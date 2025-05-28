@@ -3,15 +3,22 @@ import * as React from "react";
 import {CommentsIcon} from "../../assets/icons/Comments.jsx";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import {Sticker} from "../Sticker/Sticker.jsx";
-import {EditIcon} from "../../assets/icons/EditIcon.jsx";
-import {AddStickerIcon} from "../../assets/icons/AddStickerIcon.jsx";
 import {StickerMenu} from "../Sticker/StickerMenu.jsx";
-import {SortableContext, verticalListSortingStrategy} from "@dnd-kit/sortable";
-import {StickerSkeleton} from "../Sticker/StickerSkeleton.jsx";
+import {stickerBgColor, stickerColor} from "../../services/util/Utils.jsx";
+import Typography from "@mui/material/Typography";
 
 export function TaskPlugins({task, hovered}) {
     const theme = useTheme();
-    const {userHasPermission} = useTaskOperations();
+    const {
+        userHasPermission,
+        openChat,
+        closeChat
+    } = useTaskOperations();
+
+
+    function handleChatOpen() {
+        openChat(task);
+    }
 
     return (
         <Box
@@ -27,39 +34,47 @@ export function TaskPlugins({task, hovered}) {
                 {userHasPermission("CREATE_READ_COMMENTS") &&
 
                     <Box
+                        onClick={handleChatOpen}
                         sx={{
                             borderRadius: '7px',
                             border: '1px solid',
+                            height: '27px',
+
                             borderColor: 'transparent',
-                            backgroundColor: 'rgba(99,213,26,0.28)',
+                            backgroundColor: stickerBgColor('GREEN'),
+                            display: 'flex',
                             p: '2px',
-                            pr: '17px',
                             ':hover': {
-                                borderColor: 'rgba(121,206,105,0.68)',
+                                borderColor: stickerColor('GREEN'),
                             }
                         }}>
 
-                        <Box sx={{p: '2px', backgroundColor: 'rgba(48,200,111,0.83)', borderRadius: '5px',}}>
-                            <IconButton disableRipple
-                                        sx={{
-                                            width: '16px',
-                                            opacity: 1, height: '16px',
-                                            p: 0,
-                                        }}>
-                                <CommentsIcon color={'rgb(255,255,255,0.9)'}/>
-                            </IconButton>
+                        <Box sx={{
+                            p: '2px',
+                            mr: '3px',
+                            backgroundColor: stickerColor('GREEN'),
+                            borderRadius: '5px',
+                        }}>
+                            <CommentsIcon color={theme.palette.stickerName}/>
                         </Box>
+                        <Typography sx={theme => ({
+                            pt: '2px',
+                            maxWidth: '185px',
+                            filter: theme.palette.mode === 'light' && 'brightness(0.7)',
+                            color: stickerColor('GREEN'),
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            userSelect: 'none',
+                            textOverflow: 'ellipsis',
+                            mr: '3px'
+                        })} variant='body2' fontSize={'0.7rem'}>
+                            Комментарии
+                        </Typography>
                     </Box>
                 }
-
-                <SortableContext items={task.stickers.map(t => t.id)}
-                                 // strategy={verticalListSortingStrategy}
-                                 // disabled={disableTaskDragging}
-                >
-                    {task.stickers.map(sticker =>
-                        <Sticker key={sticker.id} sticker={sticker} deskId={task.deskId}/>
-                    )}
-                </SortableContext>
+                {task.stickers.map(sticker =>
+                    <Sticker key={sticker.id} sticker={sticker} deskId={task.deskId}/>)
+                }
                 {userHasPermission("CREATE_STICKERS") &&
                     <StickerMenu task={task} hovered={hovered}/>
                 }

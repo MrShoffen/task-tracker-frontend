@@ -44,7 +44,7 @@ export function DeskMenu({desk}) {
     const handleColorChange = async (newColor) => {
         try {
             updateDeskField(desk.id, 'color', newColor);
-            await sendEditDesk(desk.api.links.updateDeskColor.href,
+            await sendEditDesk('color', desk,
                 {newColor: newColor}
             );
         } catch (error) {
@@ -55,7 +55,7 @@ export function DeskMenu({desk}) {
     const handleDeleteDesk = async () => {
         try {
             deleteDesk(desk);
-            await sendDeleteDesk(desk.api.links.deleteDesk.href);
+            await sendDeleteDesk(desk);
         } catch (error) {
             console.log(error);
         }

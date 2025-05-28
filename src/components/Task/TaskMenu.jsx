@@ -36,7 +36,7 @@ UploadIcon.propTypes = {
     size: PropTypes.string
 };
 
-export function TaskMenu({task, hovered, setContentIsLoading}) {
+export function TaskMenu({task, hovered, setContentIsLoading, sx={}}) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const theme = useTheme();
@@ -49,6 +49,7 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
     }
 
     const handleMenuClick = (event) => {
+        event.stopPropagation();
         setAnchorEl(event.currentTarget);
     };
 
@@ -94,7 +95,7 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
             try {
                 const uploadedImage = await uploadImage(formData);
                 updateTaskField(task.deskId, task.id, 'coverUrl', uploadedImage.imageUrl);
-                await sendEditTask(task.api.links.updateTaskCover.href,
+                await sendEditTask("cover", task,
                     {
                         newCoverUrl: uploadedImage.imageUrl
                     }
@@ -109,7 +110,7 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
     const handleCoverDelete = async (e) => {
         handleMenuClose();
         updateTaskField(task.deskId, task.id, 'coverUrl', null);
-        await sendEditTask(task.api.links.updateTaskCover.href,
+        await sendEditTask("cover", task,
             {
                 newCoverUrl: null
             }
@@ -119,7 +120,7 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
     const handleColorChange = async (newColor) => {
         try {
             updateTaskField(task.deskId, task.id, 'color', newColor);
-            await sendEditTask(task.api.links.updateTaskColor.href,
+            await sendEditTask("color", task,
                 {
                     newColor: newColor
                 }
@@ -131,7 +132,7 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
 
     const handleDelete = async () => {
         try {
-            await sendDeleteTask(task.api.links.deleteTask.href);
+            await sendDeleteTask(task);
             deleteTask(task);
         } catch (error) {
             console.log(error);
@@ -150,7 +151,8 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
                     opacity: !task.completed ? 1 : (!hovered ? 0.5 : 1),
                     p: 0,
                     ml: -2.8,
-                    mt: 1
+                    mt: 1,
+                    ...sx
                 }}>
                 <MenuIcon color={theme.palette.taskName} size={"17px"}/>
 
@@ -161,6 +163,7 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
                 anchorEl={anchorEl}
                 open={open}
                 onClose={handleMenuClose}
+                onClick={e => e.stopPropagation()}
                 placement="right"
                 sx={{
                     zIndex: 1300,
@@ -190,7 +193,11 @@ export function TaskMenu({task, hovered, setContentIsLoading}) {
                                     <ListItem
                                         button={"true"}
                                         disableGutters
-                                        onClick={() => fileInputRef.current.click()}
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            fileInputRef.current.click()
+                                        }
+                                    }
                                         sx={{
                                             px: 1,
                                             py: 1

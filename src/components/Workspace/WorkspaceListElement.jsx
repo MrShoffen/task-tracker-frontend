@@ -30,7 +30,7 @@ export default function WorkspaceListElement({workspace}) {
         e.stopPropagation();
         setDeleting(true);
         try {
-            await sendDeleteWs(workspace.api.links.deleteWorkspace.href)
+            await sendDeleteWs(workspace)
             showInfo("Пространство удалено");
             deleteWorkspace(workspace);
         } catch (error) {

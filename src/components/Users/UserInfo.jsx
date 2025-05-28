@@ -9,7 +9,8 @@ import {formatDate} from "../../services/util/Utils.jsx";
 export function UserInfo({sx = {}, createdAt, user}) {
     const [anchorEl, setAnchorEl] = useState(null);
 
-    const handleMenuClick = (event) => {
+    const handleAvatarClick = (event) => {
+        event.stopPropagation();
         setAnchorEl(event.currentTarget);
     };
 
@@ -24,7 +25,7 @@ export function UserInfo({sx = {}, createdAt, user}) {
             {user &&
                 <>
                     <UserAvatar
-                        handleMenuClick={handleMenuClick}
+                        handleMenuClick={handleAvatarClick}
                         sx={{
                             position: 'bottom',
                             width: '25px',
