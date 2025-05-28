@@ -2,15 +2,15 @@ import {useCustomThemeContext} from "../../context/GlobalThemeContext/CustomThem
 
 export const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat("en-GB", {
         day: "2-digit",
         month: "2-digit",
         year: "2-digit",
         hour: "2-digit",
         minute: "2-digit",
-        hourCycle: "h23", // 24-часовой формат (без AM/PM)
+        hourCycle: "h23",
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-    }).format(date).replace(",", ""); // Удаляем лишнюю запятую
+    }).format(date).replace(",", "");
 };
 
 

@@ -1,37 +1,41 @@
-import {styled} from "@mui/material/styles";
-import {Box, Card, IconButton, TextareaAutosize, Typography, useTheme} from "@mui/material";
+import {Box, Card, CircularProgress, IconButton, Typography, useTheme} from "@mui/material";
 import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
-import {EditableTaskName} from "../Task/EditableTaskName.jsx";
 import * as React from "react";
+import {useEffect, useRef, useState} from "react";
 import {UncheckedIcon} from "../../assets/icons/UncheckedIcon.jsx";
 import {CheckedIcon} from "../../assets/icons/CheckedIcon.jsx";
-import {TaskPlugins} from "../Task/TaskPlugins.jsx";
 import {TaskMenu} from "../Task/TaskMenu.jsx";
 import {sendEditTask} from "../../services/fetch/tasks/task/SendEditTask.js";
 import {EditIcon} from "../../assets/icons/EditIcon.jsx";
 import {darkTaskColor, lightTaskColor} from "../../services/util/Utils.jsx";
 import {useCustomThemeContext} from "../../context/GlobalThemeContext/CustomThemeProvider.jsx";
-import {useEffect, useRef, useState} from "react";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 import ConflictException from "../../exception/ConflictException.jsx";
 import TextField from "@mui/material/TextField";
 import {ChatMessage} from "./ChatMessage.jsx";
-import {SendIcon} from "../../assets/icons/Send.jsx";
 import {MessageField} from "./MessageField.jsx";
+import {CloseIcon} from "../../assets/icons/CloseIcon.jsx";
 
 
 export function ChatCard({open}) {
 
-    const {activeTask, closeChat, userHasPermission, updateTaskField} = useTaskOperations();
+    const {
+        activeTask,
+        closeChat,
+        commentsInCurrentTask,
+        userHasPermission,
+        loadMoreComments,
+        updateTaskField,
+    } = useTaskOperations();
 
     const [hovered, setHovered] = React.useState(false);
     const theme = useTheme();
     const {isDarkMode} = useCustomThemeContext();
-
+    const messagesEndRef = useRef(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editingText, setEditingText] = useState(''); // Добавить состояние для текста
     const {showWarn} = useNotification();
-
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (!activeTask()) {
@@ -42,9 +46,51 @@ export function ChatCard({open}) {
         }
     }, [activeTask()]);
 
+
     const handleEditClick = () => {
         setEditingText(activeTask()?.name || '');
         setIsEditing(true);
+    };
+
+    const handleKeyDown = async (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            await handleBlur();
+        } else if (e.key === 'Escape') {
+            setEditingText(activeTask()?.name || '');
+            setIsEditing(false);
+        }
+    };
+
+    const handleInputChange = (e) => {
+        setEditingText(e.target.value);
+    };
+
+    const taskColor = (taskColor) => {
+        return !isDarkMode ? lightTaskColor[taskColor] : darkTaskColor[taskColor];
+    }
+
+
+    function scrollToBottom() {
+        if (messagesEndRef.current && commentsInCurrentTask.length > 0) {
+            messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
+        }
+    }
+
+    const handleScroll = async (e) => {
+        const {scrollTop} = e.target;
+        if (scrollTop === 0) { // Прокрутили до верха
+            setIsLoading(true);
+            try {
+                const prevScrollHeight = messagesEndRef.current.scrollHeight;
+                await loadMoreComments();
+                messagesEndRef.current.scrollTop =
+                    messagesEndRef.current.scrollHeight - prevScrollHeight;
+
+            } finally {
+                setIsLoading(false);
+            }
+        }
     };
 
     const handleBlur = async (duplicatedCount = 0) => {
@@ -70,25 +116,6 @@ export function ChatCard({open}) {
         setIsEditing(false);
     };
 
-    const handleKeyDown = async (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            await handleBlur();
-        } else if (e.key === 'Escape') {
-            setEditingText(activeTask()?.name || '');
-            setIsEditing(false);
-        }
-    };
-
-    const handleInputChange = (e) => {
-        setEditingText(e.target.value);
-    };
-
-
-    const taskColor = (taskColor) => {
-        return !isDarkMode ? lightTaskColor[taskColor] : darkTaskColor[taskColor];
-    }
-
     const handleCompletionClick = async () => {
         if (!userHasPermission("UPDATE_TASK_COMPLETION")) {
             return;
@@ -102,23 +129,33 @@ export function ChatCard({open}) {
         }
     }
 
+    useEffect(() => {
+        if (commentsInCurrentTask?.length <= 25) {
+            scrollToBottom();
+        }
+
+    }, [commentsInCurrentTask]); // Срабатывает при изменении комментариев
+
+    function handleCloseChat() {
+        closeChat();
+    }
 
     return (
         <Card
             elevation={0}
             sx={{
-            position: 'relative',
-            backgroundColor: 'desk',
-            width: open ? '450px' : '0px',
-            zIndex: 4000,
-            display: 'flex',
-            flexDirection: 'column',
-            boxShadow: 20,
-            borderLeft: '1px solid',
-            borderColor: 'action.disabled',
-            transition: 'width 200ms ease-in-out',
-            height: '100vh',
-        }}
+                position: 'relative',
+                backgroundColor: 'desk',
+                width: open ? '450px' : '0px',
+                zIndex: 4000,
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: 20,
+                borderLeft: '1px solid',
+                borderColor: 'action.disabled',
+                transition: 'width 200ms ease-in-out',
+                height: '100vh',
+            }}
         >
 
             <Box
@@ -141,7 +178,7 @@ export function ChatCard({open}) {
                     display: 'flex',
                     position: 'relative',
                     backgroundColor: taskColor(activeTask()?.color),
-                    flexDirection: 'row', mt: 4, ml: 1, mr: 1,
+                    flexDirection: 'row', mt: 7, ml: 1, mr: 1,
                     borderRadius: 3,
                     border: '1px solid',
                     borderColor: 'action.disabled',
@@ -244,6 +281,8 @@ export function ChatCard({open}) {
 
 
             <Box
+                ref={messagesEndRef} // Привязываем ref к контейнеру
+                onScroll={handleScroll}
                 sx={{
                     width: '100%',
                     height: '100%',
@@ -270,19 +309,32 @@ export function ChatCard({open}) {
                 }}
                 id='content'
             >
-
-                <ChatMessage/>
-                <ChatMessage/>
-                <ChatMessage/>
-                <ChatMessage/>
-                <ChatMessage/>
-                <ChatMessage/>
-
+                {isLoading && <CircularProgress/>}
+                {commentsInCurrentTask
+                    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+                    .map(comment =>
+                        <ChatMessage key={comment.id} message={comment}/>)}
+                <div style={{float: "left", clear: "both"}}/>
+                {/*<div ref={messagesEndRef} />*/}
             </Box>
 
 
-            <MessageField/>
+            <MessageField task={activeTask()} scroll={scrollToBottom}/>
 
+            <Box
+                onClick={handleCloseChat}
+                sx={{
+                    borderTopLeftRadius: '4px',
+                    borderBottomLeftRadius: '4px',
+                    position: 'absolute',
+                    cursor: 'pointer',
+                    left: '6px',
+                    top: '6px'
+                    // zIndex: 200000
+                }}
+            >
+                <CloseIcon/>
+            </Box>
         </Card>
     )
 }

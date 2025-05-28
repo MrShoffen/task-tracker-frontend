@@ -91,7 +91,7 @@ const AnimatedCard = styled(Card)(({theme, open}) => ({
 export const PersistentDrawerLeft = ({children, open, setOpen}) => {
     const {auth} = useAuthContext();
 
-    const {workspaces, loadAllWorkspaces, chatOpen} = useTaskOperations();
+    const {workspaces, loadAllWorkspaces, chatOpen,closeChat} = useTaskOperations();
 
     const {isDarkMode, toggleTheme} = useCustomThemeContext();
     const [openSubmenu, setOpenSubmenu] = React.useState(false);
@@ -184,7 +184,10 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                                             borderRight: 'none'
                                         }
                                     }}
-                                    onClick={() => navigate('/profile')}
+                                    onClick={() => {
+                                        closeChat();
+                                        navigate('/profile');
+                                    }}
                                 >
                                     <ListItemIcon
                                         sx={{
@@ -315,18 +318,6 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                         flex: 1
                     }}>
                         {children}
-                        <Button
-                            onClick={toggleCard}
-                            variant="contained"
-                            sx={{
-                                position: 'fixed',
-                                left: 50,
-                                top: 50,
-                                zIndex: 5000
-                            }}
-                        >
-                            test
-                        </Button>
                     </Box>
 
                     {auth.isAuthenticated &&

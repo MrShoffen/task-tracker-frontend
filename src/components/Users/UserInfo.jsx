@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import {formatDate} from "../../services/util/Utils.jsx";
 
 
-export function UserInfo({sx = {}, createdAt, user}) {
+export function UserInfo({sx = {}, createdAt, user, label = "Автор задачи"}) {
     const [anchorEl, setAnchorEl] = useState(null);
 
     const handleAvatarClick = (event) => {
@@ -68,7 +68,7 @@ export function UserInfo({sx = {}, createdAt, user}) {
                                                 textAlign="center"
                                                 fontSize="0.8rem"
                                                 fontWeight="500">
-                                        Автор задачи
+                                        {label}
                                     </Typography>
 
                                     <Box display='flex' flexDirection='column'
@@ -169,18 +169,22 @@ export function UserInfo({sx = {}, createdAt, user}) {
                                                 </Typography>
                                             }
                                         </Box>
+                                        {createdAt &&
+                                            <>
+                                                <Divider/>
+                                                <Box mb='2px' mt={'4px'} display="flex" flexDirection="row" gap='5px'
+                                                     pl='8px'>
+                                                    <Typography sx={{
+                                                        alignSelf: 'start',
+                                                        userSelect: 'none', color: 'taskName'
+                                                    }} textAlign="center"
+                                                                fontSize="0.8rem"
+                                                                fontWeight="400">
+                                                        {'Дата: ' + formatDate(createdAt)}
+                                                    </Typography>
+                                                </Box>
+                                            </>}
 
-                                        <Divider/>
-                                        <Box mb='2px' mt={'4px'} display="flex" flexDirection="row" gap='5px' pl='8px'>
-                                            <Typography sx={{
-                                                alignSelf: 'start',
-                                                userSelect: 'none', color: 'taskName'
-                                            }} textAlign="center"
-                                                        fontSize="0.8rem"
-                                                        fontWeight="400">
-                                                {'Дата: ' + formatDate(createdAt)}
-                                            </Typography>
-                                        </Box>
                                     </Box>
 
                                 </Paper>

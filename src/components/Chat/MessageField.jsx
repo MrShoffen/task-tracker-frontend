@@ -2,15 +2,18 @@ import {Box, useTheme} from "@mui/material";
 import TextField from "@mui/material/TextField";
 import {SendIcon} from "../../assets/icons/Send.jsx";
 import * as React from "react";
-import {sendCreateSticker} from "../../services/fetch/tasks/sticker/SendCreateSticker.js";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
+import {sendCreateComment} from "../../services/fetch/tasks/comments/SendCreateComment.js";
+import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 
 
-export function MessageField() {
+export function MessageField({task, scroll}) {
     const [message, setMessage] = React.useState('');
     const theme = useTheme();
 
     const {showWarn} = useNotification();
+
+    const {addNewComment} = useTaskOperations();
 
     const handleKeyDown = async (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -18,6 +21,7 @@ export function MessageField() {
             await handleConfirm();
         }
     };
+
     const [errorMessage, setErrorMessage] = React.useState(false);
 
 
@@ -25,18 +29,24 @@ export function MessageField() {
         if (message.trim().length === 0) {
             return;
         }
-        if(message.trim().length > 1024) {
+        if (message.trim().length > 1024) {
             showWarn("Длина не должна превышать 1024 символа")
         }
 
         try {
-            console.log('booba')
+            const newM = await sendCreateComment(task, {
+                message: message,
+            });
+            addNewComment(newM);
         } catch (error) {
+            showWarn(error.message);
             console.log(error.message);
         }
+        setMessage("");
+        setTimeout(() => scroll(), 100);
     }
 
-    function handleChange(e){
+    function handleChange(e) {
         const t = e.target.value;
 
         if (t.trim().length > 1024) {

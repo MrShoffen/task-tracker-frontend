@@ -3,6 +3,7 @@ import {sendGetAllWorkspaces} from "../../services/fetch/tasks/ws/SendGetAllWork
 import {sendGetFullWsInformation} from "../../services/fetch/tasks/ws/SendGetFullWsInformation.js";
 import {useAuthContext} from "../Auth/AuthContext.jsx";
 import {sendUserInfo} from "../../services/fetch/unauth/SendUserInfo.js";
+import {sendGetAllComments} from "../../services/fetch/tasks/comments/SendGetAllComments.js";
 
 
 const TaskLoadContext = createContext(null);
@@ -25,8 +26,13 @@ export const TaskLoadProvider = ({children}) => {
     const [currentOpenTask, setCurrentOpenTask] = useState(null);
 
 
-    function activeTask  () {
-        if(!currentOpenTask){
+    const [commentsInCurrentTask, setCommentsInCurrentTask] = useState([]);
+    const [currentOffset, setCurrentOffset] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+
+
+    function activeTask() {
+        if (!currentOpenTask) {
             return null;
         }
         const deskIndex = fullWorkspaceInformation.desks.findIndex(desk => desk.id === currentOpenTask.deskId);
@@ -43,15 +49,45 @@ export const TaskLoadProvider = ({children}) => {
         return fullWorkspaceInformation.desks[deskIndex].tasks[taskIndex]
     }
 
-    function openChat(task) {
+    async function openChat(task) {
         setChatOpen(true);
         setCurrentOpenTask(task);
+        setCurrentOffset(0);
+        setHasMore(true);
+        const allComs = await sendGetAllComments(task, 25, 0);
+        setCommentsInCurrentTask(allComs);
+    }
+
+    async function loadMoreComments() {
+        if (hasMore) {
+            const newCommsChunk = await sendGetAllComments(activeTask(), 25, currentOffset);
+            if (newCommsChunk.length < 25) {
+                setHasMore(false);
+            }
+            setCommentsInCurrentTask(prev => {
+                const commentMap = new Map([...prev, ...newCommsChunk].map(c => [c.id, c]));
+                return Array.from(commentMap.values());
+            });
+            setCurrentOffset(currentOffset + newCommsChunk.length);
+        }
     }
 
     function closeChat() {
         setChatOpen(false);
         setCurrentOpenTask(null);
+        setCurrentOffset(0);
+        setHasMore(true);
+        setCommentsInCurrentTask([]);
     }
+
+    function addNewComment(newComment) {
+        setCommentsInCurrentTask(prev => [...prev, newComment]);
+    }
+
+    function deleteComment(comment) {
+        setCommentsInCurrentTask(prev => prev.filter(c => c.id !== comment.id));
+    }
+
 
     const [fullWorkspaceInformation, setFullWorkspaceInformation] = useState({
         createdAt: "2025-05-14T09:49:41.258378Z",
@@ -485,7 +521,11 @@ export const TaskLoadProvider = ({children}) => {
             openChat,
             chatOpen,
             activeTask,
-            closeChat
+            closeChat,
+            commentsInCurrentTask,
+            addNewComment,
+            deleteComment,
+            loadMoreComments
         }}>
             {children}
         </TaskLoadContext.Provider>
