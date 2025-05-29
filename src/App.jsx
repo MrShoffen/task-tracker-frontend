@@ -10,6 +10,7 @@ import AvailableAfterLoginRoute from "./context/Auth/AvailableAfterLoginRoute.js
 import ProfilePage from "./pages/ProfilePage.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
 import PublicWsPage from "./pages/PublicWsPage.jsx";
+import ChatPage from "./components/Chat/ChatPage.jsx";
 
 function App() {
 
@@ -48,6 +49,10 @@ function App() {
                                element={<PublicWsPage/>}
                         />
 
+
+                        <Route path="chat"
+                               element={<ChatPage username={"username"} />}
+                        />
 
                         <Route path="profile"
                                element={

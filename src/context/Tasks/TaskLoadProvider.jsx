@@ -4,6 +4,10 @@ import {sendGetFullWsInformation} from "../../services/fetch/tasks/ws/SendGetFul
 import {useAuthContext} from "../Auth/AuthContext.jsx";
 import {sendUserInfo} from "../../services/fetch/unauth/SendUserInfo.js";
 import {sendGetAllComments} from "../../services/fetch/tasks/comments/SendGetAllComments.js";
+import {connectToWebsocket} from "../../services/websocket/ConnectToWebsocket.js";
+import SockJS from 'sockjs-client/dist/sockjs';
+import {API_BASE_URL, API_CONTEXT} from "../../../UrlConstants.jsx";
+import {Stomp} from "@stomp/stompjs";
 
 
 const TaskLoadContext = createContext(null);
@@ -30,6 +34,38 @@ export const TaskLoadProvider = ({children}) => {
     const [currentOffset, setCurrentOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
 
+    function connectToWebsocket(workspaceId) {
+
+        const socket = new SockJS(API_BASE_URL + API_CONTEXT + "/websocket");
+
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, () => {
+            stompClient.subscribe('/topic/workspace/' + workspaceId,
+                (message) => {
+                    console.log('success!!');
+                    const event = JSON.parse(message.body);
+                    console.log('Получено обновление', event);
+                    const eventType = event.type;
+                    console.log(eventType);
+                    switch (eventType) {
+                        case 'WORKSPACE_UPDATED':
+                            updateWorkspace(event.payload);
+                            break;
+
+                        default:
+                            console.log('error with handling websocket message');
+                    }
+                })
+        })
+    }
+
+    function updateWorkspace(payload) {
+        setFullWorkspaceInformation(prev => ({
+            ...prev,
+            ...payload
+        }))
+    }
 
     function activeTask() {
         if (!currentOpenTask) {
@@ -119,7 +155,7 @@ export const TaskLoadProvider = ({children}) => {
         const uap = fullWs.usersAndPermissions.find(uap => uap.info.email === auth.user.email);
 
         setPermissions(uap?.permissions);
-
+        connectToWebsocket(wsId);
         preloadWsUsers(fullWs.desks, fullWs.usersAndPermissions);
 
         return fullWs;
