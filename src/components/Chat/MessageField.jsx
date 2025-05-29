@@ -11,6 +11,8 @@ export function MessageField({task, scroll}) {
     const [message, setMessage] = React.useState('');
     const theme = useTheme();
 
+    const [sending, setSending] = React.useState(false);
+
     const {showWarn} = useNotification();
 
     const {addNewComment} = useTaskOperations();
@@ -24,7 +26,6 @@ export function MessageField({task, scroll}) {
 
     const [errorMessage, setErrorMessage] = React.useState(false);
 
-
     async function handleConfirm() {
         if (message.trim().length === 0) {
             return;
@@ -32,18 +33,21 @@ export function MessageField({task, scroll}) {
         if (message.trim().length > 1024) {
             showWarn("Длина не должна превышать 1024 символа")
         }
+        setSending(true);
 
         try {
-            const newM = await sendCreateComment(task, {
-                message: message,
-            });
-            addNewComment(newM);
+            const newM = await sendCreateComment(task, {message: message});
+            addNewComment(newM, task);
         } catch (error) {
             showWarn(error.message);
             console.log(error.message);
         }
         setMessage("");
-        setTimeout(() => scroll(), 100);
+
+        setTimeout(() => {
+            scroll();
+            setSending(false);
+        }, 100);
     }
 
     function handleChange(e) {
@@ -53,7 +57,6 @@ export function MessageField({task, scroll}) {
             setErrorMessage(true);
         } else {
             setErrorMessage(false);
-
         }
         setMessage(t)
     }
@@ -64,7 +67,7 @@ export function MessageField({task, scroll}) {
                 position: 'relative',
                 display: 'flex',
                 width: '100%',
-                height: '150px', // Минимальная высота
+                height: '150px',
                 backgroundColor: 'desk',
                 borderTop: '1px solid',
                 borderTopColor: 'action.disabled',
@@ -74,6 +77,7 @@ export function MessageField({task, scroll}) {
             <TextField
                 multiline
                 rows={2}
+                disabled={sending}
                 onKeyDown={handleKeyDown}
                 placeholder="Ваше сообщение... (1024 символа)"
                 variant="standard"
@@ -97,7 +101,6 @@ export function MessageField({task, scroll}) {
                         backgroundColor: 'background.default',
                         borderRadius: 3,
                     }
-                    // остальной стиль
                 }}
                 value={message}
                 onChange={handleChange}
@@ -107,6 +110,7 @@ export function MessageField({task, scroll}) {
 
             <Box
                 onClick={handleConfirm}
+                disabled={sending}
                 sx={{
                     position: 'absolute',
                     right: '20px',

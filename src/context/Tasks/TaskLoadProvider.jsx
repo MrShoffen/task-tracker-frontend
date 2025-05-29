@@ -80,12 +80,14 @@ export const TaskLoadProvider = ({children}) => {
         setCommentsInCurrentTask([]);
     }
 
-    function addNewComment(newComment) {
+    function addNewComment(newComment, task) {
         setCommentsInCurrentTask(prev => [...prev, newComment]);
+        updateTaskField(task.deskId, task.id, 'commentsCount', task.commentsCount + 1)
     }
 
-    function deleteComment(comment) {
+    function deleteComment(comment, task) {
         setCommentsInCurrentTask(prev => prev.filter(c => c.id !== comment.id));
+        updateTaskField(task.deskId, task.id, 'commentsCount', task.commentsCount - 1)
     }
 
 

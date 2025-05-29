@@ -84,8 +84,11 @@ export function ChatCard({open}) {
             try {
                 const prevScrollHeight = messagesEndRef.current.scrollHeight;
                 await loadMoreComments();
-                messagesEndRef.current.scrollTop =
-                    messagesEndRef.current.scrollHeight - prevScrollHeight;
+                setTimeout(() => {
+                    messagesEndRef.current.scrollTop =
+                        messagesEndRef.current.scrollHeight - prevScrollHeight;
+                }, 300)
+
 
             } finally {
                 setIsLoading(false);
@@ -312,8 +315,12 @@ export function ChatCard({open}) {
                 {isLoading && <CircularProgress/>}
                 {commentsInCurrentTask
                     .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-                    .map(comment =>
-                        <ChatMessage key={comment.id} message={comment}/>)}
+                    .map(comment => <>
+                        <ChatMessage task={activeTask()} key={comment.id} message={comment}/>
+                        <ChatMessage task={activeTask()} message={{...comment, type: 'AUDIT'}}/>
+                    </>)}
+
+
                 <div style={{float: "left", clear: "both"}}/>
                 {/*<div ref={messagesEndRef} />*/}
             </Box>

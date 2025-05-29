@@ -66,9 +66,10 @@ export function TaskPlugins({task, hovered}) {
                             overflow: 'hidden',
                             userSelect: 'none',
                             textOverflow: 'ellipsis',
-                            mr: '3px'
+                            mr: '3px',
+                            ml: '3px'
                         })} variant='body2' fontSize={'0.7rem'}>
-                            Комментарии
+                            {task.commentsCount ? task.commentsCount : 0}
                         </Typography>
                     </Box>
                 }

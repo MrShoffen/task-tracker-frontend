@@ -7,15 +7,16 @@ import {useAuthContext} from "../../context/Auth/AuthContext.jsx";
 import {DeleteTask} from "../../assets/icons/DeleteTask.jsx";
 import {sendDeleteComment} from "../../services/fetch/tasks/comments/SendDeleteCommen.js";
 
-export function ChatMessage({message}) {
+export function ChatMessage({message, task}) {
     const {usersInWs, userHasPermission, deleteComment} = useTaskOperations();
     const {auth} = useAuthContext();
-
 
     function loadUser() {
         const alreadySavedUser = usersInWs.findIndex(user => user.id === message.userId);
         if (alreadySavedUser !== -1) {
             return usersInWs[alreadySavedUser];
+        } else {
+            return {email: 'email', firstName: 'name', lastName: 'name'};
         }
     }
 
@@ -23,13 +24,45 @@ export function ChatMessage({message}) {
     const isCurrentUser = auth.user.email === userInfo?.email;
 
     async function handleCommDel() {
-
-        try{
-           await sendDeleteComment(message);
-           deleteComment(message);
-        } catch (error){
+        try {
+            await sendDeleteComment(message);
+            deleteComment(message, task);
+        } catch (error) {
             console.log(error.message);
         }
+    }
+
+    if (message.type === 'AUDIT') {
+        return (
+            <Card
+                elevation={0}
+                sx={{
+                    width: '400px',
+                    // boxShadow: 2,
+                    minHeight: '60px',
+                    position: 'relative',
+                    display: 'flex',
+                    borderRadius: 2,
+                    border: '1px solid',
+                    borderColor: 'action.selected',
+                    // backgroundColor: isCurrentUser ? 'messageBg' : 'background.default',
+                    // backgroundColor: 'audit',
+                    backgroundColor: 'auditSuccess',
+                    mb: '20px',
+                    mt: '20px',
+                    flexDirection: 'column',
+                    // ml: isCurrentUser ? '90px' : '20px',
+                    ml: '25px',
+                    pb: '5px',
+                }}
+            >
+                <Box sx={{display: 'flex', justifyContent: 'center',  m: '10px'}}>
+                    <Typography fontSize='0.72rem' fontWeight={500} color='text.disabled'>
+                        {formatDate(message.createdAt)}
+                    </Typography>
+                </Box>
+            </Card>
+        )
     }
 
     return (
@@ -51,10 +84,7 @@ export function ChatMessage({message}) {
                 pb: '5px',
             }}
         >
-            <Box
-                sx={{ml: '10px', mr: '10px', mt: 1, display: 'flex', flexDirection: 'row'}}
-
-            >
+            <Box sx={{ml: '10px', mr: '10px', mt: 1, display: 'flex', flexDirection: 'row'}}>
                 <UserInfo label={"Автор комментария"} user={userInfo} sx={{
                     height: '20px',
                     width: '20px',
@@ -71,25 +101,21 @@ export function ChatMessage({message}) {
                     }}
                     fontSize='0.8rem' fontWeight='500' color='message'>
                     {
-                        (userInfo.firstName && userInfo.lastName) ?
-                            (userInfo.firstName + ' ' + userInfo.lastName) :
+                        (userInfo?.firstName && userInfo?.lastName) ?
+                            (userInfo?.firstName + ' ' + userInfo?.lastName) :
                             userInfo?.email
                     }
                 </Typography>
             </Box>
 
 
-            <Box
-                sx={{ml: '10px', mr: '10px', mt: '0px'}}
-            >
+            <Box sx={{ml: '10px', mr: '10px', mt: '0px'}}>
                 <Typography fontSize='0.8rem' color='message'>
                     {message.message}
                 </Typography>
             </Box>
 
-            <Box
-                sx={{ml: '10px', display: 'flex', justifyContent: 'flex-end', mr: '10px', mt: '10px'}}
-            >
+            <Box sx={{ml: '10px', display: 'flex', justifyContent: 'flex-end', mr: '10px', mt: '10px'}}>
                 <Typography fontSize='0.72rem' color='text.disabled'>
                     {formatDate(message.createdAt)}
                 </Typography>
@@ -98,12 +124,8 @@ export function ChatMessage({message}) {
             {userHasPermission("DELETE_COMMENTS") &&
                 <IconButton
                     onClick={handleCommDel}
-                    sx={{
-                        position: 'absolute',
-                        right: 1
-                    }}
+                    sx={{position: 'absolute', right: 1}}
                 >
-
                     <DeleteTask color={'rgba(209,34,34,0.75)'}/>
                 </IconButton>
             }
