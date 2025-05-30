@@ -8,22 +8,16 @@ import {UserAvatar} from "../Users/UserAvatar.jsx";
 
 
 export function StickerInfo({sx = {}, sticker, handleClose, open, anchorEl}) {
-    const {usersInWs} = useTaskOperations();
+    const {loadUser} = useTaskOperations();
 
 
     const [user, setUser] = React.useState(null);
 
-    async function loadUser() {
-        const alreadySavedUser = usersInWs.findIndex(user => user.id === sticker.userId);
-        console.log('loading user in sticker')
-        if (alreadySavedUser !== -1) {
-            setUser(usersInWs[alreadySavedUser]);
-        }
-    }
 
     useEffect(() => {
         if (open) {
-            loadUser();
+            const foundUser = loadUser(sticker.userId);
+            setUser(foundUser);
         }
     }, [open]);
 

@@ -26,6 +26,7 @@ export function Task({task, setContentIsLoading, disableDragging}) {
     }
 
 
+
     const {
         setNodeRef,
         attributes,
@@ -40,19 +41,16 @@ export function Task({task, setContentIsLoading, disableDragging}) {
         }
     })
 
-    const {updateTaskField, openChat, closeChat, chatOpen, activeTask, usersInWs, userHasPermission} = useTaskOperations();
+    const {updateTaskField, loadUser, openChat, closeChat, chatOpen, activeTask,  userHasPermission} = useTaskOperations();
+
+    const currentUser = loadUser(task.userId);
+
 
     const style = {
         transform: transform ? CSS.Translate.toString(transform) : undefined,
         paddingBottom: '10px'
     };
 
-    function loadUser() {
-        const alreadySavedUser = usersInWs.findIndex(user => user.id === task.userId);
-        if (alreadySavedUser !== -1) {
-            return usersInWs[alreadySavedUser];
-        }
-    }
 
     const handleCompletionClick = async (event) => {
         event.stopPropagation();
@@ -60,7 +58,7 @@ export function Task({task, setContentIsLoading, disableDragging}) {
             return;
         }
         try {
-            updateTaskField(task.deskId, task.id, 'completed', !task.completed);
+            // updateTaskField(task.deskId, task.id, 'completed', !task.completed);
             await sendEditTask("completion", task,
                 {completed: !task.completed});
         } catch (error) {
@@ -71,7 +69,7 @@ export function Task({task, setContentIsLoading, disableDragging}) {
     function handleTaskClick() {
         if (chatOpen && task.id === activeTask()?.id){
             closeChat();
-        } else {
+        } else if (userHasPermission("CREATE_READ_COMMENTS")) {
             openChat(task);
         }
     }
@@ -165,7 +163,7 @@ export function Task({task, setContentIsLoading, disableDragging}) {
                             fontSize: '0.7rem',
                             opacity: !task.completed ? 1 : (!hovered ? 0.5 : 1),
                         }}
-                        user={loadUser()}
+                        user={currentUser}
                         createdAt={task.createdAt}
                     />
                 }

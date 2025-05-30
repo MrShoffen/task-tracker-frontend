@@ -5,7 +5,7 @@ import {API_BASE_URL, API_CONTEXT} from "../../../../../UrlConstants.jsx";
 
 
 export const sendDeleteComment = async (comment) => {
-    console.log("--------------------")
+    console.log("----------deleting-comment----------")
     const url = API_BASE_URL + API_CONTEXT + "/workspaces/" + comment.workspaceId + "/desks/" + comment.taskId + "/tasks/" + comment.taskId + "/comments/" + comment.id;
 
     console.log(url);

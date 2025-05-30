@@ -222,7 +222,7 @@ export function calculateNewOrderIndexReversed(moving, target, elements) {
 }
 
 export const workspaceCovers = [
-    null,
+    "",
     "https://i.ibb.co/FLH4hCBW/mounts.jpg",
     "https://i.ibb.co/pBd9K2Rn/pole.jpg",
     "https://i.ibb.co/gZY0mGrc/rauma-river-norway-korabli-lodki-shlyupk-708609.jpg",

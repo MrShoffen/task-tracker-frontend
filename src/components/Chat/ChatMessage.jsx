@@ -8,25 +8,15 @@ import {DeleteTask} from "../../assets/icons/DeleteTask.jsx";
 import {sendDeleteComment} from "../../services/fetch/tasks/comments/SendDeleteCommen.js";
 
 export function ChatMessage({message, task}) {
-    const {usersInWs, userHasPermission, deleteComment} = useTaskOperations();
+    const { loadUser, userHasPermission} = useTaskOperations();
     const {auth} = useAuthContext();
 
-    function loadUser() {
-        const alreadySavedUser = usersInWs.findIndex(user => user.id === message.userId);
-        if (alreadySavedUser !== -1) {
-            return usersInWs[alreadySavedUser];
-        } else {
-            return {email: 'email', firstName: 'name', lastName: 'name'};
-        }
-    }
-
-    const userInfo = loadUser();
+    const userInfo = loadUser(message.userId);
     const isCurrentUser = auth.user.email === userInfo?.email;
 
     async function handleCommDel() {
         try {
             await sendDeleteComment(message);
-            deleteComment(message, task);
         } catch (error) {
             console.log(error.message);
         }

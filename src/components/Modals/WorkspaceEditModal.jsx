@@ -44,7 +44,6 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
             return;
         }
         try {
-            updateWsField('coverUrl', imageUrl);
             await sendEditWs('cover', workspace, {
                 newCoverUrl: imageUrl
             });
@@ -65,7 +64,6 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
     async function handleNameSave() {
         const oldName = workspace.name;
         try {
-            updateWsField('name', wsName);
             await sendEditWs("name", workspace,
                 {
                     newName: wsName
@@ -82,7 +80,7 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
 
     async function handleAccessSave() {
         try {
-            updateWsField('isPublic', isPublic);
+            // updateWsField('isPublic', isPublic);
             await sendEditWs("access", workspace,
                 {
                     isPublic: isPublic

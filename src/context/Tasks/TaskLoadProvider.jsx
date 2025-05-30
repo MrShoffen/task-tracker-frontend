@@ -1,4 +1,4 @@
-import {createContext, useContext, useState} from "react";
+import {createContext, useContext, useRef, useState} from "react";
 import {sendGetAllWorkspaces} from "../../services/fetch/tasks/ws/SendGetAllWorkspaces.js";
 import {sendGetFullWsInformation} from "../../services/fetch/tasks/ws/SendGetFullWsInformation.js";
 import {useAuthContext} from "../Auth/AuthContext.jsx";
@@ -8,6 +8,7 @@ import {connectToWebsocket} from "../../services/websocket/ConnectToWebsocket.js
 import SockJS from 'sockjs-client/dist/sockjs';
 import {API_BASE_URL, API_CONTEXT} from "../../../UrlConstants.jsx";
 import {Stomp} from "@stomp/stompjs";
+import {sendCreateSticker} from "../../services/fetch/tasks/sticker/SendCreateSticker.js";
 
 
 const TaskLoadContext = createContext(null);
@@ -25,16 +26,23 @@ export const TaskLoadProvider = ({children}) => {
 
     const [usersInWs, setUsersInWs] = useState([]);
 
+    const [fullWorkspaceInformation, setFullWorkspaceInformation] = useState({
+        createdAt: "205-05-14T09:49:41.58378Z",
+        desks: [],
+        id: "67304ccb-4998-499a-a1c9-394eeb133ea1",
+        name: "1"
+    });
+
     const [chatOpen, setChatOpen] = useState(false);
-
     const [currentOpenTask, setCurrentOpenTask] = useState(null);
-
-
     const [commentsInCurrentTask, setCommentsInCurrentTask] = useState([]);
     const [currentOffset, setCurrentOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
 
-    function connectToWebsocket(workspaceId) {
+    const stompClientRef = useRef(null);
+    const subscriptionRef = useRef(null);
+
+    function connectToWsWebsocket(workspaceId) {
 
         const socket = new SockJS(API_BASE_URL + API_CONTEXT + "/websocket");
 
@@ -43,28 +51,106 @@ export const TaskLoadProvider = ({children}) => {
         stompClient.connect({}, () => {
             stompClient.subscribe('/topic/workspace/' + workspaceId,
                 (message) => {
-                    console.log('success!!');
                     const event = JSON.parse(message.body);
                     console.log('Получено обновление', event);
                     const eventType = event.type;
-                    console.log(eventType);
                     switch (eventType) {
                         case 'WORKSPACE_UPDATED':
-                            updateWorkspace(event.payload);
+                            const fieldName = Object.keys(event.payload.updatedField)[0];
+                            updateWsField(fieldName, event.payload.updatedField[fieldName]);
+                            break;
+
+                        case 'DESK_CREATED':
+                            addNewDesk(event.payload);
+                            break;
+
+                        case 'DESK_DELETED':
+                            deleteDesk(event.payload);
+                            break;
+
+                        case 'DESK_UPDATED':
+                            const fieldDesk = Object.keys(event.payload.updatedField)[0];
+                            updateDeskField(event.payload.deskId, fieldDesk, event.payload.updatedField[fieldDesk]);
+                            break;
+
+                        case 'TASK_CREATED':
+                            addNewTask(event.payload);
+                            break;
+
+                        case 'TASK_DELETED':
+                            deleteTask(event.payload.deskId, event.payload.taskId);
+                            break;
+
+                        case 'TASK_UPDATED':
+                            const fieldTask = Object.keys(event.payload.updatedField)[0];
+                            // updateTaskField(event.payload.deskId, event.payload.taskId, fieldTask, event.payload.updatedField[fieldTask]);
+                            if (fieldTask === 'deskId') {
+                                console.log('old ', event.payload.deskId);
+                                console.log('new ', event.payload.updatedField[fieldTask])
+                                moveTaskInternal(event.payload.taskId, event.payload.deskId, event.payload.updatedField[fieldTask]);
+                                // moveTaskToAnotherDesk()
+                            } else {
+                                updateTaskField(event.payload.deskId, event.payload.taskId, fieldTask, event.payload.updatedField[fieldTask]);
+                            }
+                            break;
+
+                        case 'STICKER_CREATED':
+                            addNewSticker(event.payload);
+                            break;
+
+                        case 'STICKER_DELETED':
+                            deleteSticker(event.payload.taskId, event.payload.stickerId);
+                            break;
+
+                        case 'COMMENT_CREATED':
+                            updateCommentsCount(event.payload);
+                            break;
+
+                        case 'COMMENT_DELETED':
+                            updateCommentsCountMin(event.payload);
                             break;
 
                         default:
                             console.log('error with handling websocket message');
                     }
-                })
+                },
+                {
+                    'X-Workspace-ID': workspaceId // Дополнительные кастомные заголовки
+                }
+                );
         })
     }
 
-    function updateWorkspace(payload) {
-        setFullWorkspaceInformation(prev => ({
-            ...prev,
-            ...payload
-        }))
+
+    function connectToChatWebsocket(workspaceId, taskId, task) {
+
+        const socket = new SockJS(API_BASE_URL + API_CONTEXT + "/websocket");
+
+        const stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, () => {
+            const subscription = stompClient.subscribe('/topic/workspace/' + workspaceId + '/chat/' + taskId,
+                (message) => {
+                    const event = JSON.parse(message.body);
+                    console.log('Получено обновление чата', event);
+                    const eventType = event.type;
+                    switch (eventType) {
+                        case 'COMMENT_CREATED':
+                            console.log(event.payload);
+                            addNewComment(event.payload, task)
+                            break;
+
+                        case 'COMMENT_DELETED':
+                            console.log('in deleting', event.payload);
+                            deleteComment(event.payload, task);
+                            break;
+
+                        default:
+                            console.log('error with handling websocket chat message');
+                    }
+                })
+            subscriptionRef.current = subscription;
+        })
     }
 
     function activeTask() {
@@ -86,29 +172,35 @@ export const TaskLoadProvider = ({children}) => {
     }
 
     async function openChat(task) {
+        subscriptionRef.current?.unsubscribe();
         setChatOpen(true);
         setCurrentOpenTask(task);
         setCurrentOffset(0);
         setHasMore(true);
-        const allComs = await sendGetAllComments(task, 25, 0);
+        const allComs = await sendGetAllComments(task, 5, 0);
+        connectToChatWebsocket(task.workspaceId, task.id, task);
         setCommentsInCurrentTask(allComs);
     }
 
     async function loadMoreComments() {
-        if (hasMore) {
-            const newCommsChunk = await sendGetAllComments(activeTask(), 25, currentOffset);
-            if (newCommsChunk.length < 25) {
+        if (hasMore && activeTask()) {
+            const newCommsChunk = await sendGetAllComments(activeTask(), 5, currentOffset);
+            if (newCommsChunk.length < 5) {
                 setHasMore(false);
             }
             setCommentsInCurrentTask(prev => {
-                const commentMap = new Map([...prev, ...newCommsChunk].map(c => [c.id, c]));
-                return Array.from(commentMap.values());
+                if (prev) {
+                    const commentMap = new Map([...prev, ...newCommsChunk].map(c => [c.id, c]));
+                    return Array.from(commentMap.values());
+                }
             });
             setCurrentOffset(currentOffset + newCommsChunk.length);
         }
     }
 
     function closeChat() {
+        subscriptionRef.current?.unsubscribe();
+
         setChatOpen(false);
         setCurrentOpenTask(null);
         setCurrentOffset(0);
@@ -117,22 +209,17 @@ export const TaskLoadProvider = ({children}) => {
     }
 
     function addNewComment(newComment, task) {
-        setCommentsInCurrentTask(prev => [...prev, newComment]);
-        updateTaskField(task.deskId, task.id, 'commentsCount', task.commentsCount + 1)
+        if (newComment.taskId === task.id) {
+            setCommentsInCurrentTask(prev => [...prev, newComment]);
+        }
     }
 
     function deleteComment(comment, task) {
-        setCommentsInCurrentTask(prev => prev.filter(c => c.id !== comment.id));
-        updateTaskField(task.deskId, task.id, 'commentsCount', task.commentsCount - 1)
+        if (comment.taskId === task.id) {
+            setCommentsInCurrentTask(prev => prev.filter(c => c.id !== comment.commentId));
+        }
     }
 
-
-    const [fullWorkspaceInformation, setFullWorkspaceInformation] = useState({
-        createdAt: "2025-05-14T09:49:41.258378Z",
-        desks: [],
-        id: "67304ccb-4998-499a-a1c9-394eeb133ea1",
-        name: "1"
-    });
 
     async function loadAllWorkspaces() {
         try {
@@ -151,16 +238,26 @@ export const TaskLoadProvider = ({children}) => {
 
     async function loadFullWs(wsId) {
         const fullWs = await sendGetFullWsInformation("/api/v1/workspaces/" + wsId + "/full");
+        console.log(fullWs);
         setFullWorkspaceInformation(fullWs)
         const uap = fullWs.usersAndPermissions.find(uap => uap.info.email === auth.user.email);
 
         setPermissions(uap?.permissions);
-        connectToWebsocket(wsId);
-        preloadWsUsers(fullWs.desks, fullWs.usersAndPermissions);
+        connectToWsWebsocket(wsId);
+        await preloadWsUsers(fullWs.desks, fullWs.usersAndPermissions);
 
         return fullWs;
     }
 
+    function updateWsField(field, newVal) {
+        setFullWorkspaceInformation(prev => ({
+            ...prev,
+            [field]: newVal
+        }))
+    }
+
+
+    //users----------------------------------------------------
 
     async function preloadWsUsers(desks, usersAndPermissions) {
         async function preloadDesk(desk, allUsers, usersAndPermissions) {
@@ -174,7 +271,6 @@ export const TaskLoadProvider = ({children}) => {
                 return;
             }
 
-            console.log('fetching unknown user');
             const fetchedUser = await sendUserInfo(task.userId);
             const nUser = {...fetchedUser, id: task.userId};
             allUsers.push(nUser);
@@ -191,6 +287,15 @@ export const TaskLoadProvider = ({children}) => {
         setUsersInWs(allUsers);
     }
 
+    function loadUser(userId) {
+        const alreadySavedUser = usersInWs.findIndex(user => user.id === userId);
+        if (alreadySavedUser !== -1) {
+            return usersInWs[alreadySavedUser];
+        } else {
+            return {email: 'unkonwn_user@mail'};
+        }
+    }
+
 
     function userHasPermission(permission) {
         if (permissions === null) {
@@ -200,12 +305,10 @@ export const TaskLoadProvider = ({children}) => {
         return permissions.includes(permission);
     }
 
-    function updateWsField(field, newVal) {
-        setFullWorkspaceInformation(prev => ({
-            ...prev,
-            [field]: newVal
-        }))
-    }
+    //------------------------------------------------------------------------
+
+
+    //--DESKS----------------------------------------------------------------
 
     function addNewDesk(newDesk) {
         const fullDesk = {
@@ -247,29 +350,14 @@ export const TaskLoadProvider = ({children}) => {
         }))
     }
 
-    function deleteDesk(deskToDelete) {
+
+    function deleteDesk(deskId) {
         setFullWorkspaceInformation(prev => ({
             ...prev, // Копируем все существующие поля
-            desks: prev.desks.filter(desk => desk.id !== deskToDelete.id) // Фильтруем массив, оставляя только элементы с id не равным deskId
+            desks: prev.desks.filter(desk => desk.id !== deskId) // Фильтруем массив, оставляя только элементы с id не равным deskId
         }));
     }
 
-    function updateDeskOrder(deskIndex, deskForUpdate) {
-        setFullWorkspaceInformation(prevData => {
-
-            const updatedDesks = [...prevData.desks];
-            updatedDesks[deskIndex] = {
-                ...updatedDesks[deskIndex],
-                orderIndex: deskForUpdate.orderIndex
-            };
-            console.log(updatedDesks)
-            return {
-                ...prevData,
-                desks: updatedDesks
-            }
-
-        })
-    }
 
     function updateDeskField(deskIdForUpdate, field, newVal) {
         setFullWorkspaceInformation(prevData => {
@@ -291,6 +379,9 @@ export const TaskLoadProvider = ({children}) => {
 
         })
     }
+
+    //------------------------------------------------------------------------
+
 
     function moveTaskToAnotherDesk(movingTask, targetDesk) {
         const deskIdInMovingTask = movingTask.deskId;
@@ -326,38 +417,92 @@ export const TaskLoadProvider = ({children}) => {
         })
     }
 
-    function addNewTask(newTask) {
-        console.log(newTask);
-        console.log(fullWorkspaceInformation)
-        const deskIdForUpdate = newTask.deskId;
+    function moveTaskInternal(movingTaskId, sourceDeskId, targetDeskId) {
         setFullWorkspaceInformation(prevData => {
-            const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
-            if (deskIndex === -1) {
+            const movingTaskDeskIndex = prevData.desks.findIndex(desk => desk.id === sourceDeskId);
+            if (movingTaskDeskIndex === -1) {
                 console.error("Desk not found");
                 return prevData;
             }
 
             const updatedDesks = [...prevData.desks];
 
-            updatedDesks[deskIndex] = {
-                ...updatedDesks[deskIndex],
-                tasks: [...updatedDesks[deskIndex].tasks,
-                    {
-                        ...newTask,
-                        stickers: []
-                    }]
+            const movingTaskI = updatedDesks[movingTaskDeskIndex].tasks.findIndex(t => t.id === movingTaskId);
+
+            if (movingTaskI === -1) {
+                console.error("Task not found");
+                return prevData;
+            }
+
+            const movingTask = updatedDesks[movingTaskDeskIndex].tasks[movingTaskI];
+
+            updatedDesks[movingTaskDeskIndex] = {
+                ...updatedDesks[movingTaskDeskIndex],
+                tasks: updatedDesks[movingTaskDeskIndex].tasks.filter(t => t.id !== movingTaskId)
             };
-            console.log(updatedDesks)
+
+            const targetDeskIndex = prevData.desks.findIndex(d => d.id === targetDeskId)
+
+            if (targetDeskIndex === -1) {
+                console.error("Task not found");
+                return prevData;
+            }
+
+            if (updatedDesks[targetDeskIndex]
+                .tasks.findIndex(t => t.name === movingTask.name) !== -1) {
+                return prevData;
+            }
+
+            updatedDesks[targetDeskIndex] = {
+                ...updatedDesks[targetDeskIndex],
+                tasks: [...updatedDesks[targetDeskIndex].tasks, {...movingTask, deskId: targetDeskId}]
+            }
+
             return {
                 ...prevData,
                 desks: updatedDesks
             }
-
         })
     }
 
-    function deleteTask(taskToDelete) {
-        const deskIdForUpdate = taskToDelete.deskId;
+    function addNewTask(newTask) {
+        console.log(fullWorkspaceInformation);
+        setFullWorkspaceInformation(prevData => {
+            const deskIndex = prevData.desks.findIndex(desk => desk.id === newTask.deskId);
+            if (deskIndex === -1) {
+                console.error("Desk not found");
+                return prevData;
+            }
+
+            const existingTaskIndex = prevData.desks[deskIndex].tasks.findIndex(
+                task => task.id === newTask.id
+            );
+
+            if (existingTaskIndex !== -1) {
+                console.log("Task with this ID already exists");
+                return prevData; // Возвращаем неизмененные данные
+            }
+
+            const updatedDesks = [...prevData.desks];
+            updatedDesks[deskIndex] = {
+                ...updatedDesks[deskIndex],
+                tasks: [
+                    ...updatedDesks[deskIndex].tasks,
+                    {
+                        ...newTask,
+                        stickers: []
+                    }
+                ]
+            };
+
+            return {
+                ...prevData,
+                desks: updatedDesks
+            };
+        });
+    }
+
+    function deleteTask(deskIdForUpdate, taskId) {
         setFullWorkspaceInformation(prevData => {
             const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
             if (deskIndex === -1) {
@@ -368,7 +513,7 @@ export const TaskLoadProvider = ({children}) => {
             const updatedDesks = [...prevData.desks];
             updatedDesks[deskIndex] = {
                 ...updatedDesks[deskIndex],
-                tasks: updatedDesks[deskIndex].tasks.filter(t => t.id !== taskToDelete.id)
+                tasks: updatedDesks[deskIndex].tasks.filter(t => t.id !== taskId)
             };
             console.log(updatedDesks)
             return {
@@ -405,6 +550,7 @@ export const TaskLoadProvider = ({children}) => {
     }
 
     function updateTaskField(deskIdForUpdate, taskIdForUpdate, fieldName, newValue) {
+        let retTask = null;
         setFullWorkspaceInformation(prevData => {
             const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
             if (deskIndex === -1) {
@@ -426,6 +572,7 @@ export const TaskLoadProvider = ({children}) => {
                 ...updatedTasks[taskIndex],
                 [fieldName]: newValue
             };
+            retTask = updatedTasks[taskIndex];
 
             updatedDesks[deskIndex] = {
                 ...updatedDesks[deskIndex],
@@ -437,13 +584,97 @@ export const TaskLoadProvider = ({children}) => {
                 desks: updatedDesks
             };
         });
+
+        return retTask;
+    }
+
+    function updateCommentsCount(taskIdForUpdate) {
+        setFullWorkspaceInformation(prevData => {
+            const tasks = prevData.desks.flatMap(d => d.tasks);
+            const deskIdForUpdate = tasks
+                .find(t => t.id === taskIdForUpdate).deskId;
+
+            const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
+            if (deskIndex === -1) {
+                console.error("Desk not found");
+                return prevData;
+            }
+
+            const updatedDesks = [...prevData.desks];
+
+
+            const taskIndex = prevData.desks[deskIndex].tasks.findIndex(task => task.id === taskIdForUpdate);
+
+            const updatedTasks = [...prevData.desks[deskIndex].tasks];
+
+            updatedTasks[taskIndex] = {
+                ...updatedTasks[taskIndex],
+                commentsCount: +updatedTasks[taskIndex].commentsCount + 1
+            }
+
+            updatedDesks[deskIndex] = {
+                ...updatedDesks[deskIndex],
+                tasks: updatedTasks
+            };
+            console.log(updatedDesks)
+            return {
+                ...prevData,
+                desks: updatedDesks
+            }
+
+        })
+    }
+
+    function updateCommentsCountMin(taskIdForUpdate) {
+        setFullWorkspaceInformation(prevData => {
+            const tasks = prevData.desks.flatMap(d => d.tasks);
+            const deskIdForUpdate = tasks
+                .find(t => t.id === taskIdForUpdate).deskId;
+
+            const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
+            if (deskIndex === -1) {
+                console.error("Desk not found");
+                return prevData;
+            }
+
+            const updatedDesks = [...prevData.desks];
+
+
+            const taskIndex = prevData.desks[deskIndex].tasks.findIndex(task => task.id === taskIdForUpdate);
+
+            const updatedTasks = [...prevData.desks[deskIndex].tasks];
+
+            updatedTasks[taskIndex] = {
+                ...updatedTasks[taskIndex],
+                commentsCount: +updatedTasks[taskIndex].commentsCount - 1
+            }
+
+            updatedDesks[deskIndex] = {
+                ...updatedDesks[deskIndex],
+                tasks: updatedTasks
+            };
+            console.log(updatedDesks)
+            return {
+                ...prevData,
+                desks: updatedDesks
+            }
+
+        })
     }
 
 
-    function addNewSticker(deskIdForUpdate, newSticker) {
-        console.log(newSticker);
-        const taskIdForUpdate = newSticker.taskId;
+    function addNewSticker(newSticker) {
+        console.log(fullWorkspaceInformation);
+
+
         setFullWorkspaceInformation(prevData => {
+
+
+            const taskIdForUpdate = newSticker.taskId;
+            const tasks = prevData.desks.flatMap(d => d.tasks);
+            const deskIdForUpdate = tasks
+                .find(t => t.id === taskIdForUpdate).deskId;
+
             const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
             if (deskIndex === -1) {
                 console.error("Desk not found");
@@ -476,10 +707,13 @@ export const TaskLoadProvider = ({children}) => {
     }
 
 
-    function deleteSticker(deskIdForUpdate, sticker) {
-        const taskIdForUpdate = sticker.taskId;
+    function deleteSticker(taskIdForUpdate, stickerId) {
 
         setFullWorkspaceInformation(prevData => {
+            const tasks = prevData.desks.flatMap(d => d.tasks);
+            const deskIdForUpdate = tasks
+                .find(t => t.id === taskIdForUpdate).deskId;
+
             const deskIndex = prevData.desks.findIndex(desk => desk.id === deskIdForUpdate);
             if (deskIndex === -1) {
                 console.error("Desk not found");
@@ -506,7 +740,7 @@ export const TaskLoadProvider = ({children}) => {
 
             updatedTasks[taskIndex] = {
                 ...currentTask,
-                stickers: currentTask.stickers.filter(stick => stick.id !== sticker.id)
+                stickers: currentTask.stickers.filter(stick => stick.id !== stickerId)
             };
 
             // Обновляем доску
@@ -532,37 +766,25 @@ export const TaskLoadProvider = ({children}) => {
             fullWorkspaceInformation,
             setFullWorkspaceInformation,
             deleteWorkspace,
-            updateWsField,
 
             permissions,
             userHasPermission,
 
-            addNewTask,
-            deleteTask,
             moveTaskToAnotherDesk,
             updateTaskOrder,
             updateTaskField,
 
-            addNewDesk,
-            deleteDesk,
-            updateDeskField,
-            updateDeskOrder,
 
             addNewPermission,
             deletePermission,
 
-            usersInWs,
-
-            addNewSticker,
-            deleteSticker,
+            loadUser,
 
             openChat,
             chatOpen,
             activeTask,
             closeChat,
             commentsInCurrentTask,
-            addNewComment,
-            deleteComment,
             loadMoreComments
         }}>
             {children}

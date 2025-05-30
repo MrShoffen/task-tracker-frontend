@@ -19,7 +19,6 @@ export function StickerMenu({task, hovered}) {
     const [selectedIcon, setSelectedIcon] = useState("Stick");
     const [selectedColor, setSelectedColor] = useState("RED");
     const [stickerText, setStickerText] = useState('');
-    const {addNewSticker, userHasPermission} = useTaskOperations();
 
     const handleMenuClick = (event) => {
         event.stopPropagation();
@@ -58,7 +57,7 @@ export function StickerMenu({task, hovered}) {
                 color: selectedColor,
                 icon: selectedIcon
             });
-            addNewSticker(task.deskId, newSticker);
+            // addNewSticker(task.deskId, newSticker);
         } catch (error) {
             console.log(error.message);
         }

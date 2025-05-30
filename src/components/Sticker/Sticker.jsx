@@ -30,7 +30,7 @@ export function Sticker({sticker, deskId}) {
 
     const [anchorEl, setAnchorEl] = useState(null);
 
-    const {deleteSticker, userHasPermission} = useTaskOperations();
+    const { userHasPermission} = useTaskOperations();
 
     const handleOpen = (event) => {
         event.stopPropagation();
@@ -45,7 +45,7 @@ export function Sticker({sticker, deskId}) {
     async function handleDelete(event) {
         event.stopPropagation();
         try {
-            deleteSticker(deskId, sticker);
+            // deleteSticker(deskId, sticker);
             await sendDeleteSticker(sticker)
         } catch (error) {
             console.log(error.message);

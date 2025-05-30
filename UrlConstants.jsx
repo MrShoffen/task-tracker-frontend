@@ -1,9 +1,8 @@
 const isProduction = import.meta.env.MODE === "production"; // Определяем режим окружения
 
 
-export const API_BASE_URL =
+export const API_BASE_URL = isProduction ? "http://192.168.0.125:8080" :
         "http://192.168.0.190:8080"
-    // "http://localhost:8080"
 ;
 
 export const API_CONTEXT = '/api/v1';
@@ -27,6 +26,6 @@ export const API_ALL_WORKSPACES = API_BASE_URL + API_CONTEXT + '/workspaces';
 
 //autofill cities api and image upload api
 
-export const API_IMAGE_UPLOAD = 'http://localhost:8079/image-upload-api';
-
-export const API_PREVIEW =  'http://192.168.0.125:9000/user-files/';
+export const API_IMAGE_UPLOAD = isProduction ?
+    "http://192.168.0.190:8079/image-upload-api"
+    : 'http://localhost:8079/image-upload-api';

@@ -26,7 +26,7 @@ export function DeskMenu({desk}) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const theme = useTheme();
-    const {deleteDesk, userHasPermission, updateDeskField} = useTaskOperations();
+    const {userHasPermission} = useTaskOperations();
 
     const handleMenuClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -43,7 +43,6 @@ export function DeskMenu({desk}) {
 
     const handleColorChange = async (newColor) => {
         try {
-            updateDeskField(desk.id, 'color', newColor);
             await sendEditDesk('color', desk,
                 {newColor: newColor}
             );
@@ -54,7 +53,6 @@ export function DeskMenu({desk}) {
 
     const handleDeleteDesk = async () => {
         try {
-            deleteDesk(desk);
             await sendDeleteDesk(desk);
         } catch (error) {
             console.log(error);

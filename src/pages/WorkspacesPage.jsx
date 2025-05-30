@@ -23,10 +23,8 @@ import {sendCreateSticker} from "../services/fetch/tasks/sticker/SendCreateStick
 export default function WorkspacesPage() {
     const {
         fullWorkspaceInformation,
-        updateDeskOrder,
         workspaces,
         userHasPermission,
-        addNewSticker,
         moveTaskToAnotherDesk,
         loadAllWorkspaces,
         updateTaskOrder,
@@ -123,7 +121,7 @@ export default function WorkspacesPage() {
                     color: sticker.color,
                     icon: sticker.icon
                 });
-                addNewSticker(task.deskId, newSticker);
+                // addNewSticker(task.deskId, newSticker);
             } catch (error) {
                 console.log(error.message);
             }
@@ -255,7 +253,6 @@ export default function WorkspacesPage() {
             const overDeskIndex = fullWorkspaceInformation.desks.findIndex(d => d.id === overId);
 
             const deskWithUpdatedOrder = calculateNewOrderIndex(activeDeskIndex, overDeskIndex, fullWorkspaceInformation.desks);
-            updateDeskOrder(activeDeskIndex, deskWithUpdatedOrder);
             try {
                 await sendEditDesk('order', deskWithUpdatedOrder,
                     {

@@ -2,7 +2,6 @@ import {Box, Card, IconButton, Typography} from "@mui/material";
 import * as React from "react";
 import {useEffect, useRef, useState} from "react";
 import AddIcon from "@mui/icons-material/Add";
-import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import {UncheckedIcon} from "../../assets/icons/UncheckedIcon.jsx";
 import {sendCreateTask} from "../../services/fetch/tasks/task/SendCreateTask.js";
 import ConflictException from "../../exception/ConflictException.jsx";
@@ -15,7 +14,6 @@ export function NewTaskBadge({taskCreationLink}) {
         setIsEditing(true);
     }
 
-    const {addNewTask} = useTaskOperations();
 
     const [isEditing, setIsEditing] = useState(false);
     const typographyRef = useRef(null);
@@ -48,7 +46,6 @@ export function NewTaskBadge({taskCreationLink}) {
                 const taskNameWithDubls = taskName + (duplicatedCount === 0 ? '' : (' (' + duplicatedCount + ')'));
                 const newTask = await sendCreateTask(taskCreationLink,
                     {name: taskNameWithDubls});
-                addNewTask(newTask);
             } catch (error) {
                 switch (true) {
                     case error instanceof ConflictException:

@@ -10,7 +10,7 @@ import ConflictException from "../../exception/ConflictException.jsx";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 
 export const NewDeskBadge = () => {
-    const {fullWorkspaceInformation, addNewDesk} = useTaskOperations();
+    const {fullWorkspaceInformation} = useTaskOperations();
 
     const [hovered, setHovered] = React.useState(false);
 
@@ -55,7 +55,7 @@ export const NewDeskBadge = () => {
                         name: newNameWithDubls,
                         color: randomDeskColor()
                     });
-                addNewDesk(newDesk);
+                // addNewDesk(newDesk);
             } catch (error) {
                 switch (true) {
                     case error instanceof ConflictException:

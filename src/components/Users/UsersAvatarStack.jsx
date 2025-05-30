@@ -24,9 +24,13 @@ export function UsersAvatarStack({workspace}) {
         return null;
     }
 
-    const uap = workspace.usersAndPermissions;
+    const uap = workspace?.usersAndPermissions;
 
-    const overflow = uap.length - 4;
+    const overflow = uap?.length - 4;
+
+    if(!uap) {
+        return null;
+    }
 
     return (
         <Box

@@ -12,7 +12,6 @@ export function TaskPlugins({task, hovered}) {
     const {
         userHasPermission,
         openChat,
-        closeChat
     } = useTaskOperations();
 
 

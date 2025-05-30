@@ -4,19 +4,15 @@ import {SendIcon} from "../../assets/icons/Send.jsx";
 import * as React from "react";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 import {sendCreateComment} from "../../services/fetch/tasks/comments/SendCreateComment.js";
-import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
+import {useRef} from "react";
 
 
 export function MessageField({task, scroll}) {
     const [message, setMessage] = React.useState('');
     const theme = useTheme();
-
     const [sending, setSending] = React.useState(false);
-
     const {showWarn} = useNotification();
-
-    const {addNewComment} = useTaskOperations();
-
+    const textFieldRef = useRef(null); // Добавляем ref
     const handleKeyDown = async (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -37,13 +33,15 @@ export function MessageField({task, scroll}) {
 
         try {
             const newM = await sendCreateComment(task, {message: message});
-            addNewComment(newM, task);
         } catch (error) {
             showWarn(error.message);
             console.log(error.message);
         }
         setMessage("");
 
+        if (textFieldRef.current) {
+            textFieldRef.current.focus();
+        }
         setTimeout(() => {
             scroll();
             setSending(false);
@@ -75,6 +73,7 @@ export function MessageField({task, scroll}) {
             }}
         >
             <TextField
+                inputRef={textFieldRef} // Привязываем ref
                 multiline
                 rows={2}
                 disabled={sending}

@@ -112,7 +112,7 @@ export function TaskMenu({task, hovered, setContentIsLoading, sx={}}) {
         updateTaskField(task.deskId, task.id, 'coverUrl', null);
         await sendEditTask("cover", task,
             {
-                newCoverUrl: null
+                newCoverUrl: ""
             }
         );
     }

@@ -55,7 +55,7 @@ export function EditableTaskName({
                         newName: newNameWithDubls
                     });
                 typographyRef.current.textContent = newNameWithDubls + ' ';
-                updateTaskField(task.deskId, task.id, 'name', newNameWithDubls);
+                // updateTaskField(task.deskId, task.id, 'name', newNameWithDubls);
             } catch (error) {
                 switch (true) {
                     case error instanceof ConflictException:

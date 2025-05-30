@@ -272,14 +272,6 @@ export function ChatCard({open}) {
                         />}
                 </Box>
 
-                <Box
-                    sx={{
-                        width: '100%',
-                    }}
-                >
-
-                </Box>
-
             </Box>
 
 
@@ -313,11 +305,11 @@ export function ChatCard({open}) {
                 id='content'
             >
                 {isLoading && <CircularProgress/>}
-                {commentsInCurrentTask
+                {commentsInCurrentTask && commentsInCurrentTask
                     .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
                     .map(comment => <>
                         <ChatMessage task={activeTask()} key={comment.id} message={comment}/>
-                        <ChatMessage task={activeTask()} message={{...comment, type: 'AUDIT'}}/>
+                        {/*<ChatMessage task={activeTask()} message={{...comment, type: 'AUDIT'}}/>*/}
                     </>)}
 
 
