@@ -1,7 +1,7 @@
 const isProduction = import.meta.env.MODE === "production"; // Определяем режим окружения
 
 
-export const API_BASE_URL = isProduction ? "http://taskzone.ru" :
+export const API_BASE_URL = isProduction ? "http://taskzone.ru:8080" :
         "http://192.168.0.190:8080"
 ;
 
