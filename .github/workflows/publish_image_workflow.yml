@@ -27,6 +27,7 @@ jobs:
 
       - name: Build and push
         run: |
+          npm run build
           docker build -t mrshoffen/task-tracker-frontend:latest .
           docker images
           docker push mrshoffen/task-tracker-frontend:latest
