@@ -39,8 +39,8 @@ export const TaskLoadProvider = ({children}) => {
     const [currentOffset, setCurrentOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
 
-    const stompClientRef = useRef(null);
     const subscriptionRef = useRef(null);
+    const subscriptionRefWs = useRef(null);
 
     function connectToWsWebsocket(workspaceId) {
 
@@ -48,8 +48,12 @@ export const TaskLoadProvider = ({children}) => {
 
         const stompClient = Stomp.over(socket);
 
+        if (subscriptionRefWs.current) {
+            subscriptionRefWs.current.unsubscribe();
+        }
+
         stompClient.connect({}, () => {
-            stompClient.subscribe('/topic/workspace/' + workspaceId,
+            const subscription = stompClient.subscribe('/topic/workspace/' + workspaceId,
                 (message) => {
                     const event = JSON.parse(message.body);
                     console.log('Получено обновление', event);
@@ -113,11 +117,9 @@ export const TaskLoadProvider = ({children}) => {
                         default:
                             console.log('error with handling websocket message');
                     }
-                },
-                {
-                    'X-Workspace-ID': workspaceId // Дополнительные кастомные заголовки
                 }
-                );
+            )
+            subscriptionRefWs.current = subscription;
         })
     }
 
@@ -127,6 +129,10 @@ export const TaskLoadProvider = ({children}) => {
         const socket = new SockJS(API_BASE_URL + API_CONTEXT + "/websocket");
 
         const stompClient = Stomp.over(socket);
+
+        if (subscriptionRef.current) {
+            subscriptionRef.current.unsubscribe();
+        }
 
         stompClient.connect({}, () => {
             const subscription = stompClient.subscribe('/topic/workspace/' + workspaceId + '/chat/' + taskId,
@@ -200,7 +206,6 @@ export const TaskLoadProvider = ({children}) => {
 
     function closeChat() {
         subscriptionRef.current?.unsubscribe();
-
         setChatOpen(false);
         setCurrentOpenTask(null);
         setCurrentOffset(0);
@@ -223,6 +228,7 @@ export const TaskLoadProvider = ({children}) => {
 
     async function loadAllWorkspaces() {
         try {
+            console.log('fetching all workspaces');
             const allWs = await sendGetAllWorkspaces();
             setWorkspaces(allWs)
             return allWs;
@@ -238,6 +244,7 @@ export const TaskLoadProvider = ({children}) => {
 
     async function loadFullWs(wsId) {
         const fullWs = await sendGetFullWsInformation("/api/v1/workspaces/" + wsId + "/full");
+        subscriptionRefWs.current?.unsubscribe();
         console.log(fullWs);
         setFullWorkspaceInformation(fullWs)
         const uap = fullWs.usersAndPermissions.find(uap => uap.info.email === auth.user.email);
@@ -490,7 +497,8 @@ export const TaskLoadProvider = ({children}) => {
                     ...updatedDesks[deskIndex].tasks,
                     {
                         ...newTask,
-                        stickers: []
+                        stickers: [],
+                        commentsCount: 0
                     }
                 ]
             };

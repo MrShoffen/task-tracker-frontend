@@ -27,5 +27,5 @@ export const API_ALL_WORKSPACES = API_BASE_URL + API_CONTEXT + '/workspaces';
 //autofill cities api and image upload api
 
 export const API_IMAGE_UPLOAD = isProduction ?
-    "http://192.168.0.190:8079/image-upload-api"
+    "http://taskzone.ru:8079/image-upload-api"
     : 'http://localhost:8079/image-upload-api';

@@ -3,7 +3,7 @@ import {styled} from "@mui/material/styles";
 import MuiDrawer from "@mui/material/Drawer";
 import {
     Avatar,
-    Box, Button, Card,
+    Box,
     Collapse,
     Divider,
     IconButton,
@@ -76,17 +76,6 @@ const Drawer = styled(MuiDrawer)(({theme, open}) => ({
 }));
 
 
-const AnimatedCard = styled(Card)(({theme, open}) => ({
-    backgroundColor: 'white',
-    width: open ? '450px' : '0px',
-    zIndex: 4000,
-    transition: 'width 200ms ease-in-out',
-    // transform: open ? 'translateX(0)' : 'translateX(100%)',
-    // position: 'fixed',
-    right: 0,
-    top: 0,
-    height: '100vh',
-}));
 
 export const PersistentDrawerLeft = ({children, open, setOpen}) => {
     const {auth} = useAuthContext();
@@ -95,7 +84,6 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
 
     const {isDarkMode, toggleTheme} = useCustomThemeContext();
     const [openSubmenu, setOpenSubmenu] = React.useState(false);
-    const [cardOpen, setCardOpen] = React.useState(false); // Состояние для карточки
 
     const navigate = useNavigate();
     const handleDrawerClick = () => {
@@ -109,7 +97,7 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
 
     const handleProjectsOpen = async () => {
         if (open) {
-            if (!openSubmenu) {
+            if (!openSubmenu ) {
                 await loadAllWorkspaces();
             }
             setOpenSubmenu(prev => !prev);
@@ -121,10 +109,6 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
             setOpenSubmenu(true);
         }
 
-    };
-
-    const toggleCard = () => {
-        setCardOpen(prev => !prev);
     };
 
     if (!auth.isAuthenticated) {

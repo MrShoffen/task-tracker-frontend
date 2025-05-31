@@ -139,7 +139,7 @@ export default function ValidatedAvatarInput({
                         )}
 
                         {avatarPreview && <>
-                            <Box component="img" src={avatarPreview ? avatarPreview : initialAvatarUrl}
+                            <Box component="img" src={avatarPreview ? avatarPreview : initialAvatarUrl === '' ? null : initialAvatarUrl}
                                  alt="Avatar Preview"
                                  sx={{
                                      width: "100%",

@@ -4,7 +4,7 @@ import {SendIcon} from "../../assets/icons/Send.jsx";
 import * as React from "react";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 import {sendCreateComment} from "../../services/fetch/tasks/comments/SendCreateComment.js";
-import {useRef} from "react";
+import {useEffect, useRef} from "react";
 
 
 export function MessageField({task, scroll}) {
@@ -21,6 +21,13 @@ export function MessageField({task, scroll}) {
     };
 
     const [errorMessage, setErrorMessage] = React.useState(false);
+
+    useEffect(() => {
+        if (message === "" && textFieldRef.current) {
+            textFieldRef.current.focus();
+        }
+    }, [message]);
+
 
     async function handleConfirm() {
         if (message.trim().length === 0) {
@@ -39,9 +46,6 @@ export function MessageField({task, scroll}) {
         }
         setMessage("");
 
-        if (textFieldRef.current) {
-            textFieldRef.current.focus();
-        }
         setTimeout(() => {
             scroll();
             setSending(false);
@@ -76,8 +80,9 @@ export function MessageField({task, scroll}) {
                 inputRef={textFieldRef} // Привязываем ref
                 multiline
                 rows={2}
-                disabled={sending}
+                // disabled={sending}
                 onKeyDown={handleKeyDown}
+                autoFocus={true}
                 placeholder="Ваше сообщение... (1024 символа)"
                 variant="standard"
                 InputProps={{
