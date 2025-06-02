@@ -6,9 +6,10 @@ import {UserInfo} from "../Users/UserInfo.jsx";
 import {useAuthContext} from "../../context/Auth/AuthContext.jsx";
 import {DeleteTask} from "../../assets/icons/DeleteTask.jsx";
 import {sendDeleteComment} from "../../services/fetch/tasks/comments/SendDeleteCommen.js";
+import {HistoryMessage} from "./HistoryMessage.jsx";
 
 export function ChatMessage({message, task}) {
-    const { loadUser, userHasPermission} = useTaskOperations();
+    const {loadUser, userHasPermission} = useTaskOperations();
     const {auth} = useAuthContext();
 
     const userInfo = loadUser(message.userId);
@@ -22,103 +23,74 @@ export function ChatMessage({message, task}) {
         }
     }
 
-    if (message.type === 'AUDIT') {
+    if (message.isHistory) {
+        return (<HistoryMessage history={message}/>)
+    } else {
         return (
             <Card
                 elevation={0}
                 sx={{
-                    width: '400px',
-                    // boxShadow: 2,
+                    width: '340px',
+                    boxShadow: 2,
                     minHeight: '60px',
                     position: 'relative',
                     display: 'flex',
                     borderRadius: 2,
                     border: '1px solid',
                     borderColor: 'action.selected',
-                    // backgroundColor: isCurrentUser ? 'messageBg' : 'background.default',
-                    // backgroundColor: 'audit',
-                    backgroundColor: 'auditSuccess',
-                    mb: '20px',
-                    mt: '20px',
+                    backgroundColor: isCurrentUser ? 'messageBg' : 'background.default',
+                    m: '10px',
                     flexDirection: 'column',
-                    // ml: isCurrentUser ? '90px' : '20px',
-                    ml: '25px',
+                    ml: isCurrentUser ? '90px' : '20px',
                     pb: '5px',
                 }}
             >
-                <Box sx={{display: 'flex', justifyContent: 'center',  m: '10px'}}>
-                    <Typography fontSize='0.72rem' fontWeight={500} color='text.disabled'>
+                <Box sx={{ml: '10px', mr: '10px', mt: 1, display: 'flex', flexDirection: 'row'}}>
+                    <UserInfo label={"Автор комментария"} user={userInfo} sx={{
+                        height: '20px',
+                        width: '20px',
+                        mt: '6px',
+                        mb: 0,
+                        cursor: 'pointer',
+                    }}/>
+                    <Typography
+                        sx={{
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            maxWidth: '290px',
+                        }}
+                        fontSize='0.8rem' fontWeight='500' color='message'>
+                        {
+                            (userInfo?.firstName && userInfo?.lastName) ?
+                                (userInfo?.firstName + ' ' + userInfo?.lastName) :
+                                userInfo?.email
+                        }
+                    </Typography>
+                </Box>
+
+
+                <Box sx={{ml: '10px', mr: '10px', mt: '0px'}}>
+                    <Typography fontSize='0.8rem' color='message'>
+                        {message.message}
+                    </Typography>
+                </Box>
+
+                <Box sx={{ml: '10px', display: 'flex', justifyContent: 'flex-end', mr: '10px', mt: '10px'}}>
+                    <Typography fontSize='0.72rem' color='text.disabled'>
                         {formatDate(message.createdAt)}
                     </Typography>
                 </Box>
+
+                {userHasPermission("DELETE_COMMENTS") &&
+                    <IconButton
+                        onClick={handleCommDel}
+                        sx={{position: 'absolute', right: 1}}
+                    >
+                        <DeleteTask color={'rgba(209,34,34,0.75)'}/>
+                    </IconButton>
+                }
             </Card>
         )
     }
-
-    return (
-        <Card
-            elevation={0}
-            sx={{
-                width: '340px',
-                boxShadow: 2,
-                minHeight: '60px',
-                position: 'relative',
-                display: 'flex',
-                borderRadius: 2,
-                border: '1px solid',
-                borderColor: 'action.selected',
-                backgroundColor: isCurrentUser ? 'messageBg' : 'background.default',
-                m: '10px',
-                flexDirection: 'column',
-                ml: isCurrentUser ? '90px' : '20px',
-                pb: '5px',
-            }}
-        >
-            <Box sx={{ml: '10px', mr: '10px', mt: 1, display: 'flex', flexDirection: 'row'}}>
-                <UserInfo label={"Автор комментария"} user={userInfo} sx={{
-                    height: '20px',
-                    width: '20px',
-                    mt: '6px',
-                    mb: 0,
-                    cursor: 'pointer',
-                }}/>
-                <Typography
-                    sx={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        maxWidth: '290px',
-                    }}
-                    fontSize='0.8rem' fontWeight='500' color='message'>
-                    {
-                        (userInfo?.firstName && userInfo?.lastName) ?
-                            (userInfo?.firstName + ' ' + userInfo?.lastName) :
-                            userInfo?.email
-                    }
-                </Typography>
-            </Box>
-
-
-            <Box sx={{ml: '10px', mr: '10px', mt: '0px'}}>
-                <Typography fontSize='0.8rem' color='message'>
-                    {message.message}
-                </Typography>
-            </Box>
-
-            <Box sx={{ml: '10px', display: 'flex', justifyContent: 'flex-end', mr: '10px', mt: '10px'}}>
-                <Typography fontSize='0.72rem' color='text.disabled'>
-                    {formatDate(message.createdAt)}
-                </Typography>
-            </Box>
-
-            {userHasPermission("DELETE_COMMENTS") &&
-                <IconButton
-                    onClick={handleCommDel}
-                    sx={{position: 'absolute', right: 1}}
-                >
-                    <DeleteTask color={'rgba(209,34,34,0.75)'}/>
-                </IconButton>
-            }
-        </Card>
-    )
 }

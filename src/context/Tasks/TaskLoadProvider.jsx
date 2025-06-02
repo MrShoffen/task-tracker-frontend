@@ -3,12 +3,10 @@ import {sendGetAllWorkspaces} from "../../services/fetch/tasks/ws/SendGetAllWork
 import {sendGetFullWsInformation} from "../../services/fetch/tasks/ws/SendGetFullWsInformation.js";
 import {useAuthContext} from "../Auth/AuthContext.jsx";
 import {sendUserInfo} from "../../services/fetch/unauth/SendUserInfo.js";
-import {sendGetAllComments} from "../../services/fetch/tasks/comments/SendGetAllComments.js";
-import {connectToWebsocket} from "../../services/websocket/ConnectToWebsocket.js";
+import {getComments, getHistoryEvents} from "../../services/fetch/tasks/comments/SendGetTaskEvents.js";
 import SockJS from 'sockjs-client/dist/sockjs';
 import {API_BASE_URL, API_CONTEXT} from "../../../UrlConstants.jsx";
 import {Stomp} from "@stomp/stompjs";
-import {sendCreateSticker} from "../../services/fetch/tasks/sticker/SendCreateSticker.js";
 
 
 const TaskLoadContext = createContext(null);
@@ -41,6 +39,35 @@ export const TaskLoadProvider = ({children}) => {
 
     const subscriptionRef = useRef(null);
     const subscriptionRefWs = useRef(null);
+
+
+    const sendGetTaskEvents = async (task, limit, offset) => {
+        const comms = await getComments(task, limit, offset);
+        const hist = await getHistoryEvents(task, limit, offset);
+        console.log(hist);
+        return [...unpackComments(comms), ...unpackHistoryEvents(hist)];
+    }
+
+
+    const unpackComments = (comments) => {
+        return comments.map((comment) => ({...comment, isHistory: false}))
+    }
+
+    const unpackHistoryEvents = (histories) => {
+        return histories.map((history) => ({...history, isHistory: true, createdAt: history.timestamp}));
+    }
+
+
+    function loadDeskName(deskId) {
+        const deskIndex = fullWorkspaceInformation.desks.findIndex(desk => desk.id === deskId);
+        if (deskIndex === -1) {
+            console.error("Desk not found");
+            return prevData;
+        }
+
+        return fullWorkspaceInformation.desks[deskIndex];
+    }
+
 
     function connectToWsWebsocket(workspaceId) {
 
@@ -95,11 +122,29 @@ export const TaskLoadProvider = ({children}) => {
                                 // moveTaskToAnotherDesk()
                             } else {
                                 updateTaskField(event.payload.deskId, event.payload.taskId, fieldTask, event.payload.updatedField[fieldTask]);
+
+                                    addCustomHistoryEvent({
+                                        isHistory: true,
+                                        type: 'TASK_UPDATED',
+                                        id: event.payload.taskId,
+                                        timestamp: event.payload.updatedAt,
+                                        author: event.payload.updatedBy,
+                                        additionalInfo: {[fieldTask]: event.payload.updatedField[fieldTask]}
+                                    })
+
                             }
                             break;
 
                         case 'STICKER_CREATED':
                             addNewSticker(event.payload);
+                            addCustomHistoryEvent({
+                                isHistory: true,
+                                type: 'STICKER_CREATED',
+                                id: event.payload.id,
+                                timestamp: event.payload.createdAt,
+                                author: event.payload.userId,
+                                additionalInfo: {sticker: event.payload}
+                            })
                             break;
 
                         case 'STICKER_DELETED':
@@ -125,7 +170,6 @@ export const TaskLoadProvider = ({children}) => {
 
 
     function connectToChatWebsocket(workspaceId, taskId, task) {
-
         const socket = new SockJS(API_BASE_URL + API_CONTEXT + "/websocket");
 
         const stompClient = Stomp.over(socket);
@@ -183,15 +227,16 @@ export const TaskLoadProvider = ({children}) => {
         setCurrentOpenTask(task);
         setCurrentOffset(0);
         setHasMore(true);
-        const allComs = await sendGetAllComments(task, 5, 0);
+        const allComs = await sendGetTaskEvents(task, 25, 0);
+        console.log(allComs);
         connectToChatWebsocket(task.workspaceId, task.id, task);
         setCommentsInCurrentTask(allComs);
     }
 
     async function loadMoreComments() {
         if (hasMore && activeTask()) {
-            const newCommsChunk = await sendGetAllComments(activeTask(), 5, currentOffset);
-            if (newCommsChunk.length < 5) {
+            const newCommsChunk = await sendGetTaskEvents(activeTask(), 25, currentOffset);
+            if (newCommsChunk.length < 50) {
                 setHasMore(false);
             }
             setCommentsInCurrentTask(prev => {
@@ -202,6 +247,10 @@ export const TaskLoadProvider = ({children}) => {
             });
             setCurrentOffset(currentOffset + newCommsChunk.length);
         }
+    }
+
+    function addCustomHistoryEvent(event) {
+        setCommentsInCurrentTask(prev => [...prev, event])
     }
 
     function closeChat() {
@@ -774,7 +823,7 @@ export const TaskLoadProvider = ({children}) => {
             fullWorkspaceInformation,
             setFullWorkspaceInformation,
             deleteWorkspace,
-
+            updateDeskField,
             permissions,
             userHasPermission,
 
@@ -787,6 +836,7 @@ export const TaskLoadProvider = ({children}) => {
             deletePermission,
 
             loadUser,
+            loadDeskName,
 
             openChat,
             chatOpen,

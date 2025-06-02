@@ -10,7 +10,7 @@ import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import {sendDeleteSticker} from "../../services/fetch/tasks/sticker/SendDeleteSticker.js";
 import {useDraggable} from "@dnd-kit/core";
 
-export function Sticker({sticker, deskId}) {
+export function Sticker({sticker, deskId, maxW = 'none', editable = true}) {
     const theme = useTheme();
 
     const {
@@ -30,11 +30,13 @@ export function Sticker({sticker, deskId}) {
 
     const [anchorEl, setAnchorEl] = useState(null);
 
-    const { userHasPermission} = useTaskOperations();
+    const {userHasPermission} = useTaskOperations();
 
     const handleOpen = (event) => {
-        event.stopPropagation();
-        setAnchorEl(event.currentTarget);
+        if (editable) {
+            event.stopPropagation();
+            setAnchorEl(event.currentTarget);
+        }
     };
 
     const handleClose = () => {
@@ -64,13 +66,14 @@ export function Sticker({sticker, deskId}) {
                 borderRadius: '7px',
                 border: '1px solid',
                 position: 'relative',
+                maxWidth: maxW,
                 display: 'flex',
                 height: '27px',
                 borderColor: open ? 'action.active' : 'action.selected',
                 backgroundColor: stickerBgColor(sticker.color),
                 p: '2px',
                 ':hover': {
-                    borderColor: open ? 'action.active' : stickerColor(sticker.color),
+                    borderColor: open  ? 'action.active' : editable ? stickerColor(sticker.color) : 'action.selected',
                 }
             }}>
             <Box sx={{
@@ -95,7 +98,7 @@ export function Sticker({sticker, deskId}) {
             </Typography>
 
             <StickerInfo open={open} anchorEl={anchorEl} sticker={sticker} handleClose={handleClose}/>
-            {hovered && userHasPermission("DELETE_STICKERS") &&
+            {hovered && editable && userHasPermission("DELETE_STICKERS") &&
                 <IconButton disableRipple
                             onClick={handleDelete}
                             sx={{

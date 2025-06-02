@@ -27,6 +27,7 @@ export default function WorkspacesPage() {
         userHasPermission,
         moveTaskToAnotherDesk,
         loadAllWorkspaces,
+        updateDeskField,
         updateTaskOrder,
         updateTaskField,
         loadFullWs,
@@ -254,10 +255,11 @@ export default function WorkspacesPage() {
 
             const deskWithUpdatedOrder = calculateNewOrderIndex(activeDeskIndex, overDeskIndex, fullWorkspaceInformation.desks);
             try {
-                await sendEditDesk('order', deskWithUpdatedOrder,
+                updateDeskField(deskWithUpdatedOrder.id, 'orderIndex', deskWithUpdatedOrder.orderIndex)
+                const upd = await sendEditDesk('order', deskWithUpdatedOrder,
                     {
                         updatedIndex: deskWithUpdatedOrder.orderIndex
-                    })
+                    });
             } catch (error) {
                 showWarn(error.message);
             }

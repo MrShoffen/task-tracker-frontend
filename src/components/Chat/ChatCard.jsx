@@ -96,11 +96,14 @@ export function ChatCard({open}) {
         }
     };
 
-    const handleBlur = async (duplicatedCount = 0) => {
-        const newText = editingText.trim();
+    const handleBlur = async (ev, duplicatedCount = 0, text = '') => {
+        const newText = text === '' ? editingText.trim() : text;
         if (newText !== activeTask()?.name && newText !== '') {
             try {
+                console.log(newText);
                 const newNameWithDubls = newText + (duplicatedCount === 0 ? '' : (' (' + duplicatedCount + ')'));
+                console.log(duplicatedCount);
+                console.log(newNameWithDubls);
                 await sendEditTask("name", activeTask(), {
                     newName: newNameWithDubls
                 });
@@ -108,7 +111,7 @@ export function ChatCard({open}) {
                 setEditingText(newNameWithDubls);
             } catch (error) {
                 if (error instanceof ConflictException) {
-                    await handleBlur(duplicatedCount + 1);
+                    await handleBlur(ev, duplicatedCount + 1, newText);
                 } else {
                     console.log(error);
                     showWarn(error.message);
@@ -133,7 +136,7 @@ export function ChatCard({open}) {
     }
 
     useEffect(() => {
-        if (commentsInCurrentTask?.length <= 25) {
+        if (commentsInCurrentTask?.length <= 51) {
             scrollToBottom();
         }
 
