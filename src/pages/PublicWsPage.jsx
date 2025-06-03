@@ -7,7 +7,7 @@ import {sendGetPublicWs} from "../services/fetch/tasks/ws/SendGetPublicWs.js";
 import Typography from "@mui/material/Typography";
 import {useSortable} from "@dnd-kit/sortable";
 import {useTaskOperations} from "../context/Tasks/TaskLoadProvider.jsx";
-import {darkTaskColor, deskColor, lightTaskColor} from "../services/util/Utils.jsx";
+import {darkTaskColor, deskColor, lightTaskColor, stickerBgColor, stickerColor} from "../services/util/Utils.jsx";
 import {useCustomThemeContext} from "../context/GlobalThemeContext/CustomThemeProvider.jsx";
 import {sendEditTask} from "../services/fetch/tasks/task/SendEditTask.js";
 import {TaskCover} from "../components/Task/TaskCover.jsx";
@@ -18,6 +18,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import {CommentsIcon} from "../assets/icons/Comments.jsx";
 import {Sticker} from "../components/Sticker/Sticker.jsx";
 import {StickerMenu} from "../components/Sticker/StickerMenu.jsx";
+import {TaskPlugins} from "../components/Task/TaskPlugins.jsx";
 
 
 function PublicTask({task}) {
@@ -94,12 +95,26 @@ function PublicTask({task}) {
                                 sx={{
                                     display: 'flex',
                                     flexDirection: 'row',
-                                    opacity: !task.completed ? 1 : (!hovered ? 0.5 : 1),
+                                    // opacity: !task.completed ? 1 : (!hovered ? 1 : 1),
                                     mb: 1, mt: -0.5
                                 }}
                             >
                                 <Box sx={{display: 'flex', flexWrap: 'wrap', gap: '5px'}}>
-                                    //stickers todo
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            maxWidth: '200px',
+                                            flexDirection: 'row',
+                                            opacity: !task.completed ? 1 : (!hovered ? 0.5 : 1),
+                                            mb: 1, mt: -0.5
+                                        }}
+                                    >
+                                        <Box sx={{display: 'flex', flexWrap: 'wrap', gap: '5px', mt: '5px', mb: '-8px'}}>
+                                            {task.stickers.map(sticker =>
+                                                <Sticker key={sticker.id} sticker={sticker} deskId={task.deskId} editable={false}/>)
+                                            }
+                                        </Box>
+                                    </Box>
                                 </Box>
                             </Box>
                         </Box>

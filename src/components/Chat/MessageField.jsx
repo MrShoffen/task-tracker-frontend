@@ -2,9 +2,9 @@ import {Box, useTheme} from "@mui/material";
 import TextField from "@mui/material/TextField";
 import {SendIcon} from "../../assets/icons/Send.jsx";
 import * as React from "react";
+import {useEffect, useRef} from "react";
 import {useNotification} from "../../context/Notification/NotificationProvider.jsx";
 import {sendCreateComment} from "../../services/fetch/tasks/comments/SendCreateComment.js";
-import {useEffect, useRef} from "react";
 
 
 export function MessageField({task, scroll}) {
@@ -39,7 +39,7 @@ export function MessageField({task, scroll}) {
         setSending(true);
 
         try {
-            const newM = await sendCreateComment(task, {message: message});
+            await sendCreateComment(task, {message: message});
         } catch (error) {
             showWarn(error.message);
             console.log(error.message);

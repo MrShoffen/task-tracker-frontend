@@ -28,7 +28,9 @@ import {useTaskOperations} from "../../context/Tasks/TaskLoadProvider.jsx";
 import WorkspaceListElement from "../Workspace/WorkspaceListElement.jsx";
 import {NewWorkspaceBadge} from "../Workspace/NewWorkspaceBadge.jsx";
 import {ChatCard} from "../Chat/ChatCard.jsx";
-
+import {sendGetSharedWorkspaces} from "../../services/fetch/tasks/ws/SendGetSharedWs.js";
+import ShareIcon from '@mui/icons-material/Share';
+import {useState} from "react";
 
 const drawerWidth = 180;
 
@@ -76,19 +78,22 @@ const Drawer = styled(MuiDrawer)(({theme, open}) => ({
 }));
 
 
-
 export const PersistentDrawerLeft = ({children, open, setOpen}) => {
     const {auth} = useAuthContext();
 
-    const {workspaces, loadAllWorkspaces, chatOpen,closeChat} = useTaskOperations();
+    const {workspaces, loadAllWorkspaces, chatOpen, closeChat} = useTaskOperations();
+
+    const [sharedWs, setSharedWs] = useState([]);
 
     const {isDarkMode, toggleTheme} = useCustomThemeContext();
     const [openSubmenu, setOpenSubmenu] = React.useState(false);
+    const [openSharedSubmenu, setOpenSharedSubmenu] = React.useState(false);
 
     const navigate = useNavigate();
     const handleDrawerClick = () => {
         if (open) {
             setOpenSubmenu(false);
+            setOpenSharedSubmenu(false);
         }
         localStorage.setItem("drawerOpen", JSON.stringify(!open));
         setOpen(prev => !prev);
@@ -107,6 +112,24 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                 await loadAllWorkspaces();
             }
             setOpenSubmenu(true);
+        }
+
+    };
+
+    const handleSharedOpen = async () => {
+        if (open) {
+            if (!openSharedSubmenu) {
+                const sharedWss = await sendGetSharedWorkspaces();
+                setSharedWs(sharedWss);
+            }
+            setOpenSharedSubmenu(prev => !prev);
+        } else {
+            setOpen(true);
+            if (!openSubmenu) {
+                const sharedWss = await sendGetSharedWorkspaces();
+                setSharedWs(sharedWss);
+            }
+            setOpenSharedSubmenu(true);
         }
 
     };
@@ -210,6 +233,8 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                             </ListItem>
 
                             <Divider sx={{ml: open ? 1 : 0, mr: open ? 1 : 0}}/>
+
+
                             <ListItem disablePadding sx={{display: "block"}}
                             >
                                 <ListItemButton
@@ -237,13 +262,12 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                                     >
                                         <PlaylistAddCheckIcon sx={{fontSize: "24px"}}/>
                                     </ListItemIcon>
-                                    <ListItemText primary={"Проекты"} sx={{
+                                    <ListItemText primary={"Мои проекты"} sx={{
                                         opacity: open ? 1 : 0,
-                                        '& .MuiTypography-root': {
-                                            fontSize: '0.9rem',
-                                        }
+                                        '& .MuiTypography-root': {fontSize: '0.9rem',}
                                     }}/>
-                                    {open && (openSubmenu ? <ExpandLess/> : <ExpandMore/>)}
+                                    {open && (openSubmenu ? <ExpandLess sx={{mr: -1.5}}/> :
+                                        <ExpandMore sx={{mr: -1.5}}/>)}
                                 </ListItemButton>
                                 <Collapse in={openSubmenu} timeout="auto" unmountOnExit>
                                     <List disablePadding component="div">
@@ -255,6 +279,52 @@ export const PersistentDrawerLeft = ({children, open, setOpen}) => {
                                     </List>
                                 </Collapse>
                             </ListItem>
+
+
+                            <ListItem disablePadding sx={{display: "block"}}
+                            >
+                                <ListItemButton
+                                    sx={{
+                                        maxHeight: 40,
+                                        justifyContent: open ? "initial" : "center",
+                                        px: 2.5,
+                                        '&.Mui-selected': {
+                                            border: '1px solid',
+                                            borderLeft: 'none',
+                                            borderRight: 'none'
+                                        }
+                                    }}
+                                    selected={location.pathname === '/project'}
+                                    onClick={handleSharedOpen}
+                                >
+
+                                    <ListItemIcon
+                                        sx={{
+                                            minWidth: 0,
+                                            mr: open ? 3 : "auto",
+                                            width: 10,
+                                            justifyContent: "center",
+                                        }}
+                                    >
+                                        <ShareIcon sx={{fontSize: "20px"}}/>
+                                    </ListItemIcon>
+                                    <ListItemText primary={"С доступом"} sx={{
+                                        opacity: open ? 1 : 0,
+                                        '& .MuiTypography-root': {fontSize: '0.9rem',}
+                                    }}/>
+                                    {open && (openSharedSubmenu ? <ExpandLess sx={{mr: -1.5}}/> :
+                                        <ExpandMore sx={{mr: -1.5}}/>)}
+                                </ListItemButton>
+                                <Collapse in={openSharedSubmenu} timeout="auto" unmountOnExit>
+                                    <List disablePadding component="div">
+                                        {sharedWs
+                                            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                                            .map(ws => <WorkspaceListElement workspace={ws} own={false}/>)}
+                                    </List>
+                                </Collapse>
+                            </ListItem>
+
+
                             <Divider sx={{ml: open ? 1 : 0, mr: open ? 1 : 0}}/>
 
                             <ListItem disablePadding sx={{display: "block"}}>

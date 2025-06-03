@@ -7,6 +7,7 @@ import {getComments, getHistoryEvents} from "../../services/fetch/tasks/comments
 import SockJS from 'sockjs-client/dist/sockjs';
 import {API_BASE_URL, API_CONTEXT} from "../../../UrlConstants.jsx";
 import {Stomp} from "@stomp/stompjs";
+import {sendGetSharedWorkspaces} from "../../services/fetch/tasks/ws/SendGetSharedWs.js";
 
 
 const TaskLoadContext = createContext(null);
@@ -40,11 +41,36 @@ export const TaskLoadProvider = ({children}) => {
     const subscriptionRef = useRef(null);
     const subscriptionRefWs = useRef(null);
 
+    const [commOffset, setCommOffset] = useState(0);
+    const [hasMoreComments, setHasMoreComments] = useState(true);
+    const [histOffset, setHistOffset] = useState(0);
+    const [hasMoreHist, setHasMoreHist] = useState(true);
 
-    const sendGetTaskEvents = async (task, limit, offset) => {
-        const comms = await getComments(task, limit, offset);
-        const hist = await getHistoryEvents(task, limit, offset);
-        console.log(hist);
+
+    const sendGetTaskEvents = async (task, limit) => {
+
+        let comms = [];
+        let hist = [];
+
+        if (hasMoreComments) {
+            comms = await getComments(task, limit, commOffset);
+            setCommOffset(prev => prev + comms.length);
+            if (comms.length < 25) {
+                setHasMoreComments(false);
+            }
+            console.log(comms);
+        }
+
+        if (hasMoreHist) {
+            hist = await getHistoryEvents(task, limit, histOffset);
+            setHistOffset(prev => prev + hist.length);
+            if (hist.length < 25) {
+                setHasMoreHist(false);
+            }
+            console.log(hist)
+        }
+
+
         return [...unpackComments(comms), ...unpackHistoryEvents(hist)];
     }
 
@@ -62,7 +88,8 @@ export const TaskLoadProvider = ({children}) => {
         const deskIndex = fullWorkspaceInformation.desks.findIndex(desk => desk.id === deskId);
         if (deskIndex === -1) {
             console.error("Desk not found");
-            return prevData;
+            return '';
+
         }
 
         return fullWorkspaceInformation.desks[deskIndex];
@@ -123,6 +150,7 @@ export const TaskLoadProvider = ({children}) => {
                             } else {
                                 updateTaskField(event.payload.deskId, event.payload.taskId, fieldTask, event.payload.updatedField[fieldTask]);
 
+                                if ( event.payload.taskId === currentOpenTask.id) {
                                     addCustomHistoryEvent({
                                         isHistory: true,
                                         type: 'TASK_UPDATED',
@@ -131,12 +159,13 @@ export const TaskLoadProvider = ({children}) => {
                                         author: event.payload.updatedBy,
                                         additionalInfo: {[fieldTask]: event.payload.updatedField[fieldTask]}
                                     })
-
+                                }
                             }
                             break;
 
                         case 'STICKER_CREATED':
                             addNewSticker(event.payload);
+                            if (event.payload.taskId === currentOpenTask.id) {
                             addCustomHistoryEvent({
                                 isHistory: true,
                                 type: 'STICKER_CREATED',
@@ -145,6 +174,7 @@ export const TaskLoadProvider = ({children}) => {
                                 author: event.payload.userId,
                                 additionalInfo: {sticker: event.payload}
                             })
+                            }
                             break;
 
                         case 'STICKER_DELETED':
@@ -225,40 +255,52 @@ export const TaskLoadProvider = ({children}) => {
         subscriptionRef.current?.unsubscribe();
         setChatOpen(true);
         setCurrentOpenTask(task);
-        setCurrentOffset(0);
-        setHasMore(true);
-        const allComs = await sendGetTaskEvents(task, 25, 0);
+        // setCurrentOffset(0);
+        // setHasMore(true);
+
+        setHasMoreHist(true);
+        setHasMoreComments(true);
+        setCommOffset(0);
+        setHistOffset(0);
+
+        const allComs = await sendGetTaskEvents(task, 25);
         console.log(allComs);
         connectToChatWebsocket(task.workspaceId, task.id, task);
         setCommentsInCurrentTask(allComs);
     }
 
     async function loadMoreComments() {
-        if (hasMore && activeTask()) {
-            const newCommsChunk = await sendGetTaskEvents(activeTask(), 25, currentOffset);
-            if (newCommsChunk.length < 50) {
-                setHasMore(false);
-            }
+        if ((hasMoreComments || hasMoreHist) && activeTask()) {
+            const newCommsChunk = await sendGetTaskEvents(activeTask(), 25);
             setCommentsInCurrentTask(prev => {
                 if (prev) {
                     const commentMap = new Map([...prev, ...newCommsChunk].map(c => [c.id, c]));
                     return Array.from(commentMap.values());
                 }
             });
-            setCurrentOffset(currentOffset + newCommsChunk.length);
+            // setCurrentOffset(currentOffset + newCommsChunk.length);
         }
     }
 
     function addCustomHistoryEvent(event) {
-        setCommentsInCurrentTask(prev => [...prev, event])
+        setCommentsInCurrentTask(prev => {
+
+            return [...prev, event]
+        })
     }
 
     function closeChat() {
         subscriptionRef.current?.unsubscribe();
         setChatOpen(false);
         setCurrentOpenTask(null);
-        setCurrentOffset(0);
-        setHasMore(true);
+
+
+        setHasMoreHist(true);
+        setHasMoreComments(true);
+        setCommOffset(0);
+        setHistOffset(0);
+
+
         setCommentsInCurrentTask([]);
     }
 
@@ -280,6 +322,11 @@ export const TaskLoadProvider = ({children}) => {
             console.log('fetching all workspaces');
             const allWs = await sendGetAllWorkspaces();
             setWorkspaces(allWs)
+
+            const shared = await sendGetSharedWorkspaces();
+            console.log('shared ws', shared);
+
+
             return allWs;
         } catch (error) {
             console.log("failed to load all workspaces " + error);

@@ -87,7 +87,7 @@ export function ChatCard({open}) {
                 setTimeout(() => {
                     messagesEndRef.current.scrollTop =
                         messagesEndRef.current.scrollHeight - prevScrollHeight;
-                }, 300)
+                }, 500)
 
 
             } finally {

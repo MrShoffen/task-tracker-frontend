@@ -10,7 +10,7 @@ import DoDisturbIcon from '@mui/icons-material/DoDisturb';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import {sendDeleteWs} from "../../services/fetch/tasks/ws/SendDeleteWs.js";
 
-export default function WorkspaceListElement({workspace}) {
+export default function WorkspaceListElement({workspace, own = true}) {
     const {showInfo, showWarn} = useNotification();
     const [hovered, setHovered] = React.useState(false);
 
@@ -84,49 +84,51 @@ export default function WorkspaceListElement({workspace}) {
                     textOverflow: 'ellipsis',
                 }
             }}/>
-            <Box>
-                {hovered && !attemptToDelete && location.pathname !== ('/workspaces/' + workspace.id) &&
+            {own &&
+                <Box>
+                    {hovered && !attemptToDelete && location.pathname !== ('/workspaces/' + workspace.id) &&
 
-                    <IconButton disableRipple
-                                onClick={handleDeleteClick}
-                                sx={{
-                                    width: '16px',
-                                    opacity: 1, height: '16px',
-                                    p: 0,
-                                    mr: -1.6
-                                }}>
-                        <DeleteTask color={'rgba(193,9,9,0.9)'}/>
-                    </IconButton>
-                }
-
-                {hovered && attemptToDelete && location.pathname !== ('/workspaces/' + workspace.id) &&
-                    <Box sx={{mr: -1.6}}>
                         <IconButton disableRipple
-                                    onClick={handleConfirmDelete}
+                                    onClick={handleDeleteClick}
                                     sx={{
-                                        width: '15px',
-                                        opacity: 1, height: '15px',
-                                        p: 1,
-                                        mr: 1,
-                                        color: 'error.main'
-
+                                        width: '16px',
+                                        opacity: 1, height: '16px',
+                                        p: 0,
+                                        mr: -1.6
                                     }}>
-                            <CheckCircleOutlineIcon sx={{fontSize: '18px'}}/>
+                            <DeleteTask color={'rgba(193,9,9,0.9)'}/>
                         </IconButton>
-                        <IconButton disableRipple
-                                    onClick={handleCancelDelete}
-                                    sx={{
-                                        width: '15px',
-                                        opacity: 1, height: '15px',
-                                        p: 1,
-                                        color: 'success.main'
+                    }
 
-                                    }}>
-                            <DoDisturbIcon sx={{fontSize: '18px'}}/>
-                        </IconButton>
-                    </Box>
-                }
-            </Box>
+                    {hovered && attemptToDelete && location.pathname !== ('/workspaces/' + workspace.id) &&
+                        <Box sx={{mr: -1.6}}>
+                            <IconButton disableRipple
+                                        onClick={handleConfirmDelete}
+                                        sx={{
+                                            width: '15px',
+                                            opacity: 1, height: '15px',
+                                            p: 1,
+                                            mr: 1,
+                                            color: 'error.main'
+
+                                        }}>
+                                <CheckCircleOutlineIcon sx={{fontSize: '18px'}}/>
+                            </IconButton>
+                            <IconButton disableRipple
+                                        onClick={handleCancelDelete}
+                                        sx={{
+                                            width: '15px',
+                                            opacity: 1, height: '15px',
+                                            p: 1,
+                                            color: 'success.main'
+
+                                        }}>
+                                <DoDisturbIcon sx={{fontSize: '18px'}}/>
+                            </IconButton>
+                        </Box>
+                    }
+                </Box>
+            }
         </ListItemButton>
     )
 

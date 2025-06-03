@@ -5,12 +5,9 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 export const CopyLinkButton = ({linkToCopy = window.location.href}) => {
     const [text, setText] = useState("Ссылка на публичный проект");
 
+
     const handleCopy = () => {
-        navigator.clipboard.writeText(linkToCopy)
-            .then(() => setText("Скопировано!"))
-            .catch(err => {
-                console.error('Не удалось скопировать: ', err);
-            });
+        window.open(linkToCopy, '_blank', 'noopener,noreferrer');
     };
 
     return (

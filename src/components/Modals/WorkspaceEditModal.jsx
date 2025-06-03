@@ -226,7 +226,7 @@ export default function WorkspaceEditModal({workspace, open, onClose}) {
                                 >сохранить</Button>
                                 {workspace.isPublic &&
                                     <CopyLinkButton
-                                        linkToCopy={window.location.host + '/public-workspaces/' + workspace.id}/>
+                                        linkToCopy={'/public-workspaces/' + workspace.id}/>
                                 }
                             </Box>
                             <Divider/>
