@@ -85,7 +85,7 @@ function PublicTask({task}) {
                                     fontSize: '14px',
                                     alignSelf: 'start',
                                     overflowWrap: 'break-word',
-                                    wordBreak: 'break-all',
+                                    wordBreak: 'normal', // Отключаем принудительный разрыв слов
                                     whiteSpace: 'normal',
                                     outline: 'none',
                                     width: '227px',
