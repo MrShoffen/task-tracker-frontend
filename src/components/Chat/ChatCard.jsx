@@ -285,7 +285,7 @@ export function ChatCard({open}) {
                     width: '100%',
                     height: '100%',
                     background: `
-                   url(https://i.ibb.co/5gt7svpd/chat-background-new3.png)
+                   url(https://i.ibb.co/S7tPMfY6/chat-bg.png)
                    , ${theme.palette.mode === 'dark' ? 'linear-gradient(135deg,#162731,#141e2d)' : 'linear-gradient(135deg,#cfebfa,#b3d3ff)'};
                     `,
                     backgroundBlendMode: theme.palette.mode === 'dark' ? 'screen' : 'soft-light',
