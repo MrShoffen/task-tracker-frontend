@@ -115,12 +115,20 @@ export function EditableTaskName({
     }, [isEditing, task]);
 
 
+    function handleClickk(event) {
+        if (isEditing) {
+            event.stopPropagation();
+        }
+
+    }
+
     return (
         <Box sx={{display: 'flex', alignItems: 'center'}}>
             <Typography
                 component="div"
                 ref={typographyRef}
                 contentEditable={isEditing}
+                onClick={handleClickk}
                 suppressContentEditableWarning
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
@@ -134,8 +142,8 @@ export function EditableTaskName({
                     userSelect: "none",
                     fontSize: '14px',
                     alignSelf: 'start',
-                    overflowWrap: 'break-word',
-                    wordBreak: 'break-all',
+                    overflowWrap: 'break-word', // Перенос по словам, если не помещается
+                    wordBreak: 'normal', // Отключаем принудительный разрыв слов
                     whiteSpace: 'normal',
                     borderBottom: isEditing ? '1px solid #90caf9' : 'none',
                     outline: 'none',

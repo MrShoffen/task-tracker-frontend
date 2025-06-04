@@ -13,9 +13,7 @@ import {useSortable} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
 import {useCustomThemeContext} from "../../context/GlobalThemeContext/CustomThemeProvider.jsx";
 import {TaskPlugins} from "./TaskPlugins.jsx";
-import {UserAvatar} from "../Users/UserAvatar.jsx";
 import {UserInfo} from "../Users/UserInfo.jsx";
-import {useEffect} from "react";
 
 export function Task({task, setContentIsLoading, disableDragging}) {
     const [hovered, setHovered] = React.useState(false);
@@ -24,8 +22,6 @@ export function Task({task, setContentIsLoading, disableDragging}) {
     const taskColor = (taskColor) => {
         return !isDarkMode ? lightTaskColor[taskColor] : darkTaskColor[taskColor];
     }
-
-
 
     const {
         setNodeRef,
@@ -41,7 +37,7 @@ export function Task({task, setContentIsLoading, disableDragging}) {
         }
     })
 
-    const {updateTaskField, loadUser, openChat, closeChat, chatOpen, activeTask,  userHasPermission} = useTaskOperations();
+    const {loadUser, openChat, closeChat, chatOpen, activeTask,  userHasPermission} = useTaskOperations();
 
     const currentUser = loadUser(task.userId);
 
