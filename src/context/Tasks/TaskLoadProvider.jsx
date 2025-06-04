@@ -1,4 +1,4 @@
-import {createContext, useContext, useRef, useState} from "react";
+import {createContext, useContext, useEffect, useRef, useState} from "react";
 import {sendGetAllWorkspaces} from "../../services/fetch/tasks/ws/SendGetAllWorkspaces.js";
 import {sendGetFullWsInformation} from "../../services/fetch/tasks/ws/SendGetFullWsInformation.js";
 import {useAuthContext} from "../Auth/AuthContext.jsx";
@@ -35,8 +35,6 @@ export const TaskLoadProvider = ({children}) => {
     const [chatOpen, setChatOpen] = useState(false);
     const [currentOpenTask, setCurrentOpenTask] = useState(null);
     const [commentsInCurrentTask, setCommentsInCurrentTask] = useState([]);
-    const [currentOffset, setCurrentOffset] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
 
     const subscriptionRef = useRef(null);
     const subscriptionRefWs = useRef(null);
@@ -62,6 +60,7 @@ export const TaskLoadProvider = ({children}) => {
         }
 
         if (hasMoreHist) {
+            console.log('loading hist')
             hist = await getHistoryEvents(task, limit, histOffset);
             setHistOffset(prev => prev + hist.length);
             if (hist.length < 25) {
@@ -70,6 +69,19 @@ export const TaskLoadProvider = ({children}) => {
             console.log(hist)
         }
 
+
+        return [...unpackComments(comms), ...unpackHistoryEvents(hist)];
+    }
+
+    const sendGetTaskEventsInitial = async (task, limit) => {
+        let comms = [];
+        let hist = [];
+
+        comms = await getComments(task, limit, commOffset);
+        setCommOffset(prev => prev + comms.length);
+
+        hist = await getHistoryEvents(task, limit, histOffset);
+        setHistOffset(prev => prev + hist.length);
 
         return [...unpackComments(comms), ...unpackHistoryEvents(hist)];
     }
@@ -107,95 +119,111 @@ export const TaskLoadProvider = ({children}) => {
         }
 
         stompClient.connect({}, () => {
-            const subscription = stompClient.subscribe('/topic/workspace/' + workspaceId,
-                (message) => {
-                    const event = JSON.parse(message.body);
-                    console.log('Получено обновление', event);
-                    const eventType = event.type;
-                    switch (eventType) {
-                        case 'WORKSPACE_UPDATED':
-                            const fieldName = Object.keys(event.payload.updatedField)[0];
-                            updateWsField(fieldName, event.payload.updatedField[fieldName]);
-                            break;
+                const subscription = stompClient.subscribe('/topic/workspace/' + workspaceId,
+                    (message) => {
+                        const event = JSON.parse(message.body);
+                        console.log('Получено обновление', event);
+                        const eventType = event.type;
+                        switch (eventType) {
+                            case 'WORKSPACE_UPDATED':
+                                const fieldName = Object.keys(event.payload.updatedField)[0];
+                                updateWsField(fieldName, event.payload.updatedField[fieldName]);
+                                break;
 
-                        case 'DESK_CREATED':
-                            addNewDesk(event.payload);
-                            break;
+                            case 'DESK_CREATED':
+                                addNewDesk(event.payload);
+                                break;
 
-                        case 'DESK_DELETED':
-                            deleteDesk(event.payload);
-                            break;
+                            case 'DESK_DELETED':
+                                deleteDesk(event.payload);
+                                break;
 
-                        case 'DESK_UPDATED':
-                            const fieldDesk = Object.keys(event.payload.updatedField)[0];
-                            updateDeskField(event.payload.deskId, fieldDesk, event.payload.updatedField[fieldDesk]);
-                            break;
+                            case 'DESK_UPDATED':
+                                const fieldDesk = Object.keys(event.payload.updatedField)[0];
+                                updateDeskField(event.payload.deskId, fieldDesk, event.payload.updatedField[fieldDesk]);
+                                break;
 
-                        case 'TASK_CREATED':
-                            addNewTask(event.payload);
-                            break;
+                            case 'TASK_CREATED':
+                                addNewTask(event.payload);
+                                break;
 
-                        case 'TASK_DELETED':
-                            deleteTask(event.payload.deskId, event.payload.taskId);
-                            break;
+                            case 'TASK_DELETED':
+                                deleteTask(event.payload.deskId, event.payload.taskId);
+                                break;
 
-                        case 'TASK_UPDATED':
-                            const fieldTask = Object.keys(event.payload.updatedField)[0];
-                            // updateTaskField(event.payload.deskId, event.payload.taskId, fieldTask, event.payload.updatedField[fieldTask]);
-                            if (fieldTask === 'deskId') {
-                                console.log('old ', event.payload.deskId);
-                                console.log('new ', event.payload.updatedField[fieldTask])
-                                moveTaskInternal(event.payload.taskId, event.payload.deskId, event.payload.updatedField[fieldTask]);
-                                // moveTaskToAnotherDesk()
-                            } else {
-                                updateTaskField(event.payload.deskId, event.payload.taskId, fieldTask, event.payload.updatedField[fieldTask]);
-
-                                if ( event.payload.taskId === currentOpenTask.id) {
+                            case 'TASK_UPDATED':
+                                const fieldTask = Object.keys(event.payload.updatedField)[0];
+                                // updateTaskField(event.payload.deskId, event.payload.taskId, fieldTask, event.payload.updatedField[fieldTask]);
+                                if (fieldTask === 'deskId') {
+                                    console.log('old ', event.payload.deskId);
+                                    console.log('new ', event.payload.updatedField[fieldTask])
+                                    moveTaskInternal(event.payload.taskId, event.payload.deskId, event.payload.updatedField[fieldTask]);
+                                    // moveTaskToAnotherDesk()
+                                } else {
+                                    updateTaskField(event.payload.deskId, event.payload.taskId, fieldTask, event.payload.updatedField[fieldTask]);
+                                    // if (event.payload.taskId === currentOpenTask.id) {
+                                    //     setTimeout(() =>
                                     addCustomHistoryEvent({
                                         isHistory: true,
                                         type: 'TASK_UPDATED',
+                                        taskId: event.payload.taskId,
                                         id: event.payload.taskId,
                                         timestamp: event.payload.updatedAt,
+                                        createdAt: event.payload.updatedAt,
                                         author: event.payload.updatedBy,
                                         additionalInfo: {[fieldTask]: event.payload.updatedField[fieldTask]}
                                     })
+                                    // , 200)
+                                    // }
                                 }
-                            }
-                            break;
+                                break;
 
-                        case 'STICKER_CREATED':
-                            addNewSticker(event.payload);
-                            if (event.payload.taskId === currentOpenTask.id) {
-                            addCustomHistoryEvent({
-                                isHistory: true,
-                                type: 'STICKER_CREATED',
-                                id: event.payload.id,
-                                timestamp: event.payload.createdAt,
-                                author: event.payload.userId,
-                                additionalInfo: {sticker: event.payload}
-                            })
-                            }
-                            break;
+                            case
+                            'STICKER_CREATED'
+                            :
+                                addNewSticker(event.payload);
+                                // if (event.payload.taskId === currentOpenTask.id) {
+                                //     setTimeout(() =>
+                                addCustomHistoryEvent({
+                                    isHistory: true,
+                                    type: 'STICKER_CREATED',
+                                    taskId: event.payload.taskId,
+                                    id: event.payload.id,
+                                    timestamp: event.payload.createdAt,
+                                    createdAt: event.payload.updatedAt,
+                                    author: event.payload.userId,
+                                    additionalInfo: {sticker: event.payload}
+                                })
+                                // , 200)
+                                // }
+                                break;
 
-                        case 'STICKER_DELETED':
-                            deleteSticker(event.payload.taskId, event.payload.stickerId);
-                            break;
+                            case
+                            'STICKER_DELETED'
+                            :
+                                deleteSticker(event.payload.taskId, event.payload.stickerId);
+                                break;
 
-                        case 'COMMENT_CREATED':
-                            updateCommentsCount(event.payload);
-                            break;
+                            case
+                            'COMMENT_CREATED'
+                            :
+                                updateCommentsCount(event.payload);
+                                break;
 
-                        case 'COMMENT_DELETED':
-                            updateCommentsCountMin(event.payload);
-                            break;
+                            case
+                            'COMMENT_DELETED'
+                            :
+                                updateCommentsCountMin(event.payload);
+                                break;
 
-                        default:
-                            console.log('error with handling websocket message');
+                            default:
+                                console.log('error with handling websocket message');
+                        }
                     }
-                }
-            )
-            subscriptionRefWs.current = subscription;
-        })
+                )
+                subscriptionRefWs.current = subscription;
+            }
+        )
     }
 
 
@@ -263,7 +291,7 @@ export const TaskLoadProvider = ({children}) => {
         setCommOffset(0);
         setHistOffset(0);
 
-        const allComs = await sendGetTaskEvents(task, 25);
+        const allComs = await sendGetTaskEventsInitial(task, 25);
         console.log(allComs);
         connectToChatWebsocket(task.workspaceId, task.id, task);
         setCommentsInCurrentTask(allComs);
@@ -278,14 +306,15 @@ export const TaskLoadProvider = ({children}) => {
                     return Array.from(commentMap.values());
                 }
             });
-            // setCurrentOffset(currentOffset + newCommsChunk.length);
         }
     }
 
     function addCustomHistoryEvent(event) {
         setCommentsInCurrentTask(prev => {
-
-            return [...prev, event]
+            if (prev[0]?.taskId === event.taskId) {
+                return [...prev, event]
+            }
+            return [...prev]
         })
     }
 
@@ -294,12 +323,10 @@ export const TaskLoadProvider = ({children}) => {
         setChatOpen(false);
         setCurrentOpenTask(null);
 
-
         setHasMoreHist(true);
         setHasMoreComments(true);
         setCommOffset(0);
         setHistOffset(0);
-
 
         setCommentsInCurrentTask([]);
     }
@@ -360,16 +387,16 @@ export const TaskLoadProvider = ({children}) => {
     }
 
 
-    //users----------------------------------------------------
+//users----------------------------------------------------
 
     async function preloadWsUsers(desks, usersAndPermissions) {
-        async function preloadDesk(desk, allUsers, usersAndPermissions) {
+        async function preloadDesk(desk, allUsers) {
             for (const task of desk.tasks) {
-                await loadUserFromTask(task, allUsers, usersAndPermissions);
+                await loadUserFromTask(task, allUsers);
             }
         }
 
-        async function loadUserFromTask(task, allUsers, usersAndPermissions) {
+        async function loadUserFromTask(task, allUsers) {
             if (allUsers.findIndex(user => user.id === task.userId) !== -1) {
                 return;
             }
@@ -384,7 +411,7 @@ export const TaskLoadProvider = ({children}) => {
             id: uap.userId,
         }));
         for (const desk of desks) {
-            await preloadDesk(desk, allUsers, usersAndPermissions);
+            await preloadDesk(desk, allUsers);
         }
 
         setUsersInWs(allUsers);
@@ -408,10 +435,10 @@ export const TaskLoadProvider = ({children}) => {
         return permissions.includes(permission);
     }
 
-    //------------------------------------------------------------------------
+//------------------------------------------------------------------------
 
 
-    //--DESKS----------------------------------------------------------------
+//--DESKS----------------------------------------------------------------
 
     function addNewDesk(newDesk) {
         const fullDesk = {
@@ -483,7 +510,7 @@ export const TaskLoadProvider = ({children}) => {
         })
     }
 
-    //------------------------------------------------------------------------
+//------------------------------------------------------------------------
 
 
     function moveTaskToAnotherDesk(movingTask, targetDesk) {
