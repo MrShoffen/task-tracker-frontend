@@ -1,4 +1,4 @@
-import {Box, Card, CircularProgress, IconButton, ListItemIcon, useTheme} from "@mui/material";
+import {Box, Button, Card, CircularProgress, IconButton, ListItemIcon, useTheme} from "@mui/material";
 import * as React from "react";
 import {useEffect, useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
@@ -19,12 +19,15 @@ import {CommentsIcon} from "../assets/icons/Comments.jsx";
 import {Sticker} from "../components/Sticker/Sticker.jsx";
 import {StickerMenu} from "../components/Sticker/StickerMenu.jsx";
 import {TaskPlugins} from "../components/Task/TaskPlugins.jsx";
+import {useAuthContext} from "../context/Auth/AuthContext.jsx";
 
 
 function PublicTask({task}) {
     const [hovered, setHovered] = React.useState(false);
     const theme = useTheme();
     const {isDarkMode} = useCustomThemeContext();
+
+
 
     const taskColor = (taskColor) => {
         return !isDarkMode ? lightTaskColor[taskColor] : darkTaskColor[taskColor];
@@ -109,9 +112,11 @@ function PublicTask({task}) {
                                             mb: 1, mt: -0.5
                                         }}
                                     >
-                                        <Box sx={{display: 'flex', flexWrap: 'wrap', gap: '5px', mt: '5px', mb: '-8px'}}>
+                                        <Box
+                                            sx={{display: 'flex', flexWrap: 'wrap', gap: '5px', mt: '5px', mb: '-8px'}}>
                                             {task.stickers.map(sticker =>
-                                                <Sticker key={sticker.id} sticker={sticker} deskId={task.deskId} editable={false}/>)
+                                                <Sticker key={sticker.id} sticker={sticker} deskId={task.deskId}
+                                                         editable={false}/>)
                                             }
                                         </Box>
                                     </Box>
@@ -267,7 +272,6 @@ function PublicDesk({desk, sx}) {
 export default function PublicWsPage() {
 
 
-    const navigate = useNavigate();
     const location = useLocation();
     const {showWarn} = useNotification();
     const {isDarkMode, toggleTheme} = useCustomThemeContext();
@@ -276,6 +280,9 @@ export default function PublicWsPage() {
     const [workspaceLoading, setWorkspaceLoading] = useState(true);
 
     const [publicWs, setPublicWs] = useState(null);
+
+    const {auth} = useAuthContext();
+    const navigate = useNavigate();
 
     useEffect(() => {
         checkAndLoadWorkspace();
@@ -384,11 +391,11 @@ export default function PublicWsPage() {
                         {publicWs.name}
                     </Typography>
                     <Typography variant="h7" sx={{
-                    ml: 2,
-                    userSelect: 'none'
-                }}>
-                    {'(Публичный проект)'}
-                </Typography>
+                        ml: 2,
+                        userSelect: 'none'
+                    }}>
+                        {'(Публичный проект)'}
+                    </Typography>
                     <IconButton
                         sx={{
                             // maxHeight: 40,
@@ -402,6 +409,15 @@ export default function PublicWsPage() {
 
 
                     </IconButton>
+
+                    {!auth.isAuthenticated &&
+                        <Button
+                        onClick={() => navigate("/registration")}
+                        >
+                            {'Регистрация'}
+                        </Button>
+                    }
+
                 </Box>
             )}
 

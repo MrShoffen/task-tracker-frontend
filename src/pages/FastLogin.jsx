@@ -4,16 +4,27 @@ import {useEffect, useState} from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import * as React from "react";
-import {API_IMAGE_UPLOAD} from "../UrlConstants.jsx";
 import {sendRegistrationForm} from "../services/fetch/unauth/SendRegistrationForm.js";
 import {sendLoginForm} from "../services/fetch/unauth/SendLoginForm.js";
+import {API_IMAGE_UPLOAD} from "../../UrlConstants.jsx";
+import {useNavigate} from "react-router-dom";
+import {sendRegistrationConfirm} from "../services/fetch/unauth/SendRegistrationConfirm.js";
 
+
+function getSecureRandomString(length) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    const randomValues = new Uint32Array(length);
+    window.crypto.getRandomValues(randomValues); // Браузерный API
+    return Array.from(randomValues, (num) =>
+        chars[num % chars.length]
+    ).join('');
+}
 
 export default function FastLogin() {
 
     const {login, auth} = useAuthContext();
 
-
+    const navigate = useNavigate();
     const [loginInProgress] = useState(false);
     const [registrationInProgress, setRegistrationInProgress] = useState(true);
 
@@ -21,41 +32,33 @@ export default function FastLogin() {
     const [username, setUsername] = useState("");
 
     async function fetchFastLogin() {
-        const responseCat = await fetch("https://api.thecatapi.com/v1/images/search", {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-        const cat = await responseCat.json();
 
 
-        let catUrl = cat[0].url;
-        const params = new URLSearchParams({image: catUrl});
-        const imgBb = API_IMAGE_UPLOAD + '/url';
-        const url = `${imgBb}?${params.toString()}`;
-
-        const response = await fetch(url, {
-            method: 'POST',
-        });
-
-
-        const finalImage = await response.json();
-
-
-        setImage(finalImage.imageUrl);
-        setUsername(finalImage.username);
+        // setImage(finalImage.imageUrl);
+        setUsername(getSecureRandomString(10) + '@test.ru');
         setRegistrationInProgress(false);
     }
 
 
     async function registerFake() {
-        const registerData = {username: username, password: username, avatarUrl: image, storagePlan: 'STANDARD'};
+        const registerData = {email: username, password: username, avatarUrl: image};
 
-        await sendRegistrationForm(registerData);
+        const newVar = await sendRegistrationForm(registerData);
+
+        const link = new URL(newVar.link);
+        // const link = await newVar.json();
+        const confirmId = link.search.replace("?confirmationId=", "");
+        console.log(confirmId);
+
+        const confirm = await sendRegistrationConfirm(confirmId);
+        console.log(confirm);
+
+        // window.location.href = newVar.link;
 
 
-        const loginData = {username: username, password: username};
+        const loginData = {email: username, password: username};
+
+        console.log(loginData);
 
         setTimeout(async () => {
             const profile = await sendLoginForm(loginData);
@@ -66,18 +69,18 @@ export default function FastLogin() {
     }
 
     useEffect(() => {
-        if(!auth.isAuthenticated) {
+        if (!auth.isAuthenticated) {
             fetchFastLogin()
         }
     }, []); // Пустой массив зависимостей
 
     useEffect(() => {
-        if (username && image) {
+        if (username) {
             setRegistrationInProgress(false);
             registerFake();
         }
 
-    }, [username, image])
+    }, [username])
 
 
     return (

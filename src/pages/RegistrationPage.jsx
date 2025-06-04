@@ -141,7 +141,7 @@ export const RegistrationPage = () => {
                           boxShadow: 3,
                           borderRadius: 2,
                           width: '400px',
-                          height: '530px',
+                          height: '540px',
                           backgroundColor: 'background.paper',
 
                       }}
@@ -161,7 +161,16 @@ export const RegistrationPage = () => {
                                 setAvatarLoading={setAvatarLoading}
                             />
 
-                            <Divider sx={{m: 1.5, mt: -0.8, mb: 1}}/>
+                            <Button
+                                fullWidth
+                                // type="submit"
+                                variant="contained"
+                                onClick={() => navigate("/fast-sign-up")}
+                                sx={{width: '300px', alignSelf: 'center', fontSize: 12}}
+                            >
+                                Быстрая регистрация (если лень)
+                            </Button>
+
 
                             <Tooltip
                                 title={usernameError}
@@ -277,7 +286,7 @@ export const RegistrationPage = () => {
                                             position: 'absolute',
                                             left: 0,
                                             width: '100%',
-                                            bottom: 15,
+                                            bottom: -20,
                                             textAlign: 'center'
                                         }}>
                                 Уже зарегистрированы?{' '}

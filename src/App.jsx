@@ -10,6 +10,7 @@ import AvailableAfterLoginRoute from "./context/Auth/AvailableAfterLoginRoute.js
 import ProfilePage from "./pages/ProfilePage.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
 import PublicWsPage from "./pages/PublicWsPage.jsx";
+import FastLogin from "./pages/FastLogin.jsx";
 
 function App() {
 
@@ -34,6 +35,14 @@ function App() {
                                element={
                                    <UnavailableAfterLoginRoute>
                                        <RegistrationPage/>
+                                   </UnavailableAfterLoginRoute>
+                               }/>
+
+
+                        <Route path="fast-sign-up"
+                               element={
+                                   <UnavailableAfterLoginRoute>
+                                       <FastLogin/>
                                    </UnavailableAfterLoginRoute>
                                }/>
 
