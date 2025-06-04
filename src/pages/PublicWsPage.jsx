@@ -163,7 +163,8 @@ function PublicDesk({desk, sx}) {
                         left: '-30px',
                         borderRadius: 12.5,
                         position: 'absolute',
-                        height: '900px',
+                        // height: '900px',
+                        height: '100%'
                         // zIndex: 200,
                     }}
                 />
